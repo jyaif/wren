@@ -263,6 +263,7 @@ typedef enum
   WREN_TYPE_NUM,
   WREN_TYPE_FOREIGN,
   WREN_TYPE_LIST,
+  WREN_TYPE_MAP,
   WREN_TYPE_NULL,
   WREN_TYPE_STRING,
 
@@ -469,6 +470,36 @@ void wrenGetListElement(WrenVM* vm, int listSlot, int index, int elementSlot);
 // As in Wren, negative indexes can be used to insert from the end. To append
 // an element, use `-1` for the index.
 void wrenInsertInList(WrenVM* vm, int listSlot, int index, int elementSlot);
+
+// Store a new empty map in [slot].
+void wrenSetSlotNewMap(WrenVM* vm, int slot);
+
+// Retrieve the value associated with a key in a map.
+// mapSlot: the slot containing the map to be looked up
+// keySlot: the slot containing the key too look up in the map
+// valueSlot: the slot where to store the value retrieved. If you aren't actually interested in storing this value anywhere, you may pass -1 (i.e. if you just want to check the presence of the key in the map).
+// If the key is present in the map, its value is tored in [valueSlot] and true is returned.
+// If the key is absent from the map, null is stored in [valueSlot] and false is returned.
+// This function makes the difference between null and absent: if a key is associated to null, null is stored in [valueSlot] and true is returned.
+bool wrenGetMapValue(WrenVM* vm, int mapSlot, int keySlot, int valueSlot);
+
+// Associate a value with a key in a map.
+// mapSlot: the slot containing the map to be modified
+// keySlot: the slot containing the key to associate
+// valueSlot: the slot containing the value to associate with the key
+void wrenPutInMap(WrenVM* vm, int mapSlot, int keySlot, int valueSlot);
+
+// Remove a key/value association from a map.
+// mapSlot: the slot containing the map to be modified
+// keySlot: the slot containing the key to be removed from the map.
+// valueSlot: the slot where to store the value that has just been removed. If you aren't interested in storing this value anywhere, you may pass -1.
+// If the key was present in the map, its previous value is stored in [valueSlot], and true is returned.
+// If the key wasn't present in the map, null is stored in [valueSlot] and false is returned.
+// IN contrary to wrenGetMapValue above, this fonction doesn't make the difference between an absent key and a key associated to null; if a key was associated to null, false is returned.
+bool wrenRemoveMap(WrenVM* vm, int mapSlot, int keySlot, int valueSlot);
+
+ // Clear the map at the given slot
+void wrenClearMap(WrenVM* vm, int mapSlot);
 
 // Looks up the top level variable with [name] in resolved [module] and stores
 // it in [slot].
