@@ -405,77 +405,33 @@ void statPath(WrenVM* vm)
   uv_fs_stat(getLoop(), request, path, statCallback);
 }
 
-void statBlockCount(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_blocks);
-}
+#define STAT_NUM(name, cname)                                                  \
+  void stat##name(WrenVM* vm)                                                  \
+  {                                                                            \
+    uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);                   \
+    wrenSetSlotDouble(vm, 0, (double)stat->cname);                             \
+  }
 
-void statBlockSize(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_blksize);
-}
+STAT_NUM(BlockCount,    st_blocks)
+STAT_NUM(BlockSize,     st_blksize)
+STAT_NUM(Device,        st_dev)
+STAT_NUM(Group,         st_gid)
+STAT_NUM(Inode,         st_ino)
+STAT_NUM(LinkCount,     st_nlink)
+STAT_NUM(Mode,          st_mode)
+STAT_NUM(Size,          st_size)
+STAT_NUM(SpecialDevice, st_rdev)
+STAT_NUM(User,          st_uid)
 
-void statDevice(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_dev);
-}
+#define STAT_IS_MODE(name, isname)                                             \
+  void statIs##name(WrenVM* vm)                                                \
+  {                                                                            \
+    uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);                   \
+    wrenSetSlotBool(vm, 0, isname(stat->st_mode));                             \
+  }
 
-void statGroup(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_gid);
-}
-
-void statInode(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_ino);
-}
-
-void statLinkCount(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_nlink);
-}
-
-void statMode(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_mode);
-}
-
-void statSize(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_size);
-}
-
-void statSpecialDevice(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_rdev);
-}
-
-void statUser(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotDouble(vm, 0, (double)stat->st_uid);
-}
-
-void statIsDirectory(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotBool(vm, 0, S_ISDIR(stat->st_mode));
-}
-
-void statIsFile(WrenVM* vm)
-{
-  uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);
-  wrenSetSlotBool(vm, 0, S_ISREG(stat->st_mode));
-}
+STAT_IS_MODE(Directory, S_ISDIR)
+STAT_IS_MODE(File,      S_ISREG)
 
 // Sets up the stdin stream if not already initialized.
 static void initStdin()
