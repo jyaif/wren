@@ -18,44 +18,48 @@ void platformName(WrenVM* vm)
 {
   wrenEnsureSlots(vm, 1);
   
+  wrenSetSlotString(vm, 0,
   #ifdef _WIN32
-    wrenSetSlotString(vm, 0, "Windows");
+                    "Windows"
   #elif __APPLE__
     #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-      wrenSetSlotString(vm, 0, "iOS");
+                    "iOS"
     #elif TARGET_OS_MAC
-      wrenSetSlotString(vm, 0, "OS X");
+                    "OS X"
     #else
-      wrenSetSlotString(vm, 0, "Unknown");
+                    "Unknown"
     #endif
   #elif __linux__
-    wrenSetSlotString(vm, 0, "Linux");
+                    "Linux"
   #elif __unix__
-    wrenSetSlotString(vm, 0, "Unix");
+                    "Unix"
   #elif defined(_POSIX_VERSION)
-    wrenSetSlotString(vm, 0, "POSIX");
+                    "POSIX"
   #else
-    wrenSetSlotString(vm, 0, "Unknown");
+                    "Unknown"
   #endif
+                    );
 }
 
 void platformIsPosix(WrenVM* vm)
 {
   wrenEnsureSlots(vm, 1);
   
+  wrenSetSlotBool(vm, 0,
   #ifdef _WIN32
-    wrenSetSlotBool(vm, 0, false);
+                  false
   #elif __APPLE__
-    wrenSetSlotBool(vm, 0, true);
+                  true
   #elif __linux__
-    wrenSetSlotBool(vm, 0, true);
+                  true
   #elif __unix__
-    wrenSetSlotBool(vm, 0, true);
+                  true
   #elif defined(_POSIX_VERSION)
-    wrenSetSlotBool(vm, 0, true);
+                  true
   #else
-    wrenSetSlotString(vm, 0, false);
+                  false
   #endif
+                  );
 }
 
 void processAllArguments(WrenVM* vm)
