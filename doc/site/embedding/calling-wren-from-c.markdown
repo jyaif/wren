@@ -117,7 +117,7 @@ look it up][variable]. We can get a handle to the above class like so:
 
     :::c
     // Load the class into slot 0.
-    wrenEnsureSlots(vm, 1);
+    wrenSetSlotCount(vm, 1);
     wrenGetVariable(vm, 0, "main", "GameEngine");
 
 We could do this every time we call `update()`, but, again, that's kind of slow
@@ -126,7 +126,7 @@ create a handle to the class once and use it each time:
 
     :::c
     // Load the class into slot 0.
-    wrenEnsureSlots(vm, 1);
+    wrenSetSlotCount(vm, 1);
     wrenGetVariable(vm, 0, "main", "GameEngine");
     WrenHandle* gameEngineClass = wrenGetSlotHandle(vm, 0);
 

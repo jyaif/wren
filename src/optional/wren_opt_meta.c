@@ -33,7 +33,7 @@ void metaCompile(WrenVM* vm)
 
 void metaGetModuleVariables(WrenVM* vm)
 {
-  wrenEnsureSlots(vm, 3);
+  wrenSetSlotCount(vm, 3);
   
   Value moduleValue = wrenMapGet(vm->modules,
                                  canary_thread_get_slot(vm->fiber, 1));

@@ -1562,7 +1562,7 @@ WrenSlot wrenGetSlotCount(WrenVM* vm)
   return canary_thread_get_frame_size(vm->fiber);
 }
 
-void wrenEnsureSlots(WrenVM* vm, WrenSlot numSlots)
+void wrenSetSlotCount(WrenVM* vm, WrenSlot numSlots)
 {
   // If we don't have a fiber accessible, create one for the API to use.
   if (!vm->is_api_call)
@@ -1572,14 +1572,21 @@ void wrenEnsureSlots(WrenVM* vm, WrenSlot numSlots)
   }
   
   ObjFiber *fiber = vm->fiber;
-  WrenSlot currentSize = canary_thread_get_frame_size(fiber);
-  if (currentSize >= numSlots) return;
-  
+  size_t old_stack_size = (size_t)(fiber->stack_base - fiber->stack);
+  size_t new_stack_size = old_stack_size + numSlots;
+
   // Grow the stack if needed.
-  size_t needed = canary_thread_get_stack_size(fiber) + numSlots;
-  wrenEnsureStack(vm, fiber, needed);
+  wrenEnsureStack(vm, fiber, new_stack_size);
   
-  fiber->stackTop = &fiber->stack_base[numSlots];
+  Value *old_stack_top = fiber->stackTop;
+  Value *new_stack_top = &fiber->stack_base[numSlots];
+  
+  // Reset the growing stack
+  for (; old_stack_top < new_stack_top; old_stack_top++) {
+    *old_stack_top = NULL_VAL;
+  }
+  
+  fiber->stackTop = new_stack_top;
 }
 
 // Gets the type of the object in [slot].

@@ -35,7 +35,7 @@ static void call(WrenVM* vm)
   
   WrenHandle* method = wrenMakeCallHandle(otherVM, "method(_,_,_,_)");
   
-  wrenEnsureSlots(otherVM, 1);
+  wrenSetSlotCount(otherVM, 1);
   wrenGetVariable(otherVM, 0, "main", "Test");
   WrenHandle* testClass = wrenGetSlotHandle(otherVM, 0);
   
@@ -44,7 +44,7 @@ static void call(WrenVM* vm)
   double result = 0;
   for (int i = 0; i < iterations; i++)
   {
-    wrenEnsureSlots(otherVM, 5);
+    wrenSetSlotCount(otherVM, 5);
     wrenSetSlotHandle(otherVM, 0, testClass);
     wrenSetSlotDouble(otherVM, 1, 1.0);
     wrenSetSlotDouble(otherVM, 2, 2.0);

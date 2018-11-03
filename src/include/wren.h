@@ -333,7 +333,7 @@ void wrenReleaseHandle(WrenVM* vm, WrenHandle* handle);
 // and each argument to the method. The receiver is in slot 0 and the arguments
 // are in increasingly numbered slots after that. You are free to read and
 // write to those slots as you want. If you want more slots to use as scratch
-// space, you can call wrenEnsureSlots() to add more.
+// space, you can call wrenSetSlotCount() to add more.
 //
 // When your function returns, every slot except slot zero is discarded and the
 // value in slot zero is used as the return value of the method. If you don't
@@ -362,13 +362,13 @@ void wrenReleaseHandle(WrenVM* vm, WrenHandle* handle);
 // Returns the number of slots available to the current foreign method.
 WrenSlot wrenGetSlotCount(WrenVM* vm);
 
-// Ensures that the foreign method stack has at least [numSlots] available for
-// use, growing the stack if needed.
+// Set the number of slots available for the current foreign method to
+// [numSlots], growing the stack if needed.
 //
 // Does not shrink the stack if it has more than enough slots.
 //
 // It is an error to call this from a finalizer.
-void wrenEnsureSlots(WrenVM* vm, WrenSlot numSlots);
+void wrenSetSlotCount(WrenVM* vm, WrenSlot numSlots);
 
 // Gets the type of the object in [srcSlot].
 WrenType wrenGetSlotType(WrenVM* vm, WrenSlot srcSlot);

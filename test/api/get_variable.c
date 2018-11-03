@@ -20,7 +20,7 @@ static void afterAssigned(WrenVM* vm)
 
 static void otherSlot(WrenVM* vm)
 {
-  wrenEnsureSlots(vm, 3);
+  wrenSetSlotCount(vm, 3);
   wrenGetVariable(vm, 2, "./test/api/get_variable", "B");
   
   // Move it into return position.

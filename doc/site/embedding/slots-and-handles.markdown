@@ -21,14 +21,14 @@ dynamically sized, but it's your responsibility to ensure there are enough slots
 *before* you use them. You do this by calling:
 
     :::c
-    wrenEnsureSlots(WrenVM* vm, WrenSlot slotCount);
+    wrenSetSlotCount(WrenVM* vm, WrenSlot slotCount);
 
 This grows the slot array if needed to ensure that many slots are available. If
 it's already big enough, this does nothing. You'll typically call this once
 before populating the slots with data that you want to send to Wren.
 
     :::c
-    wrenEnsureSlots(vm, 4);
+    wrenSetSlotCount(vm, 4);
     // Can now use slots 0 through 3, inclusive.
 
 After you ensure an array of slots, you can only rely on them being there until
