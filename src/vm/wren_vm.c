@@ -821,6 +821,14 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
       }                                                           \
       while (false)
 
+  #define DEBUG_CURRENT_FRAME_IS_IN_SYNC()                                     \
+    do {                                                                       \
+      ASSERT(fiber == vm->fiber, "Fiber out of sync.");                        \
+      ASSERT(frame == &fiber->frames[fiber->numFrames - 1], "Frame out of sync."); \
+      ASSERT(stackStart == frame->stackStart, "StackStart out of sync.");      \
+      ASSERT(fn == frame->closure->fn, "Fn out of sync.");                     \
+    } while (false)
+  
   #if WREN_DEBUG_TRACE_INSTRUCTIONS
     // Prints the stack and instruction before each instruction is executed.
     #define DEBUG_TRACE_INSTRUCTIONS()                            \
@@ -848,6 +856,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
   #define DISPATCH()                                            \
       do                                                        \
       {                                                         \
+        DEBUG_CURRENT_FRAME_IS_IN_SYNC();                                      \
         DEBUG_TRACE_INSTRUCTIONS();                             \
         goto *dispatchTable[instruction = (Code)READ_BYTE()];   \
       }                                                         \
@@ -857,6 +866,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
 
   #define INTERPRET_LOOP                                        \
       loop:                                                     \
+        DEBUG_CURRENT_FRAME_IS_IN_SYNC();                                      \
         DEBUG_TRACE_INSTRUCTIONS();                             \
         switch (instruction = (Code)READ_BYTE())
 
@@ -1011,8 +1021,10 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
           break;
 
         case METHOD_FOREIGN:
+          STORE_FRAME();
           callForeign(vm, fiber, method->as.foreign, numArgs);
           if (wrenFiberHasError(fiber)) RUNTIME_ERROR();
+          LOAD_FRAME();
           break;
 
         case METHOD_BLOCK:
