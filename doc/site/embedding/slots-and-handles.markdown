@@ -62,9 +62,9 @@ named `wrenSetSlot<type>()` where `<type>` is the kind of data. We'll start with
 the simple ones:
 
     :::c
-    void wrenSetSlotBool(WrenVM* vm, int slot, bool value);
-    void wrenSetSlotDouble(WrenVM* vm, int slot, double value);
-    void wrenSetSlotNull(WrenVM* vm, int slot);
+    void wrenSetSlotBool(WrenVM* vm, int dstSlot, bool value);
+    void wrenSetSlotDouble(WrenVM* vm, int dstSlot, double value);
+    void wrenSetSlotNull(WrenVM* vm, int dstSlot);
 
 Each of these takes a primitive C value and converts it to the corresponding
 [Wren value][]. (Since Wren's [native number type][] *is* a double, there's not
@@ -76,10 +76,10 @@ really much *conversion* going on, but you get the idea.)
 You can also pass string data to Wren:
 
     :::c
-    void wrenSetSlotBytes(WrenVM* vm, int slot,
+    void wrenSetSlotBytes(WrenVM* vm, int dstSlot,
                           const char* bytes, size_t length);
 
-    void wrenSetSlotString(WrenVM* vm, int slot,
+    void wrenSetSlotString(WrenVM* vm, int dstSlot,
                            const char* text);
 
 Both of these copy the bytes into a new [String][] object managed by Wren's
@@ -97,15 +97,15 @@ length of the string using `strlen()`.
 You can, of course, also pull data out of slots. Here are the simple ones:
 
     :::c
-    bool wrenGetSlotBool(WrenVM* vm, int slot);
-    double wrenGetSlotDouble(WrenVM* vm, int slot);
+    bool wrenGetSlotBool(WrenVM* vm, int srcSlot);
+    double wrenGetSlotDouble(WrenVM* vm, int srcSlot);
 
 These take a Wren value of the corresponding type and convert it to its raw C
 representation. For strings, we have:
 
     :::c
-    const char* wrenGetSlotString(WrenVM* vm, int slot);
-    const char* wrenGetSlotBytes(WrenVM* vm, int slot,
+    const char* wrenGetSlotString(WrenVM* vm, int srcSlot);
+    const char* wrenGetSlotBytes(WrenVM* vm, int srcSlot,
                                  int* length);
 
 These return a pointer to the first byte of the string. If you want to know the
@@ -123,7 +123,7 @@ Fortunately, you usually know what type of data you have in a slot. If not, you
 can ask:
 
     :::c
-    WrenType wrenGetSlotType(WrenVM* vm, int slot);
+    WrenType wrenGetSlotType(WrenVM* vm, int srcSlot);
 
 This returns an enum defining what type of value is in the slot. It only covers
 the primitive values that are supported by the C API. Things like ranges and
@@ -140,7 +140,7 @@ Here's the first:
 
     :::c
     void wrenGetVariable(WrenVM* vm, const char* module,
-                         const char* name, int slot);
+                         const char* name, int dstSlot);
 
 This looks up a top level variable with the given name in the module with the
 given name and stores its value in the given slot. Note that classes are just
@@ -165,7 +165,7 @@ with them directly.
 You can create a new empty list from C using:
 
     :::c
-    void wrenSetSlotNewList(WrenVM* vm, int slot);
+    void wrenSetSlotNewList(WrenVM* vm, int dstSlot);
 
 It stores the resulting list in the given slot. If you have a list in a
 slot&mdash;either one you created from C or from Wren&mdash;you can add elements
@@ -173,7 +173,7 @@ to it using:
 
     :::c
     void wrenInsertInList(WrenVM* vm, int listSlot, int index,
-                          int elementSlot);
+                          int srcSlot);
 
 That's a lot of int parameters:
 
@@ -185,7 +185,7 @@ That's a lot of int parameters:
   Just like from within Wren, you can use a negative number to count back from
   the end, so `-1` appends to the list.
 
-* `elementSlot` identifies the slot where the value you want to insert in the
+* `srcSlot` identifies the slot where the value you want to insert in the
   list can be found.
 
 This API means getting a value from C into a list is a two step operation. First
@@ -213,14 +213,14 @@ any kind&mdash;strings, numbers, instances of classes, collections, whatever.
 You create a handle using this:
 
     :::c
-    WrenHandle* wrenGetSlotHandle(WrenVM* vm, int slot);
+    WrenHandle* wrenGetSlotHandle(WrenVM* vm, int srcSlot);
 
 This takes the object stored in the given slot, creates a new WrenHandle to wrap
 it, and returns a pointer to it back to you. You can send that wrapped object
 back to Wren by calling:
 
     :::c
-    void wrenSetSlotHandle(WrenVM* vm, int slot, WrenHandle* handle);
+    void wrenSetSlotHandle(WrenVM* vm, int dstSlot, WrenHandle* handle);
 
 Note that this doesn't invalidate your WrenHandle. You can still keep using it.
 
