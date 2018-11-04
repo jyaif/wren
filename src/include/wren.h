@@ -462,7 +462,7 @@ int wrenGetListCount(WrenVM* vm, int listSlot);
 
 // Reads element [index] from the list in [listSlot] and stores it in
 // [dstSlot].
-void wrenGetListElement(WrenVM* vm, int listSlot, int index, int dstSlot);
+void wrenGetListElement(WrenVM* vm, int dstSlot, int listSlot, int index);
 
 // Takes the value stored at [srcSlot] and inserts it into the list stored
 // at [listSlot] at [index].
@@ -473,8 +473,8 @@ void wrenInsertInList(WrenVM* vm, int listSlot, int index, int srcSlot);
 
 // Looks up the top level variable with [name] in resolved [module] and stores
 // it in [slot].
-void wrenGetVariable(WrenVM* vm, const char* module, const char* name,
-                     int dstSlot);
+void wrenGetVariable(WrenVM* vm, int dstSlot,
+                     const char* module, const char* name);
 
 // Sets the current fiber to be aborted, and uses the value in [slot] as the
 // runtime error object.

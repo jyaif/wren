@@ -22,8 +22,8 @@ void resetStackAfterForeignConstructBindClass(
 void resetStackAfterForeignConstructRunTests(WrenVM* vm)
 {
   wrenEnsureSlots(vm, 1);
-  wrenGetVariable(vm,
-      "./test/api/reset_stack_after_foreign_construct", "Test", 0);
+  wrenGetVariable(vm, 0,
+      "./test/api/reset_stack_after_foreign_construct", "Test");
   WrenHandle* testClass = wrenGetSlotHandle(vm, 0);
   
   WrenHandle* callConstruct = wrenMakeCallHandle(vm, "callConstruct()");

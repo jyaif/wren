@@ -1701,7 +1701,7 @@ int wrenGetListCount(WrenVM* vm, int listSlot)
   return listObj->elements.count;
 }
 
-void wrenGetListElement(WrenVM* vm, int listSlot, int index, int dstSlot)
+void wrenGetListElement(WrenVM* vm, int dstSlot, int listSlot, int index)
 {
   Value listValue = wrenGetSlot(vm, listSlot);
   ASSERT(IS_LIST(listValue), "Slot must hold a list.");
@@ -1726,8 +1726,8 @@ void wrenInsertInList(WrenVM* vm, int listSlot, int index, int srcSlot)
   wrenListInsert(vm, list, value, index);
 }
 
-void wrenGetVariable(WrenVM* vm, const char* module, const char* name,
-                     int dstSlot)
+void wrenGetVariable(WrenVM* vm, int dstSlot,
+                     const char* module, const char* name)
 {
   ASSERT(module != NULL, "Module cannot be NULL.");
   ASSERT(name != NULL, "Variable name cannot be NULL.");  

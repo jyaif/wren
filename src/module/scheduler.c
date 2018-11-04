@@ -33,7 +33,7 @@ static void resume(WrenHandle* method)
 void schedulerCaptureMethods(WrenVM* vm)
 {
   wrenEnsureSlots(vm, 1);
-  wrenGetVariable(vm, "scheduler", "Scheduler", 0);
+  wrenGetVariable(vm, 0, "scheduler", "Scheduler");
   schedulerClass = wrenGetSlotHandle(vm, 0);
   
   resume1 = wrenMakeCallHandle(vm, "resume_(_)");

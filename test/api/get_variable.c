@@ -4,23 +4,23 @@
 
 static void beforeDefined(WrenVM* vm)
 {
-  wrenGetVariable(vm, "./test/api/get_variable", "A", 0);
+  wrenGetVariable(vm, 0, "./test/api/get_variable", "A");
 }
 
 static void afterDefined(WrenVM* vm)
 {
-  wrenGetVariable(vm, "./test/api/get_variable", "A", 0);
+  wrenGetVariable(vm, 0, "./test/api/get_variable", "A");
 }
 
 static void afterAssigned(WrenVM* vm)
 {
-  wrenGetVariable(vm, "./test/api/get_variable", "A", 0);
+  wrenGetVariable(vm, 0, "./test/api/get_variable", "A");
 }
 
 static void otherSlot(WrenVM* vm)
 {
   wrenEnsureSlots(vm, 3);
-  wrenGetVariable(vm, "./test/api/get_variable", "B", 2);
+  wrenGetVariable(vm, 2, "./test/api/get_variable", "B");
   
   // Move it into return position.
   const char* string = wrenGetSlotString(vm, 2);
@@ -29,7 +29,7 @@ static void otherSlot(WrenVM* vm)
 
 static void otherModule(WrenVM* vm)
 {
-  wrenGetVariable(vm, "./test/api/get_variable_module", "Variable", 0);
+  wrenGetVariable(vm, 0, "./test/api/get_variable_module", "Variable");
 }
 
 WrenForeignMethodFn getVariableBindMethod(const char* signature)

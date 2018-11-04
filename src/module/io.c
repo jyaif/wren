@@ -337,7 +337,7 @@ static void statCallback(uv_fs_t* request)
   // look it up by name every time.
   if (statClass == NULL)
   {
-    wrenGetVariable(vm, "io", "Stat", 0);
+    wrenGetVariable(vm, 0, "io", "Stat");
     statClass = wrenGetSlotHandle(vm, 0);
   }
   
@@ -508,7 +508,7 @@ static void stdinReadCallback(uv_stream_t* stream, ssize_t numRead,
   if (stdinClass == NULL)
   {
     wrenEnsureSlots(vm, 1);
-    wrenGetVariable(vm, "io", "Stdin", 0);
+    wrenGetVariable(vm, 0, "io", "Stdin");
     stdinClass = wrenGetSlotHandle(vm, 0);
   }
   

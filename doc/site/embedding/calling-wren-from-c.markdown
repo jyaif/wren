@@ -118,7 +118,7 @@ look it up][variable]. We can get a handle to the above class like so:
     :::c
     // Load the class into slot 0.
     wrenEnsureSlots(vm, 1);
-    wrenGetVariable(vm, "main", "GameEngine", 0);
+    wrenGetVariable(vm, 0, "main", "GameEngine");
 
 We could do this every time we call `update()`, but, again, that's kind of slow
 because we're looking up "GameEngine" by name each time. A faster solution is to
@@ -127,7 +127,7 @@ create a handle to the class once and use it each time:
     :::c
     // Load the class into slot 0.
     wrenEnsureSlots(vm, 1);
-    wrenGetVariable(vm, "main", "GameEngine", 0);
+    wrenGetVariable(vm, 0, "main", "GameEngine");
     WrenHandle* gameEngineClass = wrenGetSlotHandle(vm, 0);
 
 Now, each time we want to call a method on GameEngine, we store that value back

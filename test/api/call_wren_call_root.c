@@ -7,7 +7,7 @@
 void callWrenCallRootRunTests(WrenVM* vm)
 {
   wrenEnsureSlots(vm, 1);
-  wrenGetVariable(vm, "./test/api/call_wren_call_root", "Test", 0);
+  wrenGetVariable(vm, 0, "./test/api/call_wren_call_root", "Test");
   WrenHandle* testClass = wrenGetSlotHandle(vm, 0);
 
   WrenHandle* run = wrenMakeCallHandle(vm, "run()");

@@ -163,7 +163,7 @@ static void getListCount(WrenVM* vm)
 static void getListElement(WrenVM* vm)
 {
   int index = (int)wrenGetSlotDouble(vm, 2);
-  wrenGetListElement(vm, 1, index, 0);
+  wrenGetListElement(vm, 0, 1, index);
 }
 
 WrenForeignMethodFn slotsBindMethod(const char* signature)

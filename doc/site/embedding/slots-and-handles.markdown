@@ -139,8 +139,8 @@ There are a few other utility functions that move data into and out of slots.
 Here's the first:
 
     :::c
-    void wrenGetVariable(WrenVM* vm, const char* module,
-                         const char* name, int dstSlot);
+    void wrenGetVariable(WrenVM* vm, int dstSlot,
+                         const char* module, const char* name);
 
 This looks up a top level variable with the given name in the module with the
 given name and stores its value in the given slot. Note that classes are just

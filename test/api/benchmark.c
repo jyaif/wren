@@ -35,7 +35,7 @@ static void call(WrenVM* vm)
   WrenHandle* method = wrenMakeCallHandle(otherVM, "method(_,_,_,_)");
   
   wrenEnsureSlots(otherVM, 1);
-  wrenGetVariable(otherVM, "main", "Test", 0);
+  wrenGetVariable(otherVM, 0, "main", "Test");
   WrenHandle* testClass = wrenGetSlotHandle(otherVM, 0);
   
   double startTime = (double)clock() / CLOCKS_PER_SEC;
