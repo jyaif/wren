@@ -16,15 +16,17 @@ static uint32_t validateIndexValue(WrenVM* vm, uint32_t count, double value,
   // Check bounds.
   if (value >= 0 && value < count) return (uint32_t)value;
   
-  vm->fiber->error = wrenStringFormat(vm, "$ out of bounds.", argName);
+  wrenFiberSetError(vm->fiber,
+                    wrenStringFormat(vm, "$ out of bounds.", argName));
   return UINT32_MAX;
 }
 
 bool validateFn(WrenVM* vm, Value arg, const char* argName)
 {
   if (IS_CLOSURE(arg)) return true;
-
-  vm->fiber->error = wrenStringFormat(vm, "$ must be a function.", argName);
+  
+  wrenFiberSetError(vm->fiber,
+                    wrenStringFormat(vm, "$ must be a function.", argName));
   return false;
 }
 
@@ -114,7 +116,7 @@ uint32_t calculateRange(WrenVM* vm, ObjRange* range, uint32_t* length,
   // Check bounds.
   if (value < 0 || value >= *length)
   {
-    vm->fiber->error = CONST_STRING(vm, "Range end out of bounds.");
+    wrenFiberSetError(vm->fiber, CONST_STRING(vm, "Range end out of bounds."));
     return UINT32_MAX;
   }
 

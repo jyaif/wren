@@ -8,10 +8,12 @@ void wrenDebugPrintStackTrace(WrenVM* vm)
   if (vm->config.errorFn == NULL) return;
   
   ObjFiber* fiber = vm->fiber;
-  if (IS_STRING(fiber->error))
+  Value error = wrenFiberGetError(fiber);
+  
+  if (IS_STRING(error))
   {
     vm->config.errorFn(vm, WREN_ERROR_RUNTIME,
-                       NULL, -1, AS_CSTRING(fiber->error));
+                       NULL, -1, AS_CSTRING(error));
   }
   else
   {
