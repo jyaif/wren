@@ -237,4 +237,25 @@ static inline ObjClass* wrenGetClassInline(WrenVM* vm, Value value)
   return NULL;
 }
 
+// Ensures that [slot] is a valid index into the API's stack of slots.
+static inline void
+wrenValidateApiSlot(WrenVM* vm, int slot) {
+  ASSERT(slot >= 0, "Slot cannot be negative.");
+  ASSERT(slot < wrenGetSlotCount(vm), "Not that many slots.");
+}
+
+// Restores [value] from [srcSlot] in the foreign call stack.
+static inline Value
+wrenGetSlot(WrenVM* vm, int srcSlot) {
+  wrenValidateApiSlot(vm, srcSlot);
+  return vm->apiStack[srcSlot];
+}
+
+// Stores [value] in [dstSlot] in the foreign call stack.
+static inline Value
+wrenSetSlot(WrenVM* vm, int dstSlot, Value value) {
+  wrenValidateApiSlot(vm, dstSlot);
+  return vm->apiStack[dstSlot] = value;
+}
+
 #endif
