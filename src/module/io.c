@@ -380,8 +380,8 @@ static void fileWriteBytesCallback(uv_fs_t* request)
 void fileWriteBytes(WrenVM* vm)
 {
   int fd = *(int*)wrenGetSlotForeign(vm, 0);
-  int length;
-  const char* bytes = wrenGetSlotBytes(vm, 1, &length);
+  size_t length;
+  const void* bytes = wrenGetSlotBytes(vm, 1, &length);
   size_t offset = (size_t)wrenGetSlotDouble(vm, 2);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 3));
   

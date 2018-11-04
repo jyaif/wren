@@ -77,7 +77,7 @@ You can also pass string data to Wren:
 
     :::c
     void wrenSetSlotBytes(WrenVM* vm, int dstSlot,
-                          const char* bytes, size_t length);
+                          const void* bytes, size_t length);
 
     void wrenSetSlotString(WrenVM* vm, int dstSlot,
                            const char* text);
@@ -104,9 +104,10 @@ These take a Wren value of the corresponding type and convert it to its raw C
 representation. For strings, we have:
 
     :::c
-    const char* wrenGetSlotString(WrenVM* vm, int srcSlot);
-    const char* wrenGetSlotBytes(WrenVM* vm, int srcSlot,
+    const void* wrenGetSlotBytes(WrenVM* vm, int srcSlot,
                                  int* length);
+
+    const char* wrenGetSlotString(WrenVM* vm, int srcSlot);
 
 These return a pointer to the first byte of the string. If you want to know the
 length, the latter stores it in the variable pointed to by `length`. Both of

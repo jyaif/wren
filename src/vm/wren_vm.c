@@ -1597,7 +1597,7 @@ bool wrenGetSlotBool(WrenVM* vm, int srcSlot)
   return AS_BOOL(value);
 }
 
-const char* wrenGetSlotBytes(WrenVM* vm, int srcSlot, int* length)
+const void* wrenGetSlotBytes(WrenVM* vm, int srcSlot, size_t* length)
 {
   Value value = wrenGetSlot(vm, srcSlot);
   ASSERT(IS_STRING(value), "Slot must hold a string.");
@@ -1643,11 +1643,11 @@ void wrenSetSlotBool(WrenVM* vm, int dstSlot, bool value)
   wrenSetSlot(vm, dstSlot, BOOL_VAL(value));
 }
 
-void wrenSetSlotBytes(WrenVM* vm, int dstSlot, const char* bytes, size_t length)
+void wrenSetSlotBytes(WrenVM* vm, int dstSlot, const void* bytes, size_t length)
 {
   ASSERT(bytes != NULL, "Byte array cannot be NULL.");
   
-  wrenSetSlot(vm, dstSlot, wrenNewStringLength(vm, bytes, length));
+  wrenSetSlot(vm, dstSlot, wrenNewStringLength(vm, (const char*)bytes, length));
 }
 
 void wrenSetSlotDouble(WrenVM* vm, int dstSlot, double value)
