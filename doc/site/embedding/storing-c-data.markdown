@@ -72,7 +72,7 @@ how many bytes of raw memory you need. You do that by calling:
 
     :::c
     void* wrenSetSlotNewForeign(WrenVM* vm,
-        int dstSlot, int classSlot, size_t size);
+        WrenSlot dstSlot, WrenSlot classSlot, size_t size);
 
 Like other [slot manipulation functions][dstSlot], it both reads from and writes
 to the slot array. It has a few parameters to make it more general purpose since
@@ -122,7 +122,7 @@ Once you have a foreign instance in a slot, you can access the raw bytes it
 stores by calling:
 
     :::c
-    void* wrenGetSlotForeign(WrenVM* vm, int srcSlot);
+    void* wrenGetSlotForeign(WrenVM* vm, WrenSlot srcSlot);
 
 You pass in the slot index containing the foreign object and it gives you back a
 pointer to the raw memory the object wraps. As usual, the C API doesn't do any
