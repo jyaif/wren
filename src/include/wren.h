@@ -367,15 +367,15 @@ int wrenGetSlotCount(WrenVM* vm);
 // It is an error to call this from a finalizer.
 void wrenEnsureSlots(WrenVM* vm, int numSlots);
 
-// Gets the type of the object in [slot].
+// Gets the type of the object in [srcSlot].
 WrenType wrenGetSlotType(WrenVM* vm, int srcSlot);
 
-// Reads a boolean value from [slot].
+// Reads a boolean value from [srcSlot].
 //
 // It is an error to call this if the slot does not contain a boolean value.
 bool wrenGetSlotBool(WrenVM* vm, int srcSlot);
 
-// Reads a byte array from [slot].
+// Reads a byte array from [srcSlot].
 //
 // The memory for the returned string is owned by Wren. You can inspect it
 // while in your foreign method, but cannot keep a pointer to it after the
@@ -387,19 +387,19 @@ bool wrenGetSlotBool(WrenVM* vm, int srcSlot);
 // It is an error to call this if the slot does not contain a string.
 const void* wrenGetSlotBytes(WrenVM* vm, int srcSlot, size_t* length);
 
-// Reads a number from [slot].
+// Reads a number from [srcSlot].
 //
 // It is an error to call this if the slot does not contain a number.
 double wrenGetSlotDouble(WrenVM* vm, int srcSlot);
 
-// Reads a foreign object from [slot] and returns a pointer to the foreign data
-// stored with it.
+// Reads a foreign object from [srcSlot] and returns a pointer to the foreign
+// data stored with it.
 //
 // It is an error to call this if the slot does not contain an instance of a
 // foreign class.
 void* wrenGetSlotForeign(WrenVM* vm, int srcSlot);
 
-// Reads a string from [slot].
+// Reads a string from [srcSlot].
 //
 // The memory for the returned string is owned by Wren. You can inspect it
 // while in your foreign method, but cannot keep a pointer to it after the
@@ -408,27 +408,27 @@ void* wrenGetSlotForeign(WrenVM* vm, int srcSlot);
 // It is an error to call this if the slot does not contain a string.
 const char* wrenGetSlotString(WrenVM* vm, int srcSlot);
 
-// Creates a handle for the value stored in [slot].
+// Creates a handle for the value stored in [srcSlot].
 //
 // This will prevent the object that is referred to from being garbage collected
 // until the handle is released by calling [wrenReleaseHandle()].
 WrenHandle* wrenGetSlotHandle(WrenVM* vm, int srcSlot);
 
-// Stores the boolean [value] in [slot].
+// Stores the boolean [value] in [dstSlot].
 void wrenSetSlotBool(WrenVM* vm, int dstSlot, bool value);
 
-// Stores the array [length] of [bytes] in [slot].
+// Stores the array [length] of [bytes] in [dstSlot].
 //
 // The bytes are copied to a new string within Wren's heap, so you can free
 // memory used by them after this is called.
 void wrenSetSlotBytes(WrenVM* vm, int dstSlot,
                       const void* bytes, size_t length);
 
-// Stores the numeric [value] in [slot].
+// Stores the numeric [value] in [dstSlot].
 void wrenSetSlotDouble(WrenVM* vm, int dstSlot, double value);
 
 // Creates a new instance of the foreign class stored in [classSlot] with [size]
-// bytes of raw storage and places the resulting object in [slot].
+// bytes of raw storage and places the resulting object in [dstSlot].
 //
 // This does not invoke the foreign class's constructor on the new instance. If
 // you need that to happen, call the constructor from Wren, which will then
@@ -438,13 +438,13 @@ void wrenSetSlotDouble(WrenVM* vm, int dstSlot, double value);
 // Returns a pointer to the foreign object's data.
 void* wrenSetSlotNewForeign(WrenVM* vm, int dstSlot, int classSlot, size_t size);
 
-// Stores a new empty list in [slot].
+// Stores a new empty list in [dstSlot].
 void wrenSetSlotNewList(WrenVM* vm, int dstSlot);
 
-// Stores null in [slot].
+// Stores null in [dstSlot].
 void wrenSetSlotNull(WrenVM* vm, int dstSlot);
 
-// Stores the string [text] in [slot].
+// Stores the string [text] in [dstSlot].
 //
 // The [text] is copied to a new string within Wren's heap, so you can free
 // memory used by it after this is called. The length is calculated using
@@ -452,7 +452,7 @@ void wrenSetSlotNull(WrenVM* vm, int dstSlot);
 // should use [wrenSetSlotBytes()] instead.
 void wrenSetSlotString(WrenVM* vm, int dstSlot, const char* text);
 
-// Stores the value captured in [handle] in [slot].
+// Stores the value captured in [handle] in [dstSlot].
 //
 // This does not release the handle for the value.
 void wrenSetSlotHandle(WrenVM* vm, int dstSlot, WrenHandle* handle);
@@ -472,11 +472,11 @@ void wrenGetListElement(WrenVM* vm, int dstSlot, int listSlot, int index);
 void wrenInsertInList(WrenVM* vm, int listSlot, int index, int srcSlot);
 
 // Looks up the top level variable with [name] in resolved [module] and stores
-// it in [slot].
+// it in [dstSlot].
 void wrenGetVariable(WrenVM* vm, int dstSlot,
                      const char* module, const char* name);
 
-// Sets the current fiber to be aborted, and uses the value in [slot] as the
+// Sets the current fiber to be aborted, and uses the value in [srcSlot] as the
 // runtime error object.
 void wrenAbortFiber(WrenVM* vm, int srcSlot);
 
