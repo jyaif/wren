@@ -78,10 +78,6 @@ typedef uint64_t canary_value_nantagging_t;
 // An object pointer is a NaN with a set sign bit.
 #define IS_OBJ(value) (((value) & (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
 
-#define IS_FALSE(value)     ((value) == FALSE_VAL)
-#define IS_NULL(value)      ((value) == NULL_VAL)
-#define IS_UNDEFINED(value) ((value) == UNDEFINED_VAL)
-
 // Masks out the tag bits used to identify the singleton value.
 #define MASK_TAG (7)
 
@@ -100,12 +96,6 @@ typedef uint64_t canary_value_nantagging_t;
 
 // Value -> Obj*.
 #define AS_OBJ(value) ((Obj*)(uintptr_t)((value) & ~(SIGN_BIT | QNAN)))
-
-// Singleton values.
-#define NULL_VAL      ((Value)(uint64_t)(QNAN | TAG_NULL))
-#define FALSE_VAL     ((Value)(uint64_t)(QNAN | TAG_FALSE))
-#define TRUE_VAL      ((Value)(uint64_t)(QNAN | TAG_TRUE))
-#define UNDEFINED_VAL ((Value)(uint64_t)(QNAN | TAG_UNDEFINED))
 
 // Gets the singleton type tag for a Value (which must be a singleton).
 #define GET_TAG(value) ((int)((value) & MASK_TAG))
@@ -129,6 +119,47 @@ canary_value_nantagging_is(canary_value_nantagging_t value,
   return canary_value_nantagging_to_bits(value) ==
          canary_value_nantagging_to_bits(other);
 }
+
+#define canary_value_impl_singleton canary_value_nantagging_singleton
+static inline canary_value_nantagging_t
+canary_value_nantagging_singleton(canary_valuetype_t type) {
+  int tag = 0;
+  switch (type) {
+    case VAL_FALSE:     tag = TAG_FALSE;     break;
+    case VAL_NULL:      tag = TAG_NULL;      break;
+    case VAL_TRUE:      tag = TAG_TRUE;      break;
+    case VAL_UNDEFINED: tag = TAG_UNDEFINED; break;
+    default:            UNREACHABLE();
+  }
+  return canary_value_nantagging_from_bits((uint64_t)(QNAN | tag));
+}
+
+#define CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(name, type)                  \
+  static inline canary_value_nantagging_t                                      \
+  canary_value_nantagging_##name() {                                           \
+    return canary_value_nantagging_singleton(type);                            \
+  }                                                                            \
+                                                                               \
+  static inline bool                                                           \
+  canary_value_nantagging_is_##name(canary_value_nantagging_t value) {         \
+    return canary_value_nantagging_is(value, canary_value_nantagging_##name());\
+  }
+
+#define canary_value_impl_is_false canary_value_nantagging_is_false
+#define canary_value_impl_false canary_value_nantagging_false
+CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(false, VAL_FALSE)
+
+#define canary_value_impl_is_null canary_value_nantagging_is_null
+#define canary_value_impl_null canary_value_nantagging_null
+CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(null, VAL_NULL)
+
+#define canary_value_impl_is_true canary_value_nantagging_is_true
+#define canary_value_impl_true canary_value_nantagging_true
+CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(true, VAL_TRUE)
+
+#define canary_value_impl_is_undefined canary_value_nantagging_is_undefined
+#define canary_value_impl_undefined canary_value_nantagging_undefined
+CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(undefined, VAL_UNDEFINED)
 
 #define canary_value_impl_get_type canary_value_nantagging_get_type
 static inline canary_valuetype_t

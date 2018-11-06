@@ -63,12 +63,26 @@
 // These macros promote a primitive C value to a full Wren Value. There are
 // more defined below that are specific to the Nan tagged or other
 // representation.
+
+// Singleton values.
+#define FALSE_VAL     (canary_value_false())
+#define NULL_VAL      (canary_value_null())
+#define TRUE_VAL      (canary_value_true())
+#define UNDEFINED_VAL (canary_value_undefined())
+
 #define BOOL_VAL(boolean) ((boolean) ? TRUE_VAL : FALSE_VAL)    // boolean
 #define NUM_VAL(num)      (wrenNumToValue(num))                 // double
 #define OBJ_VAL(obj)      (wrenObjectToValue((Obj*)(obj)))      // Any Obj___*
 
 // These perform type tests on a Value, returning `true` if the Value is of the
 // given type.
+
+// Singleton values.
+#define IS_FALSE(value)     (canary_value_is_false(value))
+#define IS_NULL(value)      (canary_value_is_null(value))
+#define IS_TRUE(value)      (canary_value_is_true(value))
+#define IS_UNDEFINED(value) (canary_value_is_undefined(value))
+
 #define IS_BOOL(value) (wrenIsBool(value))                      // Bool
 
 #define IS_CLASS(value) (wrenIsObjType(value, OBJ_CLASS))       // ObjClass

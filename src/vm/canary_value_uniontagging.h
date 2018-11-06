@@ -26,16 +26,7 @@ typedef struct
 // Determines if [value] is a garbage-collected object or not.
 #define IS_OBJ(value) ((value).type == VAL_OBJ)
 
-#define IS_FALSE(value)     ((value).type == VAL_FALSE)
-#define IS_NULL(value)      ((value).type == VAL_NULL)
 #define IS_NUM(value)       ((value).type == VAL_NUM)
-#define IS_UNDEFINED(value) ((value).type == VAL_UNDEFINED)
-
-// Singleton values.
-#define FALSE_VAL     ((Value){ VAL_FALSE, { 0 } })
-#define NULL_VAL      ((Value){ VAL_NULL, { 0 } })
-#define TRUE_VAL      ((Value){ VAL_TRUE, { 0 } })
-#define UNDEFINED_VAL ((Value){ VAL_UNDEFINED, { 0 } })
 
 #define canary_value_impl_is canary_value_uniontagging_is
 static inline bool
@@ -50,6 +41,12 @@ canary_value_uniontagging_is(canary_value_uniontagging_t value,
 static inline canary_valuetype_t
 canary_value_uniontagging_get_type(canary_value_uniontagging_t value) {
   return value.type;
+}
+
+#define canary_value_impl_singleton canary_value_uniontagging_singleton
+static inline canary_value_uniontagging_t
+canary_value_uniontagging_singleton(canary_valuetype_t type) {
+    return (canary_value_uniontagging_t){ type , { } };
 }
 
 #include "canary_value_generic.h"
