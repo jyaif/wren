@@ -113,4 +113,15 @@ canary_value_impl_is_double(canary_value_impl_t value) {
 
 #endif // canary_value_impl_is_double
 
+#ifndef canary_value_impl_is_user_data
+
+static inline bool
+canary_value_impl_is_user_data(canary_value_impl_t value) {
+  canary_valuetype_t type = canary_value_impl_get_type(value);
+  
+  return type == VAL_OBJ;
+}
+
+#endif // canary_value_impl_is_user_data
+
 #endif // CANARY_VALUE_GENERIC_H

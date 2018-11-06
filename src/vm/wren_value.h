@@ -47,6 +47,8 @@
 // ensured to be the right type.
 #define AS_BOOL(value)      (canary_value_to_bool(value))       // boolean
 #define AS_NUM(value)       (canary_value_to_double(value))     // double
+#define AS_OBJ(value)       ((Obj*)canary_value_to_user_data(value))
+                                                                // Any Obj___*
 
 #define AS_CLASS(value)     ((ObjClass*)AS_OBJ(value))          // ObjClass*
 #define AS_CLOSURE(value)   ((ObjClosure*)AS_OBJ(value))        // ObjClosure*
@@ -73,7 +75,8 @@
 
 #define BOOL_VAL(boolean) (canary_value_from_bool(boolean))     // boolean
 #define NUM_VAL(num)      (canary_value_from_double(num))       // double
-#define OBJ_VAL(obj)      (wrenObjectToValue((Obj*)(obj)))      // Any Obj___*
+#define OBJ_VAL(obj)      (canary_value_from_user_data((Obj*)(obj)))
+                                                                // Any Obj___*
 
 // These perform type tests on a Value, returning `true` if the Value is of the
 // given type.
@@ -86,6 +89,7 @@
 
 #define IS_BOOL(value) (canary_value_is_bool(value))            // Bool
 #define IS_NUM(value)  (canary_value_is_double(value))          // double
+#define IS_OBJ(value)  (canary_value_is_user_data(value))       // Any Obj___*
 
 #define IS_CLASS(value) (wrenIsObjType(value, OBJ_CLASS))       // ObjClass
 #define IS_CLOSURE(value) (wrenIsObjType(value, OBJ_CLOSURE))   // ObjClosure
@@ -678,24 +682,6 @@ bool wrenValuesEqual(Value a, Value b);
 static inline bool wrenIsObjType(Value value, ObjType type)
 {
   return IS_OBJ(value) && AS_OBJ(value)->type == type;
-}
-
-// Converts the raw object pointer [obj] to a [Value].
-static inline Value wrenObjectToValue(Obj* obj)
-{
-#if WREN_NAN_TAGGING
-  // The triple casting is necessary here to satisfy some compilers:
-  // 1. (uintptr_t) Convert the pointer to a number of the right size.
-  // 2. (uint64_t)  Pad it up to 64 bits in 32-bit builds.
-  // 3. Or in the bits to make a tagged Nan.
-  // 4. Cast to a typedef'd value.
-  return (Value)(SIGN_BIT | QNAN | (uint64_t)(uintptr_t)(obj));
-#else
-  Value value;
-  value.type = VAL_OBJ;
-  value.as.obj = obj;
-  return value;
-#endif
 }
 
 #endif

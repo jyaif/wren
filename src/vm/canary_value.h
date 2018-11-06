@@ -22,6 +22,8 @@ typedef enum
 
 typedef canary_value_impl_t canary_value_t;
 
+CANARY_DEFINE_TRIVIALLY_COMPARABLE_TYPE(user_data, void *)
+
 static inline bool
 canary_valuetype_is_singleton(canary_valuetype_t type) {
   switch (type) {
@@ -104,5 +106,6 @@ canary_value_from_##name(type native) {                                        \
 
 CANARY_DEFINE_VALUE(bool, bool)
 CANARY_DEFINE_VALUE(double, double)
+CANARY_DEFINE_VALUE(user_data, void *)
 
 #endif // CANARY_VALUE_H

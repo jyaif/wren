@@ -74,9 +74,6 @@ typedef uint64_t canary_value_nantagging_t;
 // The bits that must be set to indicate a quiet NaN.
 #define QNAN ((uint64_t)0x7ffc000000000000)
 
-// An object pointer is a NaN with a set sign bit.
-#define IS_OBJ(value) (((value) & (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
-
 // Masks out the tag bits used to identify the singleton value.
 #define MASK_TAG (7)
 
@@ -89,9 +86,6 @@ typedef uint64_t canary_value_nantagging_t;
 #define TAG_UNUSED2   (5)
 #define TAG_UNUSED3   (6)
 #define TAG_UNUSED4   (7)
-
-// Value -> Obj*.
-#define AS_OBJ(value) ((Obj*)(uintptr_t)((value) & ~(SIGN_BIT | QNAN)))
 
 // Gets the singleton type tag for a Value (which must be a singleton).
 #define GET_TAG(value) ((int)((value) & MASK_TAG))
@@ -196,11 +190,37 @@ canary_value_nantagging_from_double(double value) {
   return canary_value_nantagging_from_bits(canary_double_to_bits(value));
 }
 
+#define canary_value_impl_is_user_data canary_value_nantagging_is_user_data
+static inline bool
+canary_value_nantagging_is_user_data(canary_value_nantagging_t value) {
+  return (canary_value_nantagging_to_bits(value) & (QNAN | SIGN_BIT)) ==
+         (QNAN | SIGN_BIT);
+}
+
+#define canary_value_impl_to_user_data canary_value_nantagging_to_user_data
+static inline void *
+canary_value_nantagging_to_user_data(canary_value_nantagging_t value) {
+  return (void *)(uintptr_t)(canary_value_nantagging_to_bits(value) &
+                             ~(SIGN_BIT | QNAN));
+}
+
+#define canary_value_impl_from_user_data canary_value_nantagging_from_user_data
+static inline canary_value_nantagging_t
+canary_value_nantagging_from_user_data(void *pvalue) {
+  // The triple casting is necessary here to satisfy some compilers:
+  // 1. (uintptr_t) Convert the pointer to a number of the right size.
+  // 2. (uint64_t)  Pad it up to 64 bits in 32-bit builds.
+  // 3. Or in the bits to make a tagged Nan.
+  // 4. Cast to a typedef'd value.
+  return canary_value_nantagging_from_bits(
+      (SIGN_BIT | QNAN | (uint64_t)(uintptr_t)(pvalue)));
+}
+
 #define canary_value_impl_get_type canary_value_nantagging_get_type
 static inline canary_valuetype_t
 canary_value_nantagging_get_type(canary_value_nantagging_t value) {
   if (canary_value_nantagging_is_double(value)) return VAL_NUM;
-  if (IS_OBJ(value)) return VAL_OBJ;
+  if (canary_value_nantagging_is_user_data(value)) return VAL_OBJ;
 
   switch (GET_TAG(value))
   {

@@ -13,15 +13,9 @@ typedef struct
   union
   {
     double num;
-    Obj* obj;
+    void *user_data;
   } as;
 } canary_value_uniontagging_t;
-
-// Value -> Obj*.
-#define AS_OBJ(v) ((v).as.obj)
-
-// Determines if [value] is a garbage-collected object or not.
-#define IS_OBJ(value) ((value).type == VAL_OBJ)
 
 #define canary_value_impl_is canary_value_uniontagging_is
 static inline bool
@@ -29,7 +23,7 @@ canary_value_uniontagging_is(canary_value_uniontagging_t value,
                              canary_value_uniontagging_t other) {
   if (value.type != other.type) return false;
   if (value.type == VAL_NUM) return value.as.num == other.as.num;
-  return value.as.obj == other.as.obj;
+  return value.as.user_data == other.as.user_data;
 }
 
 #define canary_value_impl_get_type canary_value_uniontagging_get_type
@@ -57,6 +51,23 @@ canary_value_uniontagging_from_double(double dvalue) {
     
     value.as.num = dvalue;
     return value;
+}
+
+
+#define canary_value_impl_to_user_data canary_value_uniontagging_to_user_data
+static inline void *
+canary_value_uniontagging_to_user_data(canary_value_uniontagging_t value) {
+  return value.as.user_data;
+}
+
+#define canary_value_impl_from_user_data                                       \
+    canary_value_uniontagging_from_user_data
+static inline canary_value_uniontagging_t
+canary_value_uniontagging_from_user_data(void *pvalue) {
+  canary_value_uniontagging_t value = { VAL_OBJ, {  } };
+  
+  value.as.user_data = pvalue;
+  return value;
 }
 
 #include "canary_value_generic.h"
