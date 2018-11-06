@@ -23,8 +23,6 @@ typedef struct
 // Determines if [value] is a garbage-collected object or not.
 #define IS_OBJ(value) ((value).type == VAL_OBJ)
 
-#define IS_NUM(value)       ((value).type == VAL_NUM)
-
 #define canary_value_impl_is canary_value_uniontagging_is
 static inline bool
 canary_value_uniontagging_is(canary_value_uniontagging_t value,
@@ -44,6 +42,21 @@ canary_value_uniontagging_get_type(canary_value_uniontagging_t value) {
 static inline canary_value_uniontagging_t
 canary_value_uniontagging_singleton(canary_valuetype_t type) {
     return (canary_value_uniontagging_t){ type, { } };
+}
+
+#define canary_value_impl_to_double canary_value_uniontagging_to_double
+static inline double
+canary_value_uniontagging_to_double(canary_value_uniontagging_t value) {
+    return value.as.num;
+}
+
+#define canary_value_impl_from_double canary_value_uniontagging_from_double
+static inline canary_value_uniontagging_t
+canary_value_uniontagging_from_double(double dvalue) {
+    canary_value_uniontagging_t value = { VAL_NUM, {  } };
+    
+    value.as.num = dvalue;
+    return value;
 }
 
 #include "canary_value_generic.h"

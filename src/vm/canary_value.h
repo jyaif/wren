@@ -103,5 +103,6 @@ canary_value_from_##name(type native) {                                        \
 }
 
 CANARY_DEFINE_VALUE(bool, bool)
+CANARY_DEFINE_VALUE(double, double)
 
 #endif // CANARY_VALUE_H

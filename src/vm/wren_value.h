@@ -46,7 +46,7 @@
 // perform any validation, so must only be used after the Value has been
 // ensured to be the right type.
 #define AS_BOOL(value)      (canary_value_to_bool(value))       // boolean
-#define AS_NUM(value)       (wrenValueToNum(value))             // double
+#define AS_NUM(value)       (canary_value_to_double(value))     // double
 
 #define AS_CLASS(value)     ((ObjClass*)AS_OBJ(value))          // ObjClass*
 #define AS_CLOSURE(value)   ((ObjClosure*)AS_OBJ(value))        // ObjClosure*
@@ -72,7 +72,7 @@
 #define UNDEFINED_VAL (canary_value_undefined())
 
 #define BOOL_VAL(boolean) (canary_value_from_bool(boolean))     // boolean
-#define NUM_VAL(num)      (wrenNumToValue(num))                 // double
+#define NUM_VAL(num)      (canary_value_from_double(num))       // double
 #define OBJ_VAL(obj)      (wrenObjectToValue((Obj*)(obj)))      // Any Obj___*
 
 // These perform type tests on a Value, returning `true` if the Value is of the
@@ -85,6 +85,7 @@
 #define IS_UNDEFINED(value) (canary_value_is_undefined(value))
 
 #define IS_BOOL(value) (canary_value_is_bool(value))            // Bool
+#define IS_NUM(value)  (canary_value_is_double(value))          // double
 
 #define IS_CLASS(value) (wrenIsObjType(value, OBJ_CLASS))       // ObjClass
 #define IS_CLOSURE(value) (wrenIsObjType(value, OBJ_CLOSURE))   // ObjClosure
@@ -693,33 +694,6 @@ static inline Value wrenObjectToValue(Obj* obj)
   Value value;
   value.type = VAL_OBJ;
   value.as.obj = obj;
-  return value;
-#endif
-}
-
-// Interprets [value] as a [double].
-static inline double wrenValueToNum(Value value)
-{
-#if WREN_NAN_TAGGING
-  DoubleBits data;
-  data.bits64 = value;
-  return data.num;
-#else
-  return value.as.num;
-#endif
-}
-
-// Converts [num] to a [Value].
-static inline Value wrenNumToValue(double num)
-{
-#if WREN_NAN_TAGGING
-  DoubleBits data;
-  data.num = num;
-  return data.bits64;
-#else
-  Value value;
-  value.type = VAL_NUM;
-  value.as.num = num;
   return value;
 #endif
 }

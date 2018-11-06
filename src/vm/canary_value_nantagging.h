@@ -6,6 +6,8 @@
 #error "Do not include directly. #include \"canary_value.h\" instead."
 #endif // CANARY_VALUE_H
 
+#include "canary_double.h"
+
 // An IEEE 754 double-precision float is a 64-bit value with bits laid out like:
 //
 // 1 Sign bit
@@ -71,9 +73,6 @@ typedef uint64_t canary_value_nantagging_t;
 
 // The bits that must be set to indicate a quiet NaN.
 #define QNAN ((uint64_t)0x7ffc000000000000)
-
-// If the NaN bits are set, it's not a number.
-#define IS_NUM(value) (((value) & QNAN) != QNAN)
 
 // An object pointer is a NaN with a set sign bit.
 #define IS_OBJ(value) (((value) & (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
@@ -178,10 +177,29 @@ canary_value_nantagging_from_bool(bool bvalue) {
                   canary_value_nantagging_false();
 }
 
+#define canary_value_impl_is_double canary_value_nantagging_is_double
+static inline bool
+canary_value_nantagging_is_double(canary_value_nantagging_t value) {
+  // If the NaN bits are set, it's not a number.
+  return (canary_value_nantagging_to_bits(value) & QNAN) != QNAN;
+}
+
+#define canary_value_impl_to_double canary_value_nantagging_to_double
+static inline double
+canary_value_nantagging_to_double(canary_value_nantagging_t value) {
+  return canary_double_from_bits(canary_value_nantagging_to_bits(value));
+}
+
+#define canary_value_impl_from_double canary_value_nantagging_from_double
+static inline canary_value_nantagging_t
+canary_value_nantagging_from_double(double value) {
+  return canary_value_nantagging_from_bits(canary_double_to_bits(value));
+}
+
 #define canary_value_impl_get_type canary_value_nantagging_get_type
 static inline canary_valuetype_t
 canary_value_nantagging_get_type(canary_value_nantagging_t value) {
-  if (IS_NUM(value)) return VAL_NUM;
+  if (canary_value_nantagging_is_double(value)) return VAL_NUM;
   if (IS_OBJ(value)) return VAL_OBJ;
 
   switch (GET_TAG(value))

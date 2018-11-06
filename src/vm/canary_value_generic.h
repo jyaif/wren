@@ -102,4 +102,15 @@ canary_value_impl_from_bool(bool bvalue) {
 }
 #endif // canary_value_impl_from_bool
 
+#ifndef canary_value_impl_is_double
+
+static inline bool
+canary_value_impl_is_double(canary_value_impl_t value) {
+  canary_valuetype_t type = canary_value_impl_get_type(value);
+  
+  return type == VAL_NUM;
+}
+
+#endif // canary_value_impl_is_double
+
 #endif // CANARY_VALUE_GENERIC_H
