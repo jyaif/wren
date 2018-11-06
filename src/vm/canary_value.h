@@ -2,6 +2,8 @@
 #ifndef CANARY_VALUE_H
 #define CANARY_VALUE_H
 
+#include "canary_type.h"
+
 typedef enum
 {
   VAL_FALSE,
@@ -77,5 +79,29 @@ CANARY_DECLARE_VALUE_SINGLETON(false)
 CANARY_DECLARE_VALUE_SINGLETON(null)
 CANARY_DECLARE_VALUE_SINGLETON(true)
 CANARY_DECLARE_VALUE_SINGLETON(undefined)
+
+#define CANARY_DEFINE_VALUE(name, type)                                        \
+static inline bool                                                             \
+canary_value_is_##name(canary_value_t value) {                                 \
+  return canary_value_impl_is_##name(value);                                   \
+}                                                                              \
+                                                                               \
+static inline type                                                             \
+canary_value_to_##name(canary_value_t value) {                                 \
+  ASSERT(canary_value_is_##name(value), "Value must hold a bool.");            \
+                                                                               \
+  return canary_value_impl_to_##name(value);                                   \
+}                                                                              \
+                                                                               \
+static inline canary_value_t                                                   \
+canary_value_from_##name(type native) {                                        \
+  canary_value_t value = canary_value_impl_from_##name(native);                \
+  ASSERT(canary_##name##_is(canary_value_to_##name(value), native),            \
+         "Value conversion failed for "#name".");                              \
+                                                                               \
+  return value;                                                                \
+}
+
+CANARY_DEFINE_VALUE(bool, bool)
 
 #endif // CANARY_VALUE_H

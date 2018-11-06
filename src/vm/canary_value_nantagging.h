@@ -91,9 +91,6 @@ typedef uint64_t canary_value_nantagging_t;
 #define TAG_UNUSED3   (6)
 #define TAG_UNUSED4   (7)
 
-// Value -> 0 or 1.
-#define AS_BOOL(value) ((value) == TRUE_VAL)
-
 // Value -> Obj*.
 #define AS_OBJ(value) ((Obj*)(uintptr_t)((value) & ~(SIGN_BIT | QNAN)))
 
@@ -160,6 +157,26 @@ CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(true, VAL_TRUE)
 #define canary_value_impl_is_undefined canary_value_nantagging_is_undefined
 #define canary_value_impl_undefined canary_value_nantagging_undefined
 CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(undefined, VAL_UNDEFINED)
+
+#define canary_value_impl_is_bool canary_value_nantagging_is_bool
+static inline bool
+canary_value_nantagging_is_bool(canary_value_nantagging_t value) {
+  return canary_value_nantagging_is(value, canary_value_nantagging_true()) ||
+         canary_value_nantagging_is(value, canary_value_nantagging_false());
+}
+
+#define canary_value_impl_to_bool canary_value_nantagging_to_bool
+static inline bool
+canary_value_nantagging_to_bool(canary_value_nantagging_t value) {
+  return canary_value_nantagging_is(value, canary_value_nantagging_true());
+}
+
+#define canary_value_impl_from_bool canary_value_nantagging_from_bool
+static inline canary_value_nantagging_t
+canary_value_nantagging_from_bool(bool bvalue) {
+  return bvalue ? canary_value_nantagging_true() :
+                  canary_value_nantagging_false();
+}
 
 #define canary_value_impl_get_type canary_value_nantagging_get_type
 static inline canary_valuetype_t

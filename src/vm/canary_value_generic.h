@@ -79,4 +79,27 @@ canary_value_impl_undefined() {
 }
 #endif // canary_value_impl_undefined
 
+#ifndef canary_value_impl_is_bool
+static inline bool
+canary_value_impl_is_bool(canary_value_impl_t value) {
+  canary_valuetype_t type = canary_value_impl_get_type(value);
+  
+  return type == VAL_TRUE || type == VAL_FALSE;
+}
+#endif // canary_value_impl_is_bool
+
+#ifndef canary_value_impl_to_bool
+static inline bool
+canary_value_impl_to_bool(canary_value_impl_t value) {
+  return canary_value_impl_get_type(value) == VAL_TRUE;
+}
+#endif // canary_value_impl_to_bool
+
+#ifndef canary_value_impl_from_bool
+static inline canary_value_impl_t
+canary_value_impl_from_bool(bool bvalue) {
+  return canary_value_impl_singleton(bvalue ? VAL_TRUE : VAL_FALSE);
+}
+#endif // canary_value_impl_from_bool
+
 #endif // CANARY_VALUE_GENERIC_H

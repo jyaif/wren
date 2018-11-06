@@ -45,6 +45,7 @@
 // These macros cast a Value to one of the specific object types. These do *not*
 // perform any validation, so must only be used after the Value has been
 // ensured to be the right type.
+#define AS_BOOL(value)      (canary_value_to_bool(value))       // boolean
 #define AS_NUM(value)       (wrenValueToNum(value))             // double
 
 #define AS_CLASS(value)     ((ObjClass*)AS_OBJ(value))          // ObjClass*
@@ -70,7 +71,7 @@
 #define TRUE_VAL      (canary_value_true())
 #define UNDEFINED_VAL (canary_value_undefined())
 
-#define BOOL_VAL(boolean) ((boolean) ? TRUE_VAL : FALSE_VAL)    // boolean
+#define BOOL_VAL(boolean) (canary_value_from_bool(boolean))     // boolean
 #define NUM_VAL(num)      (wrenNumToValue(num))                 // double
 #define OBJ_VAL(obj)      (wrenObjectToValue((Obj*)(obj)))      // Any Obj___*
 
@@ -83,7 +84,7 @@
 #define IS_TRUE(value)      (canary_value_is_true(value))
 #define IS_UNDEFINED(value) (canary_value_is_undefined(value))
 
-#define IS_BOOL(value) (wrenIsBool(value))                      // Bool
+#define IS_BOOL(value) (canary_value_is_bool(value))            // Bool
 
 #define IS_CLASS(value) (wrenIsObjType(value, OBJ_CLASS))       // ObjClass
 #define IS_CLOSURE(value) (wrenIsObjType(value, OBJ_CLOSURE))   // ObjClosure
@@ -670,17 +671,6 @@ ObjClass* wrenGetClass(WrenVM* vm, Value value);
 // numbers, ranges, and strings) are equal if they have the same data. All
 // other values are equal if they are identical objects.
 bool wrenValuesEqual(Value a, Value b);
-
-// Returns true if [value] is a bool. Do not call this directly, instead use
-// [IS_BOOL].
-static inline bool wrenIsBool(Value value)
-{
-#if WREN_NAN_TAGGING
-  return value == TRUE_VAL || value == FALSE_VAL;
-#else
-  return value.type == VAL_FALSE || value.type == VAL_TRUE;
-#endif
-}
 
 // Returns true if [value] is an object of type [type]. Do not call this
 // directly, instead use the [IS___] macro for the type in question.

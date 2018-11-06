@@ -17,9 +17,6 @@ typedef struct
   } as;
 } canary_value_uniontagging_t;
 
-// Value -> 0 or 1.
-#define AS_BOOL(value) ((value).type == VAL_TRUE)
-
 // Value -> Obj*.
 #define AS_OBJ(v) ((v).as.obj)
 
@@ -46,7 +43,7 @@ canary_value_uniontagging_get_type(canary_value_uniontagging_t value) {
 #define canary_value_impl_singleton canary_value_uniontagging_singleton
 static inline canary_value_uniontagging_t
 canary_value_uniontagging_singleton(canary_valuetype_t type) {
-    return (canary_value_uniontagging_t){ type , { } };
+    return (canary_value_uniontagging_t){ type, { } };
 }
 
 #include "canary_value_generic.h"
