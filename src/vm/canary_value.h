@@ -28,4 +28,14 @@ canary_value_is(canary_value_t value, canary_value_t other) {
   return canary_value_impl_is(value, other);
 }
 
+static inline canary_valuetype_t
+canary_value_get_type(canary_value_t value) {
+  return canary_value_impl_get_type(value);
+}
+
+static inline bool
+canary_value_has_type(canary_value_t value, canary_valuetype_t type) {
+  return canary_value_impl_has_type(value, type);
+}
+
 #endif // CANARY_VALUE_H

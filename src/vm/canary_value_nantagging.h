@@ -130,6 +130,24 @@ canary_value_nantagging_is(canary_value_nantagging_t value,
          canary_value_nantagging_to_bits(other);
 }
 
+#define canary_value_impl_get_type canary_value_nantagging_get_type
+static inline canary_valuetype_t
+canary_value_nantagging_get_type(canary_value_nantagging_t value) {
+  if (IS_NUM(value)) return VAL_NUM;
+  if (IS_OBJ(value)) return VAL_OBJ;
+
+  switch (GET_TAG(value))
+  {
+    case TAG_FALSE:     return VAL_FALSE;
+    case TAG_NAN:       return VAL_NUM;
+    case TAG_NULL:      return VAL_NULL;
+    case TAG_TRUE:      return VAL_TRUE;
+    case TAG_UNDEFINED: return VAL_UNDEFINED;
+  }
+  UNREACHABLE();
+  return VAL_UNDEFINED;
+}
+
 #include "canary_value_generic.h"
 
 #endif // CANARY_VALUE_NANTAGGING_H

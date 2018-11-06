@@ -425,15 +425,7 @@ static uint32_t hashValue(Value value)
 {
   // TODO: We'll probably want to randomize this at some point.
 
-#if WREN_NAN_TAGGING
-  if (IS_OBJ(value)) return hashObject(AS_OBJ(value));
-
-  // Hash the raw bits of the unboxed value.
-  DoubleBits bits;
-  bits.bits64 = value;
-  return hashBits(bits);
-#else
-  switch (value.type)
+  switch (canary_value_get_type(value))
   {
     case VAL_FALSE: return 0;
     case VAL_NULL:  return 1;
@@ -442,9 +434,7 @@ static uint32_t hashValue(Value value)
     case VAL_OBJ:   return hashObject(AS_OBJ(value));
     default:        UNREACHABLE();
   }
-  
   return 0;
-#endif
 }
 
 // Looks for an entry with [key] in an array of [capacity] [entries].

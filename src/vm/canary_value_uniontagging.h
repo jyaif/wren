@@ -46,6 +46,12 @@ canary_value_uniontagging_is(canary_value_uniontagging_t value,
   return value.as.obj == other.as.obj;
 }
 
+#define canary_value_impl_get_type canary_value_uniontagging_get_type
+static inline canary_valuetype_t
+canary_value_uniontagging_get_type(canary_value_uniontagging_t value) {
+  return value.type;
+}
+
 #include "canary_value_generic.h"
 
 #endif // CANARY_VALUE_UNIONTAGGING_H

@@ -13,4 +13,11 @@ canary_value_impl_is(canary_value_impl_t value, canary_value_impl_t other) {
 }
 #endif // canary_value_impl_is
 
+#ifndef canary_value_impl_has_type
+static inline bool
+canary_value_impl_has_type(canary_value_impl_t value, canary_valuetype_t type) {
+  return canary_value_impl_get_type(value) == type;
+}
+#endif //canary_value_impl_has_type
+
 #endif // CANARY_VALUE_GENERIC_H

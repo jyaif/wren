@@ -68,37 +68,16 @@ static void dumpObject(Obj* obj)
 
 void wrenDumpValue(Value value)
 {
-#if WREN_NAN_TAGGING
-  if (IS_NUM(value))
-  {
-    printf("%.14g", AS_NUM(value));
-  }
-  else if (IS_OBJ(value))
-  {
-    dumpObject(AS_OBJ(value));
-  }
-  else
-  {
-    switch (GET_TAG(value))
-    {
-      case TAG_FALSE:     printf("false"); break;
-      case TAG_NAN:       printf("NaN"); break;
-      case TAG_NULL:      printf("null"); break;
-      case TAG_TRUE:      printf("true"); break;
-      case TAG_UNDEFINED: UNREACHABLE();
-    }
-  }
-#else
-  switch (value.type)
+  switch (canary_value_get_type(value))
   {
     case VAL_FALSE:     printf("false"); break;
     case VAL_NULL:      printf("null"); break;
     case VAL_NUM:       printf("%.14g", AS_NUM(value)); break;
     case VAL_TRUE:      printf("true"); break;
     case VAL_OBJ:       dumpObject(AS_OBJ(value)); break;
-    case VAL_UNDEFINED: UNREACHABLE();
+    case VAL_UNDEFINED: printf("undefined"); break;
+    default:            UNREACHABLE();
   }
-#endif
 }
 
 static int dumpInstruction(WrenVM* vm, ObjFn* fn, int i, int* lastLine)

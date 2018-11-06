@@ -209,10 +209,11 @@ void wrenPopRoot(WrenVM* vm);
 // header doesn't have a full definitely of WrenVM yet.
 static inline ObjClass* wrenGetClassInline(WrenVM* vm, Value value)
 {
+#if WREN_NAN_TAGGING
+  // Don't use canary_value_get_type here for performance reasons.
   if (IS_NUM(value)) return vm->numClass;
   if (IS_OBJ(value)) return AS_OBJ(value)->classObj;
 
-#if WREN_NAN_TAGGING
   switch (GET_TAG(value))
   {
     case TAG_FALSE:     return vm->boolClass; break;
@@ -222,7 +223,7 @@ static inline ObjClass* wrenGetClassInline(WrenVM* vm, Value value)
     case TAG_UNDEFINED: UNREACHABLE();
   }
 #else
-  switch (value.type)
+  switch (canary_value_get_type(value))
   {
     case VAL_FALSE:     return vm->boolClass;
     case VAL_NULL:      return vm->nullClass;
