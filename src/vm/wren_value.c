@@ -1274,7 +1274,7 @@ ObjClass* wrenGetClass(WrenVM* vm, Value value)
 
 bool wrenValuesEqual(Value a, Value b)
 {
-  if (wrenValuesSame(a, b)) return true;
+  if (canary_value_is(a, b)) return true;
 
   // If we get here, it's only possible for two heap-allocated immutable objects
   // to be equal.

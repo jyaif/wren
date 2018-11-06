@@ -20,4 +20,12 @@ typedef enum
 
 typedef canary_value_impl_t canary_value_t;
 
+// Returns true if [value] and [other] are strictly the same value.
+//
+// This is identity for object values, and value equality for unboxed values.
+static inline bool
+canary_value_is(canary_value_t value, canary_value_t other) {
+  return canary_value_impl_is(value, other);
+}
+
 #endif // CANARY_VALUE_H

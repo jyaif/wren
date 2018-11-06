@@ -652,21 +652,6 @@ void wrenFreeObj(WrenVM* vm, Obj* obj);
 // benchmarks.
 ObjClass* wrenGetClass(WrenVM* vm, Value value);
 
-// Returns true if [a] and [b] are strictly the same value. This is identity
-// for object values, and value equality for unboxed values.
-static inline bool wrenValuesSame(Value a, Value b)
-{
-#if WREN_NAN_TAGGING
-  // Value types have unique bit representations and we compare object types
-  // by identity (i.e. pointer), so all we need to do is compare the bits.
-  return a == b;
-#else
-  if (a.type != b.type) return false;
-  if (a.type == VAL_NUM) return a.as.num == b.as.num;
-  return a.as.obj == b.as.obj;
-#endif
-}
-
 // Returns true if [a] and [b] are equivalent. Immutable values (null, bools,
 // numbers, ranges, and strings) are equal if they have the same data. All
 // other values are equal if they are identical objects.

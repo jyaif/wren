@@ -37,6 +37,15 @@ typedef struct
 #define TRUE_VAL      ((Value){ VAL_TRUE, { 0 } })
 #define UNDEFINED_VAL ((Value){ VAL_UNDEFINED, { 0 } })
 
+#define canary_value_impl_is canary_value_uniontagging_is
+static inline bool
+canary_value_uniontagging_is(canary_value_uniontagging_t value,
+                             canary_value_uniontagging_t other) {
+  if (value.type != other.type) return false;
+  if (value.type == VAL_NUM) return value.as.num == other.as.num;
+  return value.as.obj == other.as.obj;
+}
+
 #include "canary_value_generic.h"
 
 #endif // CANARY_VALUE_UNIONTAGGING_H

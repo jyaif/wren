@@ -120,6 +120,16 @@ canary_value_nantagging_to_bits(canary_value_nantagging_t value) {
   return (uint64_t)value;
 }
 
+#define canary_value_impl_is canary_value_nantagging_is
+static inline bool
+canary_value_nantagging_is(canary_value_nantagging_t value,
+                           canary_value_nantagging_t other) {
+  // Value types have unique bit representations and we compare object types
+  // by identity (i.e. pointer), so all we need to do is compare the bits.
+  return canary_value_nantagging_to_bits(value) ==
+         canary_value_nantagging_to_bits(other);
+}
+
 #include "canary_value_generic.h"
 
 #endif // CANARY_VALUE_NANTAGGING_H
