@@ -6,15 +6,16 @@
 #error "Do not include directly. #include \"canary_value.h\" instead."
 #endif // CANARY_VALUE_H
 
+#define canary_value_impl_t canary_value_uniontagging_t
 typedef struct
 {
-  ValueType type;
+  canary_valuetype_t type;
   union
   {
     double num;
     Obj* obj;
   } as;
-} Value;
+} canary_value_uniontagging_t;
 
 // Value -> 0 or 1.
 #define AS_BOOL(value) ((value).type == VAL_TRUE)

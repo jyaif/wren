@@ -120,6 +120,9 @@ struct sObj
 
 #include "canary_value.h"
 
+typedef canary_value_t Value;
+typedef canary_valuetype_t ValueType;
+
 DECLARE_BUFFER(Value, Value);
 
 // A heap-allocated string object.

@@ -63,7 +63,8 @@
 // do any masking or work to extract number values: they are unmodified. This
 // means math on numbers is fast.
 
-typedef uint64_t Value;
+#define canary_value_impl_t canary_value_nantagging_t
+typedef uint64_t canary_value_nantagging_t;
 
 // A mask that selects the sign bit.
 #define SIGN_BIT ((uint64_t)1 << 63)
@@ -108,6 +109,16 @@ typedef uint64_t Value;
 
 // Gets the singleton type tag for a Value (which must be a singleton).
 #define GET_TAG(value) ((int)((value) & MASK_TAG))
+
+static inline canary_value_nantagging_t
+canary_value_nantagging_from_bits(uint64_t bits) {
+  return (canary_value_nantagging_t)bits;
+}
+
+static inline uint64_t
+canary_value_nantagging_to_bits(canary_value_nantagging_t value) {
+  return (uint64_t)value;
+}
 
 #include "canary_value_generic.h"
 
