@@ -1397,7 +1397,7 @@ WrenInterpretResult wrenCall(WrenVM* vm, WrenHandle* method)
   
   ObjFiber* fiber = vm->fiber;
   ObjClosure* closure = AS_CLOSURE(method->value);
-  ASSERT(fiber->stackTop - fiber->stack >= closure->fn->arity,
+  ASSERT(canary_thread_get_frame_size(fiber) >= closure->fn->arity,
          "Stack must have enough arguments for method.");
   
   // Discard any extra temporary slots. We take for granted that the stub
@@ -1559,7 +1559,7 @@ WrenSlot wrenGetSlotCount(WrenVM* vm)
 {
   if (!vm->is_api_call) return 0;
   
-  return (WrenSlot)(vm->fiber->stackTop - vm->fiber->stack_base);
+  return canary_thread_get_frame_size(vm->fiber);
 }
 
 void wrenEnsureSlots(WrenVM* vm, WrenSlot numSlots)
@@ -1572,20 +1572,20 @@ void wrenEnsureSlots(WrenVM* vm, WrenSlot numSlots)
   }
   
   ObjFiber *fiber = vm->fiber;
-  WrenSlot currentSize = wrenGetSlotCount(vm);
+  WrenSlot currentSize = canary_thread_get_frame_size(fiber);
   if (currentSize >= numSlots) return;
   
   // Grow the stack if needed.
-  size_t needed = (size_t)(fiber->stack_base - fiber->stack) + numSlots;
+  size_t needed = canary_thread_get_stack_size(fiber) + numSlots;
   wrenEnsureStack(vm, fiber, needed);
   
-  fiber->stackTop = fiber->stack_base + numSlots;
+  fiber->stackTop = &fiber->stack_base[numSlots];
 }
 
 // Gets the type of the object in [slot].
 WrenType wrenGetSlotType(WrenVM* vm, WrenSlot srcSlot)
 {
-  Value value = wrenGetSlot(vm, srcSlot);
+  Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   
   if (IS_BOOL(value)) return WREN_TYPE_BOOL;
   if (IS_NUM(value)) return WREN_TYPE_NUM;
@@ -1599,7 +1599,7 @@ WrenType wrenGetSlotType(WrenVM* vm, WrenSlot srcSlot)
 
 bool wrenGetSlotBool(WrenVM* vm, WrenSlot srcSlot)
 {
-  Value value = wrenGetSlot(vm, srcSlot);
+  Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   ASSERT(IS_BOOL(value), "Slot must hold a bool.");
   
   return AS_BOOL(value);
@@ -1607,7 +1607,7 @@ bool wrenGetSlotBool(WrenVM* vm, WrenSlot srcSlot)
 
 const void* wrenGetSlotBytes(WrenVM* vm, WrenSlot srcSlot, size_t* length)
 {
-  Value value = wrenGetSlot(vm, srcSlot);
+  Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   ASSERT(IS_STRING(value), "Slot must hold a string.");
   
   ObjString* string = AS_STRING(value);
@@ -1617,7 +1617,7 @@ const void* wrenGetSlotBytes(WrenVM* vm, WrenSlot srcSlot, size_t* length)
 
 double wrenGetSlotDouble(WrenVM* vm, WrenSlot srcSlot)
 {
-  Value value = wrenGetSlot(vm, srcSlot);
+  Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   ASSERT(IS_NUM(value), "Slot must hold a number.");
   
   return AS_NUM(value);
@@ -1625,7 +1625,7 @@ double wrenGetSlotDouble(WrenVM* vm, WrenSlot srcSlot)
 
 void* wrenGetSlotForeign(WrenVM* vm, WrenSlot srcSlot)
 {
-  Value value = wrenGetSlot(vm, srcSlot);
+  Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   ASSERT(IS_FOREIGN(value), "Slot must hold a foreign instance.");
   
   return AS_FOREIGN(value)->data;
@@ -1633,7 +1633,7 @@ void* wrenGetSlotForeign(WrenVM* vm, WrenSlot srcSlot)
 
 const char* wrenGetSlotString(WrenVM* vm, WrenSlot srcSlot)
 {
-  Value value = wrenGetSlot(vm, srcSlot);
+  Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   ASSERT(IS_STRING(value), "Slot must hold a string.");
   
   return AS_CSTRING(value);
@@ -1641,14 +1641,14 @@ const char* wrenGetSlotString(WrenVM* vm, WrenSlot srcSlot)
 
 WrenHandle* wrenGetSlotHandle(WrenVM* vm, WrenSlot srcSlot)
 {
-  Value value = wrenGetSlot(vm, srcSlot);
+  Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   
   return wrenMakeHandle(vm, value);
 }
 
 void wrenSetSlotBool(WrenVM* vm, WrenSlot dstSlot, bool value)
 {
-  wrenSetSlot(vm, dstSlot, BOOL_VAL(value));
+  canary_thread_set_slot(vm->fiber, dstSlot, BOOL_VAL(value));
 }
 
 void wrenSetSlotBytes(WrenVM* vm, WrenSlot dstSlot,
@@ -1656,55 +1656,56 @@ void wrenSetSlotBytes(WrenVM* vm, WrenSlot dstSlot,
 {
   ASSERT(bytes != NULL, "Byte array cannot be NULL.");
   
-  wrenSetSlot(vm, dstSlot, wrenNewStringLength(vm, (const char*)bytes, length));
+  canary_thread_set_slot(vm->fiber, dstSlot,
+                   wrenNewStringLength(vm, (const char*)bytes, length));
 }
 
 void wrenSetSlotDouble(WrenVM* vm, WrenSlot dstSlot, double value)
 {
-  wrenSetSlot(vm, dstSlot, NUM_VAL(value));
+  canary_thread_set_slot(vm->fiber, dstSlot, NUM_VAL(value));
 }
 
 void* wrenSetSlotNewForeign(WrenVM* vm, WrenSlot dstSlot,
                             WrenSlot classSlot, size_t size)
 {
-  Value classValue = wrenGetSlot(vm, classSlot);
+  Value classValue = canary_thread_get_slot(vm->fiber, classSlot);
   ASSERT(IS_CLASS(classValue), "Slot must hold a class.");
   
   ObjClass* classObj = AS_CLASS(classValue);
   ASSERT(classObj->numFields == -1, "Class must be a foreign class.");
   
   ObjForeign* foreign = wrenNewForeign(vm, classObj, size);
-  wrenSetSlot(vm, dstSlot, OBJ_VAL(foreign));
+  canary_thread_set_slot(vm->fiber, dstSlot, OBJ_VAL(foreign));
   return (void*)foreign->data;
 }
 
 void wrenSetSlotNewList(WrenVM* vm, WrenSlot dstSlot)
 {
-  wrenSetSlot(vm, dstSlot, OBJ_VAL(wrenNewList(vm, 0)));
+  canary_thread_set_slot(vm->fiber, dstSlot, OBJ_VAL(wrenNewList(vm, 0)));
 }
 
 void wrenSetSlotNull(WrenVM* vm, WrenSlot dstSlot)
 {
-  wrenSetSlot(vm, dstSlot, NULL_VAL);
+  canary_thread_set_slot(vm->fiber, dstSlot, NULL_VAL);
 }
 
 void wrenSetSlotString(WrenVM* vm, WrenSlot dstSlot, const char* text)
 {
   ASSERT(text != NULL, "String cannot be NULL.");
   
-  wrenSetSlot(vm, dstSlot, wrenNewString(vm, text));
+  canary_thread_set_slot(vm->fiber, dstSlot, wrenNewString(vm, text));
 }
 
 void wrenSetSlotHandle(WrenVM* vm, WrenSlot dstSlot, WrenHandle* handle)
 {
   ASSERT(handle != NULL, "Handle cannot be NULL.");
   
-  wrenSetSlot(vm, dstSlot, handle->value);
+  canary_thread_set_slot(vm->fiber, dstSlot, handle->value);
 }
 
 int wrenGetListCount(WrenVM* vm, WrenSlot listSlot)
 {
-  Value listValue = wrenGetSlot(vm, listSlot);
+  Value listValue = canary_thread_get_slot(vm->fiber, listSlot);
   ASSERT(IS_LIST(listValue), "Slot must hold a list.");
   
   ObjList* listObj = AS_LIST(listValue);
@@ -1714,17 +1715,17 @@ int wrenGetListCount(WrenVM* vm, WrenSlot listSlot)
 void wrenGetListElement(WrenVM* vm, WrenSlot dstSlot,
                         WrenSlot listSlot, int index)
 {
-  Value listValue = wrenGetSlot(vm, listSlot);
+  Value listValue = canary_thread_get_slot(vm->fiber, listSlot);
   ASSERT(IS_LIST(listValue), "Slot must hold a list.");
   
   ObjList* listObj = AS_LIST(listValue);
-  wrenSetSlot(vm, dstSlot, listObj->elements.data[index]);
+  canary_thread_set_slot(vm->fiber, dstSlot, listObj->elements.data[index]);
 }
 
 void wrenInsertInList(WrenVM* vm, WrenSlot listSlot, int index,
                       WrenSlot srcSlot)
 {
-  Value listValue = wrenGetSlot(vm, listSlot);
+  Value listValue = canary_thread_get_slot(vm->fiber, listSlot);
   ASSERT(IS_LIST(listValue), "Must insert into a list.");
   
   ObjList* list = AS_LIST(listValue);
@@ -1734,7 +1735,7 @@ void wrenInsertInList(WrenVM* vm, WrenSlot listSlot, int index,
   
   ASSERT(index <= list->elements.count, "Index out of bounds.");
   
-  Value value = wrenGetSlot(vm, srcSlot);
+  Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   wrenListInsert(vm, list, value, index);
 }
 
@@ -1756,12 +1757,13 @@ void wrenGetVariable(WrenVM* vm, WrenSlot dstSlot,
                                          name, strlen(name));
   ASSERT(variableSlot != -1, "Could not find variable.");
   
-  wrenSetSlot(vm, dstSlot, moduleObj->variables.data[variableSlot]);
+  canary_thread_set_slot(vm->fiber, dstSlot,
+                         moduleObj->variables.data[variableSlot]);
 }
 
 void wrenAbortFiber(WrenVM* vm, WrenSlot srcSlot)
 {
-  Value value = wrenGetSlot(vm, srcSlot);
+  Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   
   wrenFiberSetError(vm->fiber, value);
 }

@@ -190,15 +190,16 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
 
 void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
 {
+  size_t old_stack_capacity = canary_thread_get_stack_capacity(fiber);
   ASSERT(old_stack_capacity < needed, "Use wrenEnsureStack instead.");
   
-  int capacity = wrenPowerOf2Ceil(needed);
+  size_t new_stack_capacity = wrenPowerOf2Ceil(needed);
   
   Value* oldStack = fiber->stack;
   fiber->stack = (Value*)wrenReallocate(vm, fiber->stack,
-                                        sizeof(Value) * fiber->stackCapacity,
-                                        sizeof(Value) * capacity);
-  fiber->stackCapacity = capacity;
+                                        sizeof(Value) * old_stack_capacity,
+                                        sizeof(Value) * new_stack_capacity);
+  fiber->stackCapacity = new_stack_capacity;
   
   ptrdiff_t stack_diff = fiber->stack - oldStack;
   
@@ -207,7 +208,7 @@ void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
   // in the new stack. We have to be a little careful about how these are
   // calculated because pointer subtraction is only well-defined within a
   // single array, hence the slightly redundant-looking arithmetic below.
-  if (fiber->stack != oldStack)
+  if (stack_diff != 0)
   {
     // Stack pointer for each call frame.
     for (size_t i = 0; i < fiber->numFrames; i++)
@@ -1053,7 +1054,7 @@ static void blackenFiber(WrenVM* vm, ObjFiber* fiber)
   // Keep track of how much memory is still in use.
   vm->bytesAllocated += sizeof(ObjFiber);
   vm->bytesAllocated += fiber->frameCapacity * sizeof(CallFrame);
-  vm->bytesAllocated += fiber->stackCapacity * sizeof(Value);
+  vm->bytesAllocated += sizeof(Value) * canary_thread_get_stack_capacity(fiber);
 }
 
 static void blackenFn(WrenVM* vm, ObjFn* fn)

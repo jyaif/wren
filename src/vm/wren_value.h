@@ -493,6 +493,8 @@ typedef union
   double num;
 } DoubleBits;
 
+#include "canary_thread.h"
+
 // Creates a new "raw" class. It has no metaclass or superclass whatsoever.
 // This is only used for bootstrapping the initial Object and Class classes,
 // which are a little special.
@@ -552,7 +554,7 @@ void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed);
 
 static inline void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
 {
-  if (fiber->stackCapacity >= needed) return;
+  if (canary_thread_get_stack_capacity(fiber) >= needed) return;
   
   _wrenEnsureStack(vm, fiber, needed);
 }

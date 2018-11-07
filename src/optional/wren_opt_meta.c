@@ -27,23 +27,25 @@ void metaCompile(WrenVM* vm)
   
   // Return the result. We can't use the public API for this since we have a
   // bare ObjClosure*.
-  wrenSetSlot(vm, 0, closure != NULL ? OBJ_VAL(closure) : NULL_VAL);
+  canary_thread_set_slot(vm->fiber, 0,
+                         closure != NULL ? OBJ_VAL(closure) : NULL_VAL);
 }
 
 void metaGetModuleVariables(WrenVM* vm)
 {
   wrenEnsureSlots(vm, 3);
   
-  Value moduleValue = wrenMapGet(vm->modules, wrenGetSlot(vm, 1));
+  Value moduleValue = wrenMapGet(vm->modules,
+                                 canary_thread_get_slot(vm->fiber, 1));
   if (IS_UNDEFINED(moduleValue))
   {
-    wrenSetSlot(vm, 0, NULL_VAL);
+    canary_thread_set_slot(vm->fiber, 0, NULL_VAL);
     return;
   }
     
   ObjModule* module = AS_MODULE(moduleValue);
   ObjList* names = wrenNewList(vm, module->variableNames.count);
-  wrenSetSlot(vm, 0, OBJ_VAL(names));
+  canary_thread_set_slot(vm->fiber, 0, OBJ_VAL(names));
 
   // Initialize the elements to null in case a collection happens when we
   // allocate the strings below.

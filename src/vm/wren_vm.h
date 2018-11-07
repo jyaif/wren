@@ -187,8 +187,8 @@ static inline void wrenCallFunction(WrenVM* vm, ObjFiber* fiber,
   }
   
   // Grow the stack if needed.
-  int stackSize = (int)(fiber->stackTop - fiber->stack);
-  int needed = stackSize + closure->fn->maxSlots;
+  size_t stackSize = canary_thread_get_stack_size(fiber);
+  size_t needed = stackSize + closure->fn->maxSlots;
   wrenEnsureStack(vm, fiber, needed);
   
   wrenAppendCallFrame(vm, fiber, closure, fiber->stackTop - numArgs);
@@ -234,26 +234,6 @@ static inline ObjClass* wrenGetClassInline(WrenVM* vm, Value value)
 
   UNREACHABLE();
   return NULL;
-}
-
-// Ensures that [slot] is a valid index into the API's stack of slots.
-static inline void
-wrenValidateApiSlot(WrenVM* vm, WrenSlot slot) {
-  ASSERT(slot < wrenGetSlotCount(vm), "Not that many slots.");
-}
-
-// Restores [value] from [srcSlot] in the foreign call stack.
-static inline Value
-wrenGetSlot(WrenVM* vm, WrenSlot srcSlot) {
-  wrenValidateApiSlot(vm, srcSlot);
-  return vm->fiber->stack_base[srcSlot];
-}
-
-// Stores [value] in [dstSlot] in the foreign call stack.
-static inline Value
-wrenSetSlot(WrenVM* vm, WrenSlot dstSlot, Value value) {
-  wrenValidateApiSlot(vm, dstSlot);
-  return vm->fiber->stack_base[dstSlot] = value;
 }
 
 #endif
