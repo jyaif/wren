@@ -1397,14 +1397,11 @@ WrenInterpretResult wrenCall(WrenVM* vm, WrenHandle* method)
   
   ObjFiber* fiber = vm->fiber;
   ObjClosure* closure = AS_CLOSURE(method->value);
-  ASSERT(canary_thread_get_frame_size(fiber) >= closure->fn->arity,
+  WrenSlot slots = closure->fn->arity + 1;
+  ASSERT(canary_thread_get_stack_size(fiber) >= slots,
          "Stack must have enough arguments for method.");
   
-  // Discard any extra temporary slots. We take for granted that the stub
-  // function has exactly one slot for each argument.
-  fiber->stackTop = &fiber->stack[closure->fn->maxSlots];
-  
-  wrenCallFunction(vm, fiber, closure, 0);
+  wrenCallFunction(vm, fiber, closure, slots);
   return runInterpreter(vm, fiber);
 }
 
