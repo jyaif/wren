@@ -66,7 +66,9 @@
 // means math on numbers is fast.
 
 #define canary_value_impl_t canary_value_nantagging_t
-typedef uint64_t canary_value_nantagging_t;
+typedef struct {
+  uint64_t bits;
+} canary_value_nantagging_t;
 
 // A mask that selects the sign bit.
 #define SIGN_BIT ((uint64_t)1 << 63)
@@ -88,16 +90,17 @@ typedef uint64_t canary_value_nantagging_t;
 #define TAG_UNUSED4   (7)
 
 // Gets the singleton type tag for a Value (which must be a singleton).
-#define GET_TAG(value) ((int)((value) & MASK_TAG))
+#define GET_TAG(value) ((int)(canary_value_nantagging_to_bits(value) &         \
+                              MASK_TAG))
 
 static inline canary_value_nantagging_t
 canary_value_nantagging_from_bits(uint64_t bits) {
-  return (canary_value_nantagging_t)bits;
+  return (canary_value_nantagging_t) { bits };
 }
 
 static inline uint64_t
 canary_value_nantagging_to_bits(canary_value_nantagging_t value) {
-  return (uint64_t)value;
+  return value.bits;
 }
 
 #define canary_value_impl_is canary_value_nantagging_is
