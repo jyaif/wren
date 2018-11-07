@@ -187,7 +187,7 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
   return fiber;
 }
 
-void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
+void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
 {
   if (fiber->stackCapacity >= needed) return;
   
