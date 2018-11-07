@@ -45,6 +45,8 @@
 // These macros cast a Value to one of the specific object types. These do *not*
 // perform any validation, so must only be used after the Value has been
 // ensured to be the right type.
+#define AS_NUM(value)       (wrenValueToNum(value))             // double
+
 #define AS_CLASS(value)     ((ObjClass*)AS_OBJ(value))          // ObjClass*
 #define AS_CLOSURE(value)   ((ObjClosure*)AS_OBJ(value))        // ObjClosure*
 #define AS_FIBER(v)         ((ObjFiber*)AS_OBJ(v))              // ObjFiber*
@@ -54,7 +56,6 @@
 #define AS_LIST(value)      ((ObjList*)AS_OBJ(value))           // ObjList*
 #define AS_MAP(value)       ((ObjMap*)AS_OBJ(value))            // ObjMap*
 #define AS_MODULE(value)    ((ObjModule*)AS_OBJ(value))         // ObjModule*
-#define AS_NUM(value)       (wrenValueToNum(value))             // double
 #define AS_RANGE(v)         ((ObjRange*)AS_OBJ(v))              // ObjRange*
 #define AS_STRING(v)        ((ObjString*)AS_OBJ(v))             // ObjString*
 #define AS_CSTRING(v)       (AS_STRING(v)->value)               // const char*
@@ -63,12 +64,13 @@
 // more defined below that are specific to the Nan tagged or other
 // representation.
 #define BOOL_VAL(boolean) ((boolean) ? TRUE_VAL : FALSE_VAL)    // boolean
-#define NUM_VAL(num) (wrenNumToValue(num))                      // double
-#define OBJ_VAL(obj) (wrenObjectToValue((Obj*)(obj)))           // Any Obj___*
+#define NUM_VAL(num)      (wrenNumToValue(num))                 // double
+#define OBJ_VAL(obj)      (wrenObjectToValue((Obj*)(obj)))      // Any Obj___*
 
 // These perform type tests on a Value, returning `true` if the Value is of the
 // given type.
 #define IS_BOOL(value) (wrenIsBool(value))                      // Bool
+
 #define IS_CLASS(value) (wrenIsObjType(value, OBJ_CLASS))       // ObjClass
 #define IS_CLOSURE(value) (wrenIsObjType(value, OBJ_CLOSURE))   // ObjClosure
 #define IS_FIBER(value) (wrenIsObjType(value, OBJ_FIBER))       // ObjFiber
