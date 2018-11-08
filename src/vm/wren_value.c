@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -198,6 +199,8 @@ void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, int needed)
                                         sizeof(Value) * capacity);
   fiber->stackCapacity = capacity;
   
+  ptrdiff_t stack_diff = fiber->stack - oldStack;
+  
   // If the reallocation moves the stack, then we need to recalculate every
   // pointer that points into the old stack to into the same relative distance
   // in the new stack. We have to be a little careful about how these are
@@ -206,16 +209,16 @@ void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, int needed)
   if (fiber->stack != oldStack)
   {
     // Top of the stack.
-    if (vm->apiStack >= oldStack && vm->apiStack <= fiber->stackTop)
+    if (vm->apiStack != NULL)
     {
-      vm->apiStack = fiber->stack + (vm->apiStack - oldStack);
+      vm->apiStack += stack_diff;
     }
     
     // Stack pointer for each call frame.
     for (int i = 0; i < fiber->numFrames; i++)
     {
       CallFrame* frame = &fiber->frames[i];
-      frame->stackStart = fiber->stack + (frame->stackStart - oldStack);
+      frame->stackStart += stack_diff;
     }
     
     // Open upvalues.
@@ -223,10 +226,10 @@ void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, int needed)
          upvalue != NULL;
          upvalue = upvalue->next)
     {
-      upvalue->value = fiber->stack + (upvalue->value - oldStack);
+      upvalue->value += stack_diff;
     }
     
-    fiber->stackTop = fiber->stack + (fiber->stackTop - oldStack);
+    fiber->stackTop += stack_diff;
   }
 }
 
