@@ -1,6 +1,6 @@
 
-#ifndef CANARY_TYPE_H
-#define CANARY_TYPE_H
+#ifndef CANARY_TYPES_H
+#define CANARY_TYPES_H
 
 #include "wren_common.h"
 
@@ -21,4 +21,4 @@
 CANARY_DEFINE_TRIVIALLY_COMPARABLE_TYPE(bool, bool)
 CANARY_DEFINE_TRIVIALLY_COMPARABLE_TYPE(double, double)
 
-#endif // CANARY_TYPE_H
+#endif // CANARY_TYPES_H

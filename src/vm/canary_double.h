@@ -2,7 +2,7 @@
 #ifndef CANARY_DOUBLE_H
 #define CANARY_DOUBLE_H
 
-#include "canary_type.h"
+#include "canary_types.h"
 
 // Helper for IEEE 754 double precision numbers.
 
