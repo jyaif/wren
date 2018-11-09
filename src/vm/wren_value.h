@@ -319,6 +319,9 @@ typedef struct sObjFiber
   // needed.
   Value* stack;
   
+  // A pointer to the first value of the stack frame.
+  Value *stack_base;
+  
   // A pointer to one past the top-most value on the stack.
   Value* stackTop;
   

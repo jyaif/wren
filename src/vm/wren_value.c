@@ -162,7 +162,8 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
   initObj(vm, &fiber->obj, OBJ_FIBER, vm->fiberClass);
 
   fiber->stack = stack;
-  fiber->stackTop = fiber->stack;
+  fiber->stack_base = stack;
+  fiber->stackTop = stack;
   fiber->stackCapacity = stackCapacity;
 
   fiber->frames = frames;
@@ -208,12 +209,6 @@ void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
   // single array, hence the slightly redundant-looking arithmetic below.
   if (fiber->stack != oldStack)
   {
-    // Top of the stack.
-    if (vm->apiStack != NULL)
-    {
-      vm->apiStack += stack_diff;
-    }
-    
     // Stack pointer for each call frame.
     for (size_t i = 0; i < fiber->numFrames; i++)
     {
@@ -229,6 +224,7 @@ void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
       upvalue->value += stack_diff;
     }
     
+    fiber->stack_base += stack_diff;
     fiber->stackTop += stack_diff;
   }
 }

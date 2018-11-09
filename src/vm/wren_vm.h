@@ -90,15 +90,13 @@ struct WrenVM
   // there are none.
   WrenHandle* handles;
   
-  // Pointer to the bottom of the range of stack slots available for use from
-  // the C API. During a foreign method, this will be in the stack of the fiber
-  // that is executing a method.
+  // Indicate if the C api is in use.
   //
-  // If not in a foreign method, this is initially NULL. If the user requests
-  // slots by calling wrenEnsureSlots(), a stack is created and this is
-  // initialized.
-  Value* apiStack;
-
+  // If not in a foreign method, this is initially false. If the user requests
+  // slots by calling wrenEnsureSlots(), a fiber is created and this is set to
+  // true.
+  bool is_api_call;
+  
   WrenConfiguration config;
   
   // Compiler and debugger data:
@@ -248,14 +246,14 @@ wrenValidateApiSlot(WrenVM* vm, WrenSlot slot) {
 static inline Value
 wrenGetSlot(WrenVM* vm, WrenSlot srcSlot) {
   wrenValidateApiSlot(vm, srcSlot);
-  return vm->apiStack[srcSlot];
+  return vm->fiber->stack_base[srcSlot];
 }
 
 // Stores [value] in [dstSlot] in the foreign call stack.
 static inline Value
 wrenSetSlot(WrenVM* vm, WrenSlot dstSlot, Value value) {
   wrenValidateApiSlot(vm, dstSlot);
-  return vm->apiStack[dstSlot] = value;
+  return vm->fiber->stack_base[dstSlot] = value;
 }
 
 #endif

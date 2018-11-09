@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <stddef.h>
 #include <string.h>
 
 #include "wren.h"
@@ -371,15 +372,18 @@ static void callForeign(WrenVM* vm, ObjFiber* fiber,
                         WrenForeignMethodFn foreign, int numArgs)
 {
   // Save the current state so we can restore it when done.
-  Value* apiStack = vm->apiStack;
-  vm->apiStack = fiber->stackTop - numArgs;
+  bool old_is_api_call = vm->is_api_call;
+  vm->is_api_call = true;
+  ptrdiff_t old_stack_base_diff = fiber->stack_base - fiber->stack;
+  fiber->stack_base = fiber->stackTop - numArgs;
 
   foreign(vm);
 
   // Discard the stack slots for the arguments and temporaries but leave one
   // for the result.
-  fiber->stackTop = vm->apiStack + 1;
-  vm->apiStack = apiStack;
+  fiber->stackTop = fiber->stack_base + 1;
+  fiber->stack_base = fiber->stack + old_stack_base_diff;
+  vm->is_api_call = old_is_api_call;
 }
 
 // Handles the current fiber having aborted because of an error.
@@ -416,7 +420,7 @@ static void runtimeError(WrenVM* vm)
   // If we got here, nothing caught the error, so show the stack trace.
   wrenDebugPrintStackTrace(vm);
   vm->fiber = NULL;
-  vm->apiStack = NULL;
+  vm->is_api_call = false;
 }
 
 // Aborts the current fiber with an appropriate method not found error for a
@@ -625,12 +629,15 @@ static void createForeign(WrenVM* vm, ObjFiber* fiber, Value* stack)
   ASSERT(method->type == METHOD_FOREIGN, "Allocator should be foreign.");
 
   // Pass the constructor arguments to the allocator as well.
-  Value* oldApiStack = vm->apiStack;
-  vm->apiStack = stack;
+  bool old_is_api_call = vm->is_api_call;
+  vm->is_api_call = true;
+  ptrdiff_t old_stack_base_diff = fiber->stack_base - fiber->stack;
+  fiber->stack_base = stack;
 
   method->as.foreign(vm);
 
-  vm->apiStack = oldApiStack;
+  fiber->stack_base = fiber->stack + old_stack_base_diff;
+  vm->is_api_call = old_is_api_call;
   // TODO: Check that allocateForeign was called.
 }
 
@@ -1385,7 +1392,7 @@ WrenInterpretResult wrenCall(WrenVM* vm, WrenHandle* method)
   ASSERT(method != NULL, "Method cannot be NULL.");
   ASSERT(IS_CLOSURE(method->value), "Method must be a method handle.");
   ASSERT(vm->fiber != NULL, "Must set up arguments for call first.");
-  ASSERT(vm->apiStack != NULL, "Must set up arguments for call first.");
+  ASSERT(vm->is_api_call, "Must set up arguments for call first.");
   ASSERT(vm->fiber->numFrames == 0, "Can not call from a foreign method.");
   
   ObjFiber* fiber = vm->fiber;
@@ -1550,28 +1557,29 @@ void wrenPopRoot(WrenVM* vm)
 
 WrenSlot wrenGetSlotCount(WrenVM* vm)
 {
-  if (vm->apiStack == NULL) return 0;
+  if (!vm->is_api_call) return 0;
   
-  return (WrenSlot)(vm->fiber->stackTop - vm->apiStack);
+  return (WrenSlot)(vm->fiber->stackTop - vm->fiber->stack_base);
 }
 
 void wrenEnsureSlots(WrenVM* vm, WrenSlot numSlots)
 {
   // If we don't have a fiber accessible, create one for the API to use.
-  if (vm->apiStack == NULL)
+  if (!vm->is_api_call)
   {
+    vm->is_api_call = true;
     vm->fiber = wrenNewFiber(vm, NULL);
-    vm->apiStack = vm->fiber->stack;
   }
   
-  WrenSlot currentSize = (WrenSlot)(vm->fiber->stackTop - vm->apiStack);
+  ObjFiber *fiber = vm->fiber;
+  WrenSlot currentSize = wrenGetSlotCount(vm);
   if (currentSize >= numSlots) return;
   
   // Grow the stack if needed.
-  size_t needed = (size_t)(vm->apiStack - vm->fiber->stack) + numSlots;
-  wrenEnsureStack(vm, vm->fiber, needed);
+  size_t needed = (size_t)(fiber->stack_base - fiber->stack) + numSlots;
+  wrenEnsureStack(vm, fiber, needed);
   
-  vm->fiber->stackTop = vm->apiStack + numSlots;
+  fiber->stackTop = fiber->stack_base + numSlots;
 }
 
 // Gets the type of the object in [slot].
