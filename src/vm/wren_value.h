@@ -323,17 +323,17 @@ typedef struct sObjFiber
   Value* stackTop;
   
   // The number of allocated slots in the stack array.
-  int stackCapacity;
+  size_t stackCapacity;
   
   // The stack of call frames. This is a dynamic array that grows as needed but
   // never shrinks.
   CallFrame* frames;
   
   // The number of frames currently in use in [frames].
-  int numFrames;
+  size_t numFrames;
   
   // The number of [frames] allocated.
-  int frameCapacity;
+  size_t frameCapacity;
   
   // Pointer to the first node in the linked list of open upvalues that are
   // pointing to values still on the stack. The head of the list will be the
@@ -545,7 +545,7 @@ static inline void wrenAppendCallFrame(WrenVM* vm, ObjFiber* fiber,
 }
 
 // Ensures [fiber]'s stack has at least [needed] slots.
-void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, int needed);
+void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed);
 
 ObjForeign* wrenNewForeign(WrenVM* vm, ObjClass* classObj, size_t size);
 

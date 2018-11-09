@@ -187,7 +187,7 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
   return fiber;
 }
 
-void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, int needed)
+void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
 {
   if (fiber->stackCapacity >= needed) return;
   
@@ -215,7 +215,7 @@ void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, int needed)
     }
     
     // Stack pointer for each call frame.
-    for (int i = 0; i < fiber->numFrames; i++)
+    for (size_t i = 0; i < fiber->numFrames; i++)
     {
       CallFrame* frame = &fiber->frames[i];
       frame->stackStart += stack_diff;
@@ -1031,7 +1031,7 @@ static void blackenClosure(WrenVM* vm, ObjClosure* closure)
 static void blackenFiber(WrenVM* vm, ObjFiber* fiber)
 {
   // Stack functions.
-  for (int i = 0; i < fiber->numFrames; i++)
+  for (size_t i = 0; i < fiber->numFrames; i++)
   {
     wrenGrayObj(vm, (Obj*)fiber->frames[i].closure);
   }
