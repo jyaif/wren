@@ -177,7 +177,7 @@ int wrenDefineVariable(WrenVM* vm, ObjModule* module, const char* name,
 // Pushes [closure] onto [fiber]'s callstack to invoke it. Expects [numArgs]
 // arguments (including the receiver) to be on the top of the stack already.
 static inline void wrenCallFunction(WrenVM* vm, ObjFiber* fiber,
-                                    ObjClosure* closure, int numArgs)
+                                    ObjClosure* closure, WrenSlot numArgs)
 {
   // Grow the call frame array if needed.
   if (fiber->numFrames + 1 > fiber->frameCapacity)
