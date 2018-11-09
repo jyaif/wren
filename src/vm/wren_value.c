@@ -189,7 +189,7 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
 
 void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
 {
-  if (fiber->stackCapacity >= needed) return;
+  ASSERT(old_stack_capacity < needed, "Use wrenEnsureStack instead.");
   
   int capacity = wrenPowerOf2Ceil(needed);
   
