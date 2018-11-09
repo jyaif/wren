@@ -1388,17 +1388,17 @@ WrenInterpretResult wrenCall(WrenVM* vm, WrenHandle* method)
   ASSERT(vm->apiStack != NULL, "Must set up arguments for call first.");
   ASSERT(vm->fiber->numFrames == 0, "Can not call from a foreign method.");
   
+  ObjFiber* fiber = vm->fiber;
   ObjClosure* closure = AS_CLOSURE(method->value);
-  
-  ASSERT(vm->fiber->stackTop - vm->fiber->stack >= closure->fn->arity,
+  ASSERT(fiber->stackTop - fiber->stack >= closure->fn->arity,
          "Stack must have enough arguments for method.");
   
   // Discard any extra temporary slots. We take for granted that the stub
   // function has exactly one slot for each argument.
-  vm->fiber->stackTop = &vm->fiber->stack[closure->fn->maxSlots];
+  fiber->stackTop = &fiber->stack[closure->fn->maxSlots];
   
-  wrenCallFunction(vm, vm->fiber, closure, 0);
-  return runInterpreter(vm, vm->fiber);
+  wrenCallFunction(vm, fiber, closure, 0);
+  return runInterpreter(vm, fiber);
 }
 
 WrenHandle* wrenMakeHandle(WrenVM* vm, Value value)
