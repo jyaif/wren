@@ -246,7 +246,7 @@ DEF_PRIMITIVE(fn_arity)
   RETURN_NUM(AS_CLOSURE(args[0])->fn->arity);
 }
 
-static void call(WrenVM* vm, Value* args, int numArgs)
+static void call(WrenVM* vm, Value* args, WrenSlot numArgs)
 {
   // We only care about missing arguments, not extras.
   if (AS_CLOSURE(args[0])->fn->arity > numArgs)

@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 // The Wren semantic version number components.
 #define WREN_VERSION_MAJOR 0
@@ -19,7 +20,8 @@
                              WREN_VERSION_MINOR * 1000 + \
                              WREN_VERSION_PATCH)
 
-typedef int WrenSlot;
+typedef uint8_t WrenSlot;
+#define WREN_SLOT_MAX UINT8_MAX
 
 // A single virtual machine for executing Wren code.
 //

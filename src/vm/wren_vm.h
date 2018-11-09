@@ -241,7 +241,6 @@ static inline ObjClass* wrenGetClassInline(WrenVM* vm, Value value)
 // Ensures that [slot] is a valid index into the API's stack of slots.
 static inline void
 wrenValidateApiSlot(WrenVM* vm, WrenSlot slot) {
-  ASSERT(slot >= 0, "Slot cannot be negative.");
   ASSERT(slot < wrenGetSlotCount(vm), "Not that many slots.");
 }
 
