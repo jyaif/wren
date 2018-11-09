@@ -1568,7 +1568,7 @@ void wrenEnsureSlots(WrenVM* vm, WrenSlot numSlots)
   if (currentSize >= numSlots) return;
   
   // Grow the stack if needed.
-  WrenSlot needed = (WrenSlot)(vm->apiStack - vm->fiber->stack) + numSlots;
+  size_t needed = (size_t)(vm->apiStack - vm->fiber->stack) + numSlots;
   wrenEnsureStack(vm, vm->fiber, needed);
   
   vm->fiber->stackTop = vm->apiStack + numSlots;
