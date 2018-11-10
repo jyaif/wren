@@ -220,12 +220,14 @@ static inline ObjClass* wrenGetClassInline(WrenVM* vm, Value value)
 #else
   switch (canary_value_get_type(value))
   {
-    case VAL_FALSE:     return vm->boolClass;
-    case VAL_NULL:      return vm->nullClass;
-    case VAL_NUM:       return vm->numClass;
-    case VAL_TRUE:      return vm->boolClass;
-    case VAL_OBJ:       return AS_OBJ(value)->classObj;
-    case VAL_UNDEFINED: UNREACHABLE();
+    case CANARY_TYPE_BOOL_FALSE: return vm->boolClass;
+    case CANARY_TYPE_NULL:       return vm->nullClass;
+    case CANARY_TYPE_DOUBLE:     return vm->numClass;
+    case CANARY_TYPE_BOOL_TRUE:  return vm->boolClass;
+    case VAL_OBJ:                return AS_OBJ(value)->classObj;
+    case CANARY_TYPE_UNDEFINED:  UNREACHABLE();
+    
+    default:                     UNREACHABLE();
   }
 #endif
 

@@ -29,6 +29,32 @@ extern "C" {
                        CANARY_VERSION_MINOR,                                   \
                        CANARY_VERSION_PATCH))
 
+typedef enum {
+  // The object is of a type that isn't accessible by the C API.
+  CANARY_TYPE_UNKNOWN        =   0,
+  
+  CANARY_TYPE_UNDEFINED      =   1,
+  CANARY_TYPE_NULL           =   2,
+//  CANARY_TYPE_BOOL           =   3,
+  CANARY_TYPE_DOUBLE         =   4,
+  
+  CANARY_TYPE_BOOL_FALSE     =  16,
+  CANARY_TYPE_BOOL_TRUE      =  17,
+  
+  CANARY_TYPE_CLASS          =  32,
+  CANARY_TYPE_CLOSURE        =  33,
+  CANARY_TYPE_FIBER          =  34,
+  CANARY_TYPE_FN             =  35,
+  CANARY_TYPE_FOREIGN        =  36,
+  CANARY_TYPE_INSTANCE       =  37,
+  CANARY_TYPE_LIST           =  38,
+  CANARY_TYPE_MAP            =  39,
+  CANARY_TYPE_MODULE         =  40,
+  CANARY_TYPE_RANGE          =  41,
+  CANARY_TYPE_STRING         =  42,
+  CANARY_TYPE_UPVALUE        =  43,
+} canary_type_t;
+
 #ifdef __cplusplus
 } // extern "C"
 #endif // __cplusplus

@@ -422,12 +422,13 @@ static uint32_t hashValue(Value value)
 
   switch (canary_value_get_type(value))
   {
-    case VAL_FALSE: return 0;
-    case VAL_NULL:  return 1;
-    case VAL_NUM:   return hashNumber(AS_NUM(value));
-    case VAL_TRUE:  return 2;
-    case VAL_OBJ:   return hashObject(AS_OBJ(value));
-    default:        UNREACHABLE();
+    case CANARY_TYPE_BOOL_FALSE: return 0;
+    case CANARY_TYPE_NULL:       return 1;
+    case CANARY_TYPE_DOUBLE:     return hashNumber(AS_NUM(value));
+    case CANARY_TYPE_BOOL_TRUE:  return 2;
+    case VAL_OBJ:                return hashObject(AS_OBJ(value));
+    
+    default:                     UNREACHABLE();
   }
   return 0;
 }
@@ -1178,6 +1179,8 @@ static void blackenObject(WrenVM* vm, Obj* obj)
     case OBJ_RANGE:    blackenRange(   vm, (ObjRange*)   obj); break;
     case OBJ_STRING:   blackenString(  vm, (ObjString*)  obj); break;
     case OBJ_UPVALUE:  blackenUpvalue( vm, (ObjUpvalue*) obj); break;
+    
+    default:           UNREACHABLE();
   }
 }
 
@@ -1247,6 +1250,9 @@ void wrenFreeObj(WrenVM* vm, Obj* obj)
     case OBJ_STRING:
     case OBJ_UPVALUE:
       break;
+    
+    default:
+      UNREACHABLE();
   }
 
   DEALLOCATE(vm, obj);

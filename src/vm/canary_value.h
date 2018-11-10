@@ -6,15 +6,8 @@
 
 #include "canary_types.h"
 
-typedef enum
-{
-  VAL_FALSE,
-  VAL_NULL,
-  VAL_NUM,
-  VAL_TRUE,
-  VAL_UNDEFINED,
-  VAL_OBJ
-} canary_valuetype_t;
+// First one in the list of OBJ
+#define VAL_OBJ CANARY_TYPE_CLASS
 
 #if WREN_NAN_TAGGING
 #include "canary_value_nantagging.h"
@@ -27,13 +20,14 @@ typedef canary_value_impl_t canary_value_t;
 CANARY_DEFINE_TRIVIALLY_COMPARABLE_TYPE(user_data, void *)
 
 static inline bool
-canary_valuetype_is_singleton(canary_valuetype_t type) {
+canary_valuetype_is_singleton(canary_type_t type) {
   switch (type) {
-    case VAL_FALSE:
-    case VAL_NULL:
-    case VAL_TRUE:
-    case VAL_UNDEFINED:
+    case CANARY_TYPE_BOOL_FALSE:
+    case CANARY_TYPE_NULL:
+    case CANARY_TYPE_BOOL_TRUE:
+    case CANARY_TYPE_UNDEFINED:
       return true;
+    
     default:
       return false;
   }
@@ -48,13 +42,13 @@ canary_value_is(canary_value_t value, canary_value_t other) {
   return canary_value_impl_is(value, other);
 }
 
-static inline canary_valuetype_t
+static inline canary_type_t
 canary_value_get_type(canary_value_t value) {
   return canary_value_impl_get_type(value);
 }
 
 static inline bool
-canary_value_has_type(canary_value_t value, canary_valuetype_t type) {
+canary_value_has_type(canary_value_t value, canary_type_t type) {
   return canary_value_impl_has_type(value, type);
 }
 
@@ -62,7 +56,7 @@ canary_value_has_type(canary_value_t value, canary_valuetype_t type) {
     canary_value_has_type((value), (type))
 
 static inline canary_value_t
-canary_value_singleton(canary_valuetype_t type) {
+canary_value_singleton(canary_type_t type) {
   ASSERT(canary_valuetype_is_singleton(type), "Invalid singleton type.");
   
   return canary_value_impl_singleton(type);

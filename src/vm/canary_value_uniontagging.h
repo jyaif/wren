@@ -9,7 +9,7 @@
 #define canary_value_impl_t canary_value_uniontagging_t
 typedef struct
 {
-  canary_valuetype_t type;
+  canary_type_t type;
   union
   {
     double num;
@@ -22,19 +22,19 @@ static inline bool
 canary_value_uniontagging_is(canary_value_uniontagging_t value,
                              canary_value_uniontagging_t other) {
   if (value.type != other.type) return false;
-  if (value.type == VAL_NUM) return value.as.num == other.as.num;
+  if (value.type == CANARY_TYPE_DOUBLE) return value.as.num == other.as.num;
   return value.as.user_data == other.as.user_data;
 }
 
 #define canary_value_impl_get_type canary_value_uniontagging_get_type
-static inline canary_valuetype_t
+static inline canary_type_t
 canary_value_uniontagging_get_type(canary_value_uniontagging_t value) {
   return value.type;
 }
 
 #define canary_value_impl_singleton canary_value_uniontagging_singleton
 static inline canary_value_uniontagging_t
-canary_value_uniontagging_singleton(canary_valuetype_t type) {
+canary_value_uniontagging_singleton(canary_type_t type) {
     return (canary_value_uniontagging_t){ type, { } };
 }
 
@@ -47,7 +47,7 @@ canary_value_uniontagging_to_double(canary_value_uniontagging_t value) {
 #define canary_value_impl_from_double canary_value_uniontagging_from_double
 static inline canary_value_uniontagging_t
 canary_value_uniontagging_from_double(double dvalue) {
-    canary_value_uniontagging_t value = { VAL_NUM, {  } };
+    canary_value_uniontagging_t value = { CANARY_TYPE_DOUBLE, {  } };
     
     value.as.num = dvalue;
     return value;

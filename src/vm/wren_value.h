@@ -1,6 +1,8 @@
 #ifndef wren_value_h
 #define wren_value_h
 
+#include "canary.h"
+
 #include "wren_utils.h"
 
 // This defines the built-in types and their core representations in memory.
@@ -103,20 +105,19 @@
 #define CONST_STRING(vm, text) wrenNewStringLength((vm), (text), sizeof(text) - 1)
 
 // Identifies which specific type a heap-allocated object is.
-typedef enum {
-  OBJ_CLASS,
-  OBJ_CLOSURE,
-  OBJ_FIBER,
-  OBJ_FN,
-  OBJ_FOREIGN,
-  OBJ_INSTANCE,
-  OBJ_LIST,
-  OBJ_MAP,
-  OBJ_MODULE,
-  OBJ_RANGE,
-  OBJ_STRING,
-  OBJ_UPVALUE
-} ObjType;
+#define OBJ_CLASS    CANARY_TYPE_CLASS
+#define OBJ_CLOSURE  CANARY_TYPE_CLOSURE
+#define OBJ_FIBER    CANARY_TYPE_FIBER
+#define OBJ_FN       CANARY_TYPE_FN
+#define OBJ_FOREIGN  CANARY_TYPE_FOREIGN
+#define OBJ_INSTANCE CANARY_TYPE_INSTANCE
+#define OBJ_LIST     CANARY_TYPE_LIST
+#define OBJ_MAP      CANARY_TYPE_MAP
+#define OBJ_MODULE   CANARY_TYPE_MODULE
+#define OBJ_RANGE    CANARY_TYPE_RANGE
+#define OBJ_STRING   CANARY_TYPE_STRING
+#define OBJ_UPVALUE  CANARY_TYPE_UPVALUE
+typedef canary_type_t ObjType;
 
 typedef struct sObjClass ObjClass;
 
@@ -137,7 +138,7 @@ struct sObj
 #include "canary_value.h"
 
 typedef canary_value_t Value;
-typedef canary_valuetype_t ValueType;
+typedef canary_type_t ValueType;
 
 DECLARE_BUFFER(Value, Value);
 

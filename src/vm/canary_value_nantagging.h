@@ -115,14 +115,15 @@ canary_value_nantagging_is(canary_value_nantagging_t value,
 
 #define canary_value_impl_singleton canary_value_nantagging_singleton
 static inline canary_value_nantagging_t
-canary_value_nantagging_singleton(canary_valuetype_t type) {
+canary_value_nantagging_singleton(canary_type_t type) {
   int tag = 0;
   switch (type) {
-    case VAL_FALSE:     tag = TAG_FALSE;     break;
-    case VAL_NULL:      tag = TAG_NULL;      break;
-    case VAL_TRUE:      tag = TAG_TRUE;      break;
-    case VAL_UNDEFINED: tag = TAG_UNDEFINED; break;
-    default:            UNREACHABLE();
+    case CANARY_TYPE_BOOL_FALSE: tag = TAG_FALSE;     break;
+    case CANARY_TYPE_NULL:       tag = TAG_NULL;      break;
+    case CANARY_TYPE_BOOL_TRUE:  tag = TAG_TRUE;      break;
+    case CANARY_TYPE_UNDEFINED:  tag = TAG_UNDEFINED; break;
+    
+    default:                     UNREACHABLE();
   }
   return canary_value_nantagging_from_bits((uint64_t)(QNAN | tag));
 }
@@ -140,19 +141,19 @@ canary_value_nantagging_singleton(canary_valuetype_t type) {
 
 #define canary_value_impl_is_false canary_value_nantagging_is_false
 #define canary_value_impl_false canary_value_nantagging_false
-CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(false, VAL_FALSE)
+CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(false, CANARY_TYPE_BOOL_FALSE)
 
 #define canary_value_impl_is_null canary_value_nantagging_is_null
 #define canary_value_impl_null canary_value_nantagging_null
-CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(null, VAL_NULL)
+CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(null, CANARY_TYPE_NULL)
 
 #define canary_value_impl_is_true canary_value_nantagging_is_true
 #define canary_value_impl_true canary_value_nantagging_true
-CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(true, VAL_TRUE)
+CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(true, CANARY_TYPE_BOOL_TRUE)
 
 #define canary_value_impl_is_undefined canary_value_nantagging_is_undefined
 #define canary_value_impl_undefined canary_value_nantagging_undefined
-CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(undefined, VAL_UNDEFINED)
+CANARY_DECLARE_VALUE_NANTAGGING_SINGLETON(undefined, CANARY_TYPE_UNDEFINED)
 
 #define canary_value_impl_is_bool canary_value_nantagging_is_bool
 static inline bool
@@ -220,21 +221,21 @@ canary_value_nantagging_from_user_data(void *pvalue) {
 }
 
 #define canary_value_impl_get_type canary_value_nantagging_get_type
-static inline canary_valuetype_t
+static inline canary_type_t
 canary_value_nantagging_get_type(canary_value_nantagging_t value) {
-  if (canary_value_nantagging_is_double(value)) return VAL_NUM;
+  if (canary_value_nantagging_is_double(value)) return CANARY_TYPE_DOUBLE;
   if (canary_value_nantagging_is_user_data(value)) return VAL_OBJ;
 
   switch (GET_TAG(value))
   {
-    case TAG_FALSE:     return VAL_FALSE;
-    case TAG_NAN:       return VAL_NUM;
-    case TAG_NULL:      return VAL_NULL;
-    case TAG_TRUE:      return VAL_TRUE;
-    case TAG_UNDEFINED: return VAL_UNDEFINED;
+    case TAG_FALSE:     return CANARY_TYPE_BOOL_FALSE;
+    case TAG_NAN:       return CANARY_TYPE_DOUBLE;
+    case TAG_NULL:      return CANARY_TYPE_NULL;
+    case TAG_TRUE:      return CANARY_TYPE_BOOL_TRUE;
+    case TAG_UNDEFINED: return CANARY_TYPE_UNDEFINED;
   }
   UNREACHABLE();
-  return VAL_UNDEFINED;
+  return CANARY_TYPE_UNDEFINED;
 }
 
 #include "canary_value_generic.h"

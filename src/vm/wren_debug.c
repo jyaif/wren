@@ -65,6 +65,7 @@ static void dumpObject(Obj* obj)
     case OBJ_RANGE: printf("[range %p]", obj); break;
     case OBJ_STRING: printf("%s", ((ObjString*)obj)->value); break;
     case OBJ_UPVALUE: printf("[upvalue %p]", obj); break;
+    
     default: printf("[unknown object %d]", obj->type); break;
   }
 }
@@ -73,13 +74,14 @@ void wrenDumpValue(Value value)
 {
   switch (canary_value_get_type(value))
   {
-    case VAL_FALSE:     printf("false"); break;
-    case VAL_NULL:      printf("null"); break;
-    case VAL_NUM:       printf("%.14g", AS_NUM(value)); break;
-    case VAL_TRUE:      printf("true"); break;
-    case VAL_OBJ:       dumpObject(AS_OBJ(value)); break;
-    case VAL_UNDEFINED: printf("undefined"); break;
-    default:            UNREACHABLE();
+    case CANARY_TYPE_BOOL_FALSE: printf("false"); break;
+    case CANARY_TYPE_NULL:       printf("null"); break;
+    case CANARY_TYPE_DOUBLE:     printf("%.14g", AS_NUM(value)); break;
+    case CANARY_TYPE_BOOL_TRUE:  printf("true"); break;
+    case VAL_OBJ:                dumpObject(AS_OBJ(value)); break;
+    case CANARY_TYPE_UNDEFINED:  printf("undefined"); break;
+    
+    default:                     UNREACHABLE();
   }
 }
 
