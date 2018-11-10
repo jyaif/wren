@@ -26,11 +26,6 @@
 // lookup faster.
 #define MAP_LOAD_PERCENT 75
 
-// The number of call frames initially allocated when a fiber is created. Making
-// this smaller makes fibers use less memory (at first) but spends more time
-// reallocating when the call stack grows.
-#define INITIAL_CALL_FRAMES 4
-
 DEFINE_BUFFER(Value, Value);
 DEFINE_BUFFER(Method, Method);
 
@@ -148,14 +143,15 @@ ObjClosure* wrenNewClosure(WrenVM* vm, ObjFn* fn)
 ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
 {
   // Allocate the arrays before the fiber in case it triggers a GC.
-  CallFrame* frames = ALLOCATE_ARRAY(vm, CallFrame, INITIAL_CALL_FRAMES);
+  const size_t frame_capacity = CANARY_THREAD_DEFAULT_FRAME_COUNT;
+  CallFrame* frames = ALLOCATE_ARRAY(vm, CallFrame, frame_capacity);
   
   // Add one slot for the unused implicit receiver slot that the compiler
   // assumes all functions have.
-  int stackCapacity = closure == NULL
-      ? 1
+  const size_t stack_capacity = closure == NULL
+      ? CANARY_THREAD_DEFAULT_SLOT_COUNT
       : wrenPowerOf2Ceil(closure->fn->maxSlots + 1);
-  Value* stack = ALLOCATE_ARRAY(vm, Value, stackCapacity);
+  Value* stack = ALLOCATE_ARRAY(vm, Value, stack_capacity);
   
   ObjFiber* fiber = ALLOCATE(vm, ObjFiber);
   initObj(vm, &fiber->obj, OBJ_FIBER, vm->fiberClass);
@@ -163,10 +159,10 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
   fiber->stack = stack;
   fiber->stack_base = stack;
   fiber->stackTop = stack;
-  fiber->stackCapacity = stackCapacity;
+  fiber->stackCapacity = stack_capacity;
 
   fiber->frames = frames;
-  fiber->frameCapacity = INITIAL_CALL_FRAMES;
+  fiber->frameCapacity = frame_capacity;
   fiber->numFrames = 0;
 
   fiber->openUpvalues = NULL;

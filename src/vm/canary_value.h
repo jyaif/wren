@@ -2,6 +2,8 @@
 #ifndef CANARY_VALUE_H
 #define CANARY_VALUE_H
 
+#include "canary_global.h"
+
 #include "canary_types.h"
 
 typedef enum

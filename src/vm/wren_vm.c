@@ -846,7 +846,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
     #define DEBUG_TRACE_INSTRUCTIONS() do { } while (false)
   #endif
 
-  #if WREN_COMPUTED_GOTO
+  #if CANARY_THREAD_INTERPRETER_FLAVOR == CANARY_THREAD_INTERPRETER_FLAVOR_GOTO
 
   static void* dispatchTable[] = {
     #define OPCODE(name, _) &&code_##name,
@@ -866,7 +866,8 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
       }                                                         \
       while (false)
 
-  #else
+  #elif CANARY_THREAD_INTERPRETER_FLAVOR ==                                    \
+      CANARY_THREAD_INTERPRETER_FLAVOR_SWITCH
 
   #define INTERPRET_LOOP                                        \
       loop:                                                     \
@@ -877,7 +878,9 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
   #define CASE_CODE(name)  case CODE_##name
   #define DISPATCH()       goto loop
 
-  #endif
+  #else // CANARY_THREAD_INTERPRETER_FLAVOR
+  #error "Unupported CANARY_THREAD_INTERPRETER_FLAVOR."
+  #endif // CANARY_THREAD_INTERPRETER_FLAVOR
 
   LOAD_FRAME();
 

@@ -1,6 +1,8 @@
 #ifndef wren_common_h
 #define wren_common_h
 
+#include "canary_config.h"
+
 // This header contains macros and defines used across the entire Wren
 // implementation. In particular, it contains "configuration" defines that
 // control how Wren works. Some of these are only used while hacking on Wren
@@ -25,24 +27,8 @@
 // debugging and may be more portable.
 //
 // Defaults to on.
-#ifndef WREN_NAN_TAGGING
-  #define WREN_NAN_TAGGING 1
-#endif
-
-// If true, the VM's interpreter loop uses computed gotos. See this for more:
-// http://gcc.gnu.org/onlinedocs/gcc-3.1.1/gcc/Labels-as-Values.html
-// Enabling this speeds up the main dispatch loop a bit, but requires compiler
-// support.
-//
-// Defaults to true on supported compilers.
-#ifndef WREN_COMPUTED_GOTO
-  #ifdef _MSC_VER
-    // No computed gotos in Visual Studio.
-    #define WREN_COMPUTED_GOTO 0
-  #else
-    #define WREN_COMPUTED_GOTO 1
-  #endif
-#endif
+#define WREN_NAN_TAGGING                                                       \
+  (CANARY_VALUE_FLAVOUR == CANARY_VALUE_FLAVOUR_NANTAGGING)
 
 // The VM includes a number of optional modules. You can choose to include
 // these or not. By default, they are all available. To disable one, set the
@@ -130,12 +116,6 @@
 // Use the VM's allocator to free the previously allocated memory at [pointer].
 #define DEALLOCATE(vm, pointer) wrenReallocate(vm, pointer, 0, 0)
 
-// The Microsoft compiler does not support the "inline" modifier when compiling
-// as plain C.
-#if defined( _MSC_VER ) && !defined(__cplusplus)
-  #define inline _inline
-#endif
-
 // This is used to clearly mark flexible-sized arrays that appear at the end of
 // some dynamically-allocated structs, known as the "struct hack".
 #if __STDC_VERSION__ >= 199901L
@@ -147,57 +127,7 @@
   #define FLEXIBLE_ARRAY 0
 #endif
 
-// Assertions are used to validate program invariants. They indicate things the
-// program expects to be true about its internal state during execution. If an
-// assertion fails, there is a bug in Wren.
-//
-// Assertions add significant overhead, so are only enabled in debug builds.
-#ifdef DEBUG
-
-  #include <stdio.h>
-  #include <stdlib.h>
-
-  #define ASSERT(condition, message) \
-      do \
-      { \
-        if (!(condition)) \
-        { \
-          fprintf(stderr, "[%s:%d] Assert failed in %s(): %s\n", \
-              __FILE__, __LINE__, __func__, message); \
-          abort(); \
-        } \
-      } \
-      while(0)
-
-  // Indicates that we know execution should never reach this point in the
-  // program. In debug mode, we assert this fact because it's a bug to get here.
-  //
-  // In release mode, we use compiler-specific built in functions to tell the
-  // compiler the code can't be reached. This avoids "missing return" warnings
-  // in some cases and also lets it perform some optimizations by assuming the
-  // code is never reached.
-  #define UNREACHABLE() \
-      do \
-      { \
-        fprintf(stderr, "[%s:%d] This code should not be reached in %s()\n", \
-            __FILE__, __LINE__, __func__); \
-        abort(); \
-      } \
-      while (0)
-
-#else
-
-  #define ASSERT(condition, message) do {} while (0)
-
-  // Tell the compiler that this part of the code will never be reached.
-  #if defined( _MSC_VER )
-    #define UNREACHABLE() __assume(0)
-  #elif (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
-    #define UNREACHABLE() __builtin_unreachable()
-  #else
-    #define UNREACHABLE()
-  #endif
-
-#endif
+#define ASSERT      CANARY_ASSERT
+#define UNREACHABLE CANARY_UNREACHABLE
 
 #endif
