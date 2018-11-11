@@ -2,6 +2,8 @@
 #ifndef CANARY_H
 #define CANARY_H
 
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -31,6 +33,7 @@ extern "C" {
                        CANARY_VERSION_MINOR,                                   \
                        CANARY_VERSION_PATCH))
 
+typedef struct canary_context_t canary_context_t;
 typedef uint8_t canary_slot_t;
 
 typedef enum {
@@ -58,6 +61,29 @@ typedef enum {
   CANARY_TYPE_STRING         =  42,
   CANARY_TYPE_UPVALUE        =  43,
 } canary_type_t;
+
+#define CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(name)                            \
+  bool canary_is_slot_##name(const canary_context_t *context,                  \
+                             canary_slot_t slot);                              \
+                                                                               \
+  void canary_set_slot_##name(canary_context_t *context, canary_slot_t slot)
+
+CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(undefined);
+CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(null);
+CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(false);
+CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(true);
+
+#define CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(name, type)                      \
+  bool canary_is_slot_##name(const canary_context_t *context,                  \
+                             canary_slot_t slot);                              \
+                                                                               \
+  type canary_get_slot_##name(canary_context_t *context, canary_slot_t slot);  \
+                                                                               \
+  type canary_set_slot_##name(canary_context_t *context, canary_slot_t slot,   \
+                              type primitive)
+
+CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(bool, bool);
+CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(double, double);
 
 #ifdef __cplusplus
 } // extern "C"
