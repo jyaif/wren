@@ -4,6 +4,12 @@
 
 #include "canary_value.h"
 
+// The global object memory associated to this thread.
+static inline canary_objectmemory_t *
+canary_thread_get_object_memory(canary_thread_t *thread) {
+  return thread->vm;
+}
+
 // The number of allocated slots in the frame array.
 static inline canary_slot_t
 canary_thread_get_frame_size(const canary_thread_t *thread) {

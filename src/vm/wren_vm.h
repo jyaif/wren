@@ -171,14 +171,14 @@ int wrenDefineVariable(WrenVM* vm, ObjModule* module, const char* name,
 
 // Pushes [closure] onto [fiber]'s callstack to invoke it. Expects [numArgs]
 // arguments (including the receiver) to be on the top of the stack already.
-static inline void wrenCallFunction(WrenVM* vm, ObjFiber* fiber,
+static inline void wrenCallFunction(ObjFiber* fiber,
                                     ObjClosure* closure, WrenSlot numArgs)
 {
   // Grow the call frame array if needed.
   if (fiber->numFrames + 1 > fiber->frameCapacity)
   {
     int max = fiber->frameCapacity * 2;
-    fiber->frames = (CallFrame*)wrenReallocate(vm, fiber->frames,
+    fiber->frames = (CallFrame*)wrenReallocate(fiber->vm, fiber->frames,
         sizeof(CallFrame) * fiber->frameCapacity, sizeof(CallFrame) * max);
     fiber->frameCapacity = max;
   }
@@ -186,9 +186,9 @@ static inline void wrenCallFunction(WrenVM* vm, ObjFiber* fiber,
   // Grow the stack if needed.
   size_t stackSize = canary_thread_get_stack_size(fiber);
   size_t needed = stackSize + closure->fn->maxSlots;
-  wrenEnsureStack(vm, fiber, needed);
+  wrenEnsureStack(fiber, needed);
   
-  wrenAppendCallFrame(vm, fiber, closure, fiber->stackTop - numArgs);
+  wrenAppendCallFrame(fiber, closure, fiber->stackTop - numArgs);
 }
 
 // Marks [obj] as a GC root so that it doesn't get collected.

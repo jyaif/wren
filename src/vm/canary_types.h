@@ -4,6 +4,7 @@
 
 #include <string.h>
 
+typedef struct WrenVM canary_objectmemory_t;
 typedef struct sObjFiber canary_thread_t;
 
 #define CANARY_DEFINE_TRIVIALLY_COMPARABLE_TYPE(name, type)                    \

@@ -225,12 +225,12 @@ void* wrenReallocate(WrenVM* vm, void* memory, size_t oldSize, size_t newSize)
 // ensure that multiple closures closing over the same variable actually see
 // the same variable.) Otherwise, it will create a new open upvalue and add it
 // the fiber's list of upvalues.
-static ObjUpvalue* captureUpvalue(WrenVM* vm, ObjFiber* fiber, Value* local)
+static ObjUpvalue* captureUpvalue(ObjFiber* fiber, Value* local)
 {
   // If there are no open upvalues at all, we must need a new one.
   if (fiber->openUpvalues == NULL)
   {
-    fiber->openUpvalues = wrenNewUpvalue(vm, local);
+    fiber->openUpvalues = wrenNewUpvalue(fiber->vm, local);
     return fiber->openUpvalues;
   }
 
@@ -251,7 +251,7 @@ static ObjUpvalue* captureUpvalue(WrenVM* vm, ObjFiber* fiber, Value* local)
   // We've walked past this local on the stack, so there must not be an
   // upvalue for it already. Make a new one and link it in in the right
   // place to keep the list sorted.
-  ObjUpvalue* createdUpvalue = wrenNewUpvalue(vm, local);
+  ObjUpvalue* createdUpvalue = wrenNewUpvalue(fiber->vm, local);
   if (prevUpvalue == NULL)
   {
     // The new one is the first one in the list.
@@ -365,10 +365,11 @@ static void bindMethod(WrenVM* vm, int methodType, int symbol,
   wrenBindMethod(vm, classObj, symbol, method);
 }
 
-static void callForeign(WrenVM* vm, ObjFiber* fiber,
+static void callForeign(ObjFiber* fiber,
                         WrenForeignMethodFn foreign, int numArgs)
 {
   // Save the current state so we can restore it when done.
+  WrenVM* vm = fiber->vm;
   bool old_is_api_call = vm->is_api_call;
   vm->is_api_call = true;
   ptrdiff_t old_stack_base_diff = fiber->stack_base - fiber->stack;
@@ -612,8 +613,9 @@ static void createClass(WrenVM* vm, int numFields, ObjModule* module)
   if (numFields == -1) bindForeignClass(vm, classObj, module);
 }
 
-static void createForeign(WrenVM* vm, ObjFiber* fiber, Value* stack)
+static void createForeign(ObjFiber* fiber, Value* stack)
 {
+  WrenVM* vm = fiber->vm;
   ObjClass* classObj = AS_CLASS(stack[0]);
   ASSERT(classObj->numFields == -1, "Class must be a foreign class.");
 
@@ -1029,14 +1031,14 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
 
         case METHOD_FOREIGN:
           STORE_FRAME();
-          callForeign(vm, fiber, method->as.foreign, numArgs);
+          callForeign(fiber, method->as.foreign, numArgs);
           if (wrenFiberHasError(fiber)) RUNTIME_ERROR();
           LOAD_FRAME();
           break;
 
         case METHOD_BLOCK:
           STORE_FRAME();
-          wrenCallFunction(vm, fiber, (ObjClosure*)method->as.closure, numArgs);
+          wrenCallFunction(fiber, (ObjClosure*)method->as.closure, numArgs);
           LOAD_FRAME();
           break;
 
@@ -1213,7 +1215,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
 
     CASE_CODE(FOREIGN_CONSTRUCT):
       ASSERT(IS_CLASS(stackStart[0]), "'this' should be a class.");
-      createForeign(vm, fiber, stackStart);
+      createForeign(fiber, stackStart);
       DISPATCH();
 
     CASE_CODE(CLOSURE):
@@ -1232,7 +1234,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
         if (isLocal)
         {
           // Make an new upvalue to close over the parent's local variable.
-          closure->upvalues[i] = captureUpvalue(vm, fiber,
+          closure->upvalues[i] = captureUpvalue(fiber,
                                                 frame->stackStart + index);
         }
         else
@@ -1292,7 +1294,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
       {
         STORE_FRAME();
         ObjClosure* closure = AS_CLOSURE(PEEK());
-        wrenCallFunction(vm, fiber, closure, 1);
+        wrenCallFunction(fiber, closure, 1);
         LOAD_FRAME();
       }
       else
@@ -1395,7 +1397,7 @@ WrenInterpretResult wrenCall(WrenVM* vm, WrenHandle* method)
   ASSERT(canary_thread_get_stack_size(fiber) >= slots,
          "Stack must have enough arguments for method.");
   
-  wrenCallFunction(vm, fiber, closure, slots);
+  wrenCallFunction(fiber, closure, slots);
   return runInterpreter(vm, fiber);
 }
 
@@ -1567,7 +1569,7 @@ void wrenSetSlotCount(WrenVM* vm, WrenSlot numSlots)
   size_t new_stack_size = old_stack_size + numSlots;
 
   // Grow the stack if needed.
-  wrenEnsureStack(vm, fiber, new_stack_size);
+  wrenEnsureStack(fiber, new_stack_size);
   
   Value *old_stack_top = fiber->stackTop;
   Value *new_stack_top = &fiber->stack_base[numSlots];

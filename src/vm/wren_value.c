@@ -155,7 +155,9 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
   
   ObjFiber* fiber = ALLOCATE(vm, ObjFiber);
   initObj(vm, &fiber->obj, OBJ_FIBER, vm->fiberClass);
-
+  
+  fiber->vm = vm;
+  
   fiber->stack = stack;
   fiber->stack_base = stack;
   fiber->stackTop = stack;
@@ -173,7 +175,7 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
   if (closure != NULL)
   {
     // Initialize the first call frame.
-    wrenAppendCallFrame(vm, fiber, closure, fiber->stack);
+    wrenAppendCallFrame(fiber, closure, fiber->stack);
 
     // The first slot always holds the closure.
     fiber->stackTop[0] = OBJ_VAL(closure);
@@ -183,7 +185,7 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
   return fiber;
 }
 
-void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
+void _wrenEnsureStack(ObjFiber* fiber, size_t needed)
 {
   size_t old_stack_capacity = canary_thread_get_stack_capacity(fiber);
   ASSERT(old_stack_capacity < needed, "Use wrenEnsureStack instead.");
@@ -191,7 +193,7 @@ void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
   size_t new_stack_capacity = wrenPowerOf2Ceil(needed);
   
   Value* oldStack = fiber->stack;
-  fiber->stack = (Value*)wrenReallocate(vm, fiber->stack,
+  fiber->stack = (Value*)wrenReallocate(fiber->vm, fiber->stack,
                                         sizeof(Value) * old_stack_capacity,
                                         sizeof(Value) * new_stack_capacity);
   fiber->stackCapacity = new_stack_capacity;

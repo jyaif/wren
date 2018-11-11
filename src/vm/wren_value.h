@@ -312,6 +312,9 @@ typedef struct sObjFiber
 {
   Obj obj;
   
+  // The vm the fiber is belonging to.
+  WrenVM* vm;
+  
   // The stack of value slots. This is used for holding local variables and
   // temporaries while the fiber is executing. It heap-allocated and grown as
   // needed.
@@ -535,7 +538,7 @@ wrenFiberSetError(ObjFiber* fiber, Value error) {
 
 // Adds a new [CallFrame] to [fiber] invoking [closure] whose stack starts at
 // [stackStart].
-static inline void wrenAppendCallFrame(WrenVM* vm, ObjFiber* fiber,
+static inline void wrenAppendCallFrame(ObjFiber* fiber,
                                        ObjClosure* closure, Value* stackStart)
 {
   // The caller should have ensured we already have enough capacity.
@@ -548,13 +551,13 @@ static inline void wrenAppendCallFrame(WrenVM* vm, ObjFiber* fiber,
 }
 
 // Ensures [fiber]'s stack has at least [needed] slots.
-void _wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed);
+void _wrenEnsureStack(ObjFiber* fiber, size_t needed);
 
-static inline void wrenEnsureStack(WrenVM* vm, ObjFiber* fiber, size_t needed)
+static inline void wrenEnsureStack(ObjFiber* fiber, size_t needed)
 {
   if (canary_thread_get_stack_capacity(fiber) >= needed) return;
   
-  _wrenEnsureStack(vm, fiber, needed);
+  _wrenEnsureStack(fiber, needed);
 }
 
 ObjForeign* wrenNewForeign(WrenVM* vm, ObjClass* classObj, size_t size);
