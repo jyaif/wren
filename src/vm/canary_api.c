@@ -4,6 +4,14 @@
 
 #include "canary_thread.h"
 
+canary_type_t
+canary_get_slot_type(canary_context_t *context, canary_slot_t slot) {
+  const canary_thread_t *thread = canary_context_to_thread_const(context);
+  canary_value_t value = canary_thread_get_slot(thread, slot);
+
+  return canary_value_get_type(value);
+}
+
 #define CANARY_DEFINE_BUILTIN_SINGLETON_TYPE(name)                             \
   bool canary_is_slot_##name(const canary_context_t *context,                  \
                              canary_slot_t slot) {                             \

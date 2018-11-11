@@ -62,6 +62,13 @@ typedef enum {
   CANARY_TYPE_UPVALUE        =  43,
 } canary_type_t;
 
+canary_type_t
+canary_get_slot_type(canary_context_t *context, canary_slot_t slot);
+
+static inline bool
+canary_is_slot_type(canary_context_t *context, canary_slot_t slot,
+                    canary_type_t type);
+
 #define CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(name)                            \
   bool canary_is_slot_##name(const canary_context_t *context,                  \
                              canary_slot_t slot);                              \
@@ -84,6 +91,8 @@ CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(true);
 
 CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(bool, bool);
 CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(double, double);
+
+#include "canary_p.h"
 
 #ifdef __cplusplus
 } // extern "C"
