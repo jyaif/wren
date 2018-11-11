@@ -2,6 +2,8 @@
 #ifndef CANARY_H
 #define CANARY_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -28,6 +30,8 @@ extern "C" {
   (CANARY_MAKE_VERSION(CANARY_VERSION_MAJOR,                                   \
                        CANARY_VERSION_MINOR,                                   \
                        CANARY_VERSION_PATCH))
+
+typedef uint8_t canary_slot_t;
 
 typedef enum {
   // The object is of a type that isn't accessible by the C API.

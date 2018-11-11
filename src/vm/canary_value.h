@@ -57,7 +57,7 @@ canary_value_has_type(canary_value_t value, canary_type_t type) {
 
 static inline canary_value_t
 canary_value_singleton(canary_type_t type) {
-  ASSERT(canary_valuetype_is_singleton(type), "Invalid singleton type.");
+  CANARY_ASSERT(canary_valuetype_is_singleton(type), "Invalid singleton type.");
   
   return canary_value_impl_singleton(type);
 }
@@ -86,7 +86,8 @@ canary_value_is_##name(canary_value_t value) {                                 \
                                                                                \
 static inline type                                                             \
 canary_value_to_##name(canary_value_t value) {                                 \
-  ASSERT(canary_value_is_##name(value), "Value does not hold '"#name"' type.");\
+  CANARY_ASSERT(canary_value_is_##name(value),                                 \
+                "Value does not hold '"#name"' type.");                        \
                                                                                \
   return canary_value_impl_to_##name(value);                                   \
 }                                                                              \
@@ -94,8 +95,8 @@ canary_value_to_##name(canary_value_t value) {                                 \
 static inline canary_value_t                                                   \
 canary_value_from_##name(type native) {                                        \
   canary_value_t value = canary_value_impl_from_##name(native);                \
-  ASSERT(canary_##name##_is(canary_value_to_##name(value), native),            \
-         "Value conversion failed for '"#name"' type.");                       \
+  CANARY_ASSERT(canary_##name##_is(canary_value_to_##name(value), native),     \
+                "Value conversion failed for '"#name"' type.");                \
                                                                                \
   return value;                                                                \
 }

@@ -3,6 +3,7 @@
 
 #include "canary.h"
 
+#include "wren_common.h"
 #include "wren_utils.h"
 
 // This defines the built-in types and their core representations in memory.

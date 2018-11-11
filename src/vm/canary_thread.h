@@ -2,7 +2,7 @@
 #ifndef CANARY_THREAD_H
 #define CANARY_THREAD_H
 
-#include "canary_types.h"
+#include "canary_value.h"
 
 // The number of allocated slots in the frame array.
 static inline canary_slot_t

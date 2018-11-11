@@ -4,14 +4,14 @@
 #include "wren_core.h"
 #include "wren_debug.h"
 
-#include <stdlib.h>
-
 #if WREN_OPT_META
   #include "wren_opt_meta.h"
 #endif
 #if WREN_OPT_RANDOM
   #include "wren_opt_random.h"
 #endif
+
+#include <stdlib.h>
 
 #if WREN_DEBUG_TRACE_MEMORY || WREN_DEBUG_TRACE_GC
   #include <time.h>

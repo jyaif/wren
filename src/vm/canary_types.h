@@ -2,11 +2,7 @@
 #ifndef CANARY_TYPES_H
 #define CANARY_TYPES_H
 
-#include "wren_common.h"
-
 #include <string.h>
-
-typedef uint8_t canary_slot_t;
 
 typedef struct sObjFiber canary_thread_t;
 
