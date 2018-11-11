@@ -90,7 +90,7 @@ canary_value_is_##name(canary_value_t value) {                                 \
                                                                                \
 static inline type                                                             \
 canary_value_to_##name(canary_value_t value) {                                 \
-  ASSERT(canary_value_is_##name(value), "Value must hold a bool.");            \
+  ASSERT(canary_value_is_##name(value), "Value does not hold '"#name"' type.");\
                                                                                \
   return canary_value_impl_to_##name(value);                                   \
 }                                                                              \
@@ -99,7 +99,7 @@ static inline canary_value_t                                                   \
 canary_value_from_##name(type native) {                                        \
   canary_value_t value = canary_value_impl_from_##name(native);                \
   ASSERT(canary_##name##_is(canary_value_to_##name(value), native),            \
-         "Value conversion failed for "#name".");                              \
+         "Value conversion failed for '"#name"' type.");                       \
                                                                                \
   return value;                                                                \
 }
