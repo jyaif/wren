@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <string.h>
 
 #include "error.h"
+
+#include <string.h>
 
 static void runtimeError(WrenVM* vm)
 {

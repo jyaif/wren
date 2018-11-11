@@ -1,7 +1,9 @@
-#include <stdio.h>
-#include <string.h>
 
 #include "resolution.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 static void write(WrenVM* vm, const char* text)
 {

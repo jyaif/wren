@@ -1,6 +1,9 @@
-#include <stdio.h>
 
 #include "wren_debug.h"
+
+#include "wren_vm.h"
+
+#include <stdio.h>
 
 void wrenDebugPrintStackTrace(WrenVM* vm)
 {

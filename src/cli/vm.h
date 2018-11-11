@@ -1,8 +1,9 @@
 #ifndef vm_h
 #define vm_h
 
-#include "uv.h"
 #include "wren.h"
+
+#include "uv.h"
 
 // Executes the Wren script at [path] in a new VM.
 WrenInterpretResult runFile(const char* path);

@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-
-#include "vm.h"
-#include "wren.h"
 
 #include "benchmark.h"
 #include "call.h"
@@ -18,6 +13,10 @@
 #include "resolution.h"
 #include "slots.h"
 #include "user_data.h"
+
+#include "vm.h"
+
+#include <string.h>
 
 // The name of the currently executing API test.
 const char* testName;
@@ -71,7 +70,7 @@ static WrenForeignMethodFn bindForeignMethod(
 
   fprintf(stderr,
       "Unknown foreign method '%s' for test '%s'\n", fullName, testName);
-  exit(1);
+  setExitCode(1);
   return NULL;
 }
 
@@ -92,7 +91,7 @@ static WrenForeignClassMethods bindForeignClass(
   
   fprintf(stderr,
           "Unknown foreign class '%s' for test '%s'\n", className, testName);
-  exit(1);
+  setExitCode(1);
   return methods;
 }
 

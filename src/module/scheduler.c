@@ -1,11 +1,11 @@
-#include <stdlib.h>
-#include <string.h>
 
-#include "uv.h"
 
 #include "scheduler.h"
-#include "wren.h"
+
 #include "vm.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 // A handle to the "Scheduler" class object. Used to call static methods on it.
 static WrenHandle* schedulerClass;

@@ -1,6 +1,7 @@
-#include <string.h>
 
 #include "lists.h"
+
+#include <string.h>
 
 static void newList(WrenVM* vm)
 {

@@ -1,7 +1,6 @@
 #ifndef wren_parser_h
 #define wren_parser_h
 
-#include "wren.h"
 #include "wren_value.h"
 
 typedef struct sCompiler Compiler;

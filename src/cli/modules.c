@@ -1,5 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
 
 #include "modules.h"
 
@@ -8,6 +6,9 @@
 #include "repl.wren.inc"
 #include "scheduler.wren.inc"
 #include "timer.wren.inc"
+
+#include <stdlib.h>
+#include <string.h>
 
 extern void directoryList(WrenVM* vm);
 extern void fileAllocate(WrenVM* vm);

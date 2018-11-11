@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <string.h>
 
-#include "wren.h"
+#include "reset_stack_after_foreign_construct.h"
+
+#include <string.h>
 
 static void counterAllocate(WrenVM* vm)
 {

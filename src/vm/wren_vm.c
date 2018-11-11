@@ -1,13 +1,10 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <string.h>
 
-#include "wren.h"
-#include "wren_common.h"
-#include "wren_compiler.h"
+#include "wren_vm.h"
+
 #include "wren_core.h"
 #include "wren_debug.h"
-#include "wren_vm.h"
+
+#include <stdlib.h>
 
 #if WREN_OPT_META
   #include "wren_opt_meta.h"

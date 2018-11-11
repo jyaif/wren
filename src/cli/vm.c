@@ -1,12 +1,16 @@
-#include <stdio.h>
-#include <string.h>
 
-#include "io.h"
+#include "vm.h"
+
 #include "modules.h"
 #include "path.h"
-#include "scheduler.h"
 #include "stat.h"
-#include "vm.h"
+
+#include "io.h"
+#include "scheduler.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // The single VM instance that the CLI uses.
 static WrenVM* vm;

@@ -1,9 +1,10 @@
+
+#include "path.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "path.h"
 
 // The maximum number of components in a path. We can't normalize a path that
 // contains more than this number of parts. The number here assumes a max path

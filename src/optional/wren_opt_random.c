@@ -2,6 +2,7 @@
 
 #if WREN_OPT_RANDOM
 
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 

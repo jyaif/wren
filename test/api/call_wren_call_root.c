@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include <string.h>
 
-#include "wren.h"
+#include "call_wren_call_root.h"
+
 #include "vm.h"
+
+#include <stdio.h>
 
 void callWrenCallRootRunTests(WrenVM* vm)
 {

@@ -1,3 +1,4 @@
+
 #include "wren.h"
 
 WrenForeignMethodFn foreignClassBindMethod(const char* signature);

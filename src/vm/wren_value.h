@@ -1,10 +1,6 @@
 #ifndef wren_value_h
 #define wren_value_h
 
-#include <stdbool.h>
-#include <string.h>
-
-#include "wren_common.h"
 #include "wren_utils.h"
 
 // This defines the built-in types and their core representations in memory.

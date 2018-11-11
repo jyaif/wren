@@ -1,6 +1,7 @@
-#include <string.h>
 
 #include "handle.h"
+
+#include <string.h>
 
 static WrenHandle* handle;
 

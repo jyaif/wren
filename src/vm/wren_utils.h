@@ -2,7 +2,6 @@
 #define wren_utils_h
 
 #include "wren.h"
-#include "wren_common.h"
 
 // Reusable data structures and other utility functions.
 

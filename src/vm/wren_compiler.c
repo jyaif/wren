@@ -1,11 +1,12 @@
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 
-#include "wren_common.h"
 #include "wren_compiler.h"
+
 #include "wren_vm.h"
+
+#include <errno.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #if WREN_DEBUG_DUMP_COMPILED_CODE
   #include "wren_debug.h"

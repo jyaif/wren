@@ -1,6 +1,7 @@
-#include <string.h>
 
 #include "new_vm.h"
+
+#include <string.h>
 
 static void nullConfig(WrenVM* vm)
 {

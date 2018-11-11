@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <string.h>
 
-#include "wren.h"
+#include "reset_stack_after_call_abort.h"
 
 void resetStackAfterCallAbortRunTests(WrenVM* vm)
 {

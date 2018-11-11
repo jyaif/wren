@@ -1,7 +1,8 @@
-#include <string.h>
-#include <time.h>
 
 #include "benchmark.h"
+
+#include <string.h>
+#include <time.h>
 
 static void arguments(WrenVM* vm)
 {

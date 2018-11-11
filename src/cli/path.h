@@ -1,6 +1,8 @@
 #ifndef path_h
 #define path_h
 
+#include <stddef.h>
+
 // Path manipulation functions.
 
 typedef struct

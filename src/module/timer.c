@@ -1,11 +1,10 @@
-#include <stdlib.h>
-#include <string.h>
 
-#include "uv.h"
+#include "timer.h"
 
 #include "scheduler.h"
 #include "vm.h"
-#include "wren.h"
+
+#include <stdlib.h>
 
 // Called by libuv when the timer finished closing.
 static void timerCloseCallback(uv_handle_t* handle)

@@ -1,9 +1,8 @@
 #ifndef wren_h
 #define wren_h
 
-#include <stdarg.h>
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 // The Wren semantic version number components.

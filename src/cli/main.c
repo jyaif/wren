@@ -1,9 +1,9 @@
-#include <stdio.h>
-#include <string.h>
 
 #include "os.h"
 #include "vm.h"
-#include "wren.h"
+
+#include <stdio.h>
+#include <string.h>
 
 int main(int argc, const char* argv[])
 {

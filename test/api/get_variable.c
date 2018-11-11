@@ -1,6 +1,7 @@
-#include <string.h>
 
 #include "get_variable.h"
+
+#include <string.h>
 
 static void beforeDefined(WrenVM* vm)
 {

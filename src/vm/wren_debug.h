@@ -2,7 +2,6 @@
 #define wren_debug_h
 
 #include "wren_value.h"
-#include "wren_vm.h"
 
 // Prints the stack trace for the current fiber.
 //

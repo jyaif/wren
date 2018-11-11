@@ -1,7 +1,7 @@
-#include <string.h>
 
 #include "call.h"
-#include "vm.h"
+
+#include <string.h>
 
 void callRunTests(WrenVM* vm)
 {

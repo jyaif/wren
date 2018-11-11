@@ -1,12 +1,11 @@
+
+#include "wren_value.h"
+
+#include "wren_vm.h"
+
 #include <math.h>
 #include <stdarg.h>
-#include <stddef.h>
 #include <stdio.h>
-#include <string.h>
-
-#include "wren.h"
-#include "wren_value.h"
-#include "wren_vm.h"
 
 #if WREN_DEBUG_TRACE_MEMORY
   #include "wren_debug.h"

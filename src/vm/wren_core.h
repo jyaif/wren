@@ -1,7 +1,7 @@
 #ifndef wren_core_h
 #define wren_core_h
 
-#include "wren_vm.h"
+#include "wren.h"
 
 // This module defines the built-in classes and their primitives methods that
 // are implemented directly in C code. Some languages try to implement as much

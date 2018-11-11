@@ -1,7 +1,10 @@
-#include <stdio.h>
-#include <string.h>
 
 #include "foreign_class.h"
+
+#include "vm.h"
+
+#include <stdio.h>
+#include <string.h>
 
 static int finalized = 0;
 
@@ -77,7 +80,7 @@ static void resourceFinalize(void* data)
 {
   // Make sure we get the right data back.
   int* value = (int*)data;
-  if (*value != 123) exit(1);
+  if (*value != 123) setExitCode(1);
   
   finalized++;
 }

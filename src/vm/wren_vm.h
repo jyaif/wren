@@ -1,10 +1,7 @@
 #ifndef wren_vm_h
 #define wren_vm_h
 
-#include "wren_common.h"
 #include "wren_compiler.h"
-#include "wren_value.h"
-#include "wren_utils.h"
 
 // The maximum number of temporary objects that can be made visible to the GC
 // at one time.
