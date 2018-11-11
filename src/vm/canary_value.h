@@ -9,11 +9,13 @@
 // First one in the list of OBJ
 #define VAL_OBJ CANARY_TYPE_CLASS
 
-#if WREN_NAN_TAGGING
+#if CANARY_VALUE_FLAVOUR == CANARY_VALUE_FLAVOUR_NANTAGGING
 #include "canary_value_nantagging.h"
-#else
+#elif CANARY_VALUE_FLAVOUR == CANARY_VALUE_FLAVOUR_UNIONTAGGING
 #include "canary_value_uniontagging.h"
-#endif
+#else // CANARY_VALUE_FLAVOUR
+#error "Unupported CANARY_VALUE_FLAVOUR."
+#endif // CANARY_VALUE_FLAVOUR
 
 typedef canary_value_impl_t canary_value_t;
 
