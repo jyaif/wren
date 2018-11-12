@@ -665,6 +665,10 @@ void wrenGrayObj(WrenVM* vm, Obj* obj);
 // during the sweep phase of a garbage collection.
 void wrenGrayValue(WrenVM* vm, Value value);
 
+// Mark [values] as reachable and still in use. This should only be called
+// during the sweep phase of a garbage collection.
+void wrenGrayValues(WrenVM* vm, Value *values, size_t size);
+
 // Mark the values in [buffer] as reachable and still in use. This should only
 // be called during the sweep phase of a garbage collection.
 void wrenGrayBuffer(WrenVM* vm, ValueBuffer* buffer);

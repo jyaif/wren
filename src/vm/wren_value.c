@@ -975,12 +975,17 @@ void wrenGrayValue(WrenVM* vm, Value value)
   wrenGrayObj(vm, AS_OBJ(value));
 }
 
+void wrenGrayValues(WrenVM* vm, Value* values, size_t size)
+{
+  for (size_t i = 0; i < size; i++)
+  {
+    wrenGrayValue(vm, values[i]);
+  }
+}
+
 void wrenGrayBuffer(WrenVM* vm, ValueBuffer* buffer)
 {
-  for (int i = 0; i < buffer->count; i++)
-  {
-    wrenGrayValue(vm, buffer->data[i]);
-  }
+  wrenGrayValues(vm, buffer->data, buffer->count);
 }
 
 static void blackenClass(WrenVM* vm, ObjClass* classObj)
@@ -1032,10 +1037,7 @@ static void blackenFiber(WrenVM* vm, ObjFiber* fiber)
   }
 
   // Stack variables.
-  for (Value* slot = fiber->stack; slot < fiber->stackTop; slot++)
-  {
-    wrenGrayValue(vm, *slot);
-  }
+  wrenGrayValues(vm, fiber->stack, canary_thread_get_stack_size(fiber));
 
   // Open upvalues.
   ObjUpvalue* upvalue = fiber->openUpvalues;
@@ -1124,10 +1126,7 @@ static void blackenMap(WrenVM* vm, ObjMap* map)
 static void blackenModule(WrenVM* vm, ObjModule* module)
 {
   // Top-level variables.
-  for (int i = 0; i < module->variables.count; i++)
-  {
-    wrenGrayValue(vm, module->variables.data[i]);
-  }
+  wrenGrayBuffer(vm, &module->variables);
 
   wrenBlackenSymbolTable(vm, &module->variableNames);
 
