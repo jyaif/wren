@@ -19,8 +19,8 @@ canary_thread_get_frame_size(const canary_thread_t *thread) {
 // Ensures that [slot] is a valid index into the API's stack of slots.
 static inline void
 canary_thread_validate_slot(const canary_thread_t* thread, canary_slot_t slot) {
-  ASSERT(slot < (canary_slot_t)canary_thread_get_frame_size(thread),
-         "Not that many slots.");
+  CANARY_ASSERT(slot < (canary_slot_t)canary_thread_get_frame_size(thread),
+                "Not that many slots.");
 }
 
 // Restores [value] from [srcSlot] in the foreign call stack.

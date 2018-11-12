@@ -123,7 +123,7 @@ canary_value_nantagging_singleton(canary_type_t type) {
     case CANARY_TYPE_BOOL_TRUE:  tag = TAG_TRUE;      break;
     case CANARY_TYPE_UNDEFINED:  tag = TAG_UNDEFINED; break;
     
-    default:                     UNREACHABLE();
+    default:                     CANARY_UNREACHABLE();
   }
   return canary_value_nantagging_from_bits((uint64_t)(QNAN | tag));
 }
@@ -234,7 +234,7 @@ canary_value_nantagging_get_type(canary_value_nantagging_t value) {
     case TAG_TRUE:      return CANARY_TYPE_BOOL_TRUE;
     case TAG_UNDEFINED: return CANARY_TYPE_UNDEFINED;
   }
-  UNREACHABLE();
+  CANARY_UNREACHABLE();
   return CANARY_TYPE_UNDEFINED;
 }
 
