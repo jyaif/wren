@@ -63,17 +63,17 @@ typedef enum {
 } canary_type_t;
 
 canary_type_t
-canary_get_slot_type(canary_context_t *context, canary_slot_t slot);
+canary_get_slot_type(const canary_context_t *context, canary_slot_t src_slot);
 
 static inline bool
-canary_is_slot_type(canary_context_t *context, canary_slot_t slot,
+canary_is_slot_type(const canary_context_t *context, canary_slot_t src_slot,
                     canary_type_t type);
 
 #define CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(name)                            \
   bool canary_is_slot_##name(const canary_context_t *context,                  \
-                             canary_slot_t slot);                              \
+                             canary_slot_t src_slot);                          \
                                                                                \
-  void canary_set_slot_##name(canary_context_t *context, canary_slot_t slot)
+  void canary_set_slot_##name(canary_context_t *context, canary_slot_t dst_slot)
 
 CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(undefined);
 CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(null);
@@ -82,12 +82,13 @@ CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(true);
 
 #define CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(name, type)                      \
   bool canary_is_slot_##name(const canary_context_t *context,                  \
-                             canary_slot_t slot);                              \
+                             canary_slot_t src_slot);                          \
                                                                                \
-  type canary_get_slot_##name(canary_context_t *context, canary_slot_t slot);  \
+  type canary_get_slot_##name(canary_context_t *context,                       \
+                              canary_slot_t src_slot);                         \
                                                                                \
-  type canary_set_slot_##name(canary_context_t *context, canary_slot_t slot,   \
-                              type primitive)
+  type canary_set_slot_##name(canary_context_t *context,                       \
+                              canary_slot_t dst_slot, type primitive)
 
 CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(bool, bool);
 CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(double, double);

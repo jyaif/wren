@@ -7,9 +7,9 @@
 #endif // CANARY_H
 
 static inline bool
-canary_is_slot_type(canary_context_t *context, canary_slot_t slot,
+canary_is_slot_type(const canary_context_t *context, canary_slot_t src_slot,
                     canary_type_t type) {
-  return canary_get_slot_type(context, slot) == type;
+  return canary_get_slot_type(context, src_slot) == type;
 }
 
 #endif // CANARY_P_H
