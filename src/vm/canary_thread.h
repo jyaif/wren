@@ -50,4 +50,21 @@ canary_thread_get_stack_size(const canary_thread_t *thread) {
   return thread->stackTop - thread->stack;
 }
 
+static inline bool
+canary_thread_has_error(const canary_thread_t *thread) {
+  return !IS_NULL(thread->error);
+}
+
+static inline canary_value_t
+canary_thread_get_error(const canary_thread_t *thread) {
+  return thread->error;
+}
+
+static inline void
+canary_thread_set_error(canary_thread_t *thread, canary_value_t error) {
+  if (canary_thread_has_error(thread)) return; // Do not clobber previous error.
+  
+  thread->error = error;
+}
+
 #endif // CANARY_THREAD_H

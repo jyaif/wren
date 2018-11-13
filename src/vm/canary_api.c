@@ -61,3 +61,32 @@ CANARY_DEFINE_BUILTIN_SINGLETON_TYPE(true)
 
 CANARY_DEFINE_BUILTIN_PRIMITIVE_TYPE(bool, bool)
 CANARY_DEFINE_BUILTIN_PRIMITIVE_TYPE(double, double)
+
+// Test if the current context has an error.
+bool
+canary_has_error(const canary_context_t *context) {
+  const canary_thread_t *thread = canary_context_to_thread_const(context);
+  
+  return canary_thread_has_error(thread);
+}
+
+// Gets the error from the [src_context] into [context] [dst_slot] slot.
+void
+canary_get_error(canary_context_t *context, canary_slot_t dst_slot,
+                 const canary_context_t *src_context) {
+  canary_thread_t *thread = canary_context_to_thread(context);
+  const canary_thread_t *src_thread =
+       canary_context_to_thread_const(src_context);
+  canary_value_t error = canary_thread_get_error(src_thread);
+  
+  canary_thread_set_slot(thread, dst_slot, error);
+}
+
+// Sets the [context] error form [src_slot] slot.
+void
+canary_set_error(canary_context_t *context, canary_slot_t src_slot) {
+  canary_thread_t *thread = canary_context_to_thread(context);
+  canary_value_t error = canary_thread_get_slot(thread, src_slot);
+  
+  canary_thread_set_error(thread, error);
+}

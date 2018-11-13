@@ -93,6 +93,19 @@ CANARY_DECLARE_BUILTIN_SINGLETON_TYPE(true);
 CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(bool, bool);
 CANARY_DECLARE_BUILTIN_PRIMITIVE_TYPE(double, double);
 
+// Test if the current context has an error.
+bool
+canary_has_error(const canary_context_t *context);
+
+// Gets the error from the [src_context] into [context] [dst_slot] slot.
+void
+canary_get_error(canary_context_t *context, canary_slot_t dst_slot,
+                 const canary_context_t *src_context);
+
+// Sets the [context] error form [src_slot] slot.
+void
+canary_set_error(canary_context_t *context, canary_slot_t src_slot);
+
 #include "canary_p.h"
 
 #ifdef __cplusplus

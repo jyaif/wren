@@ -347,7 +347,7 @@ static void bindMethod(WrenVM* vm, int methodType, int symbol,
 
     if (method.as.foreign == NULL)
     {
-      wrenFiberSetError(vm->fiber, wrenStringFormat(vm,
+      canary_thread_set_error(vm->fiber, wrenStringFormat(vm,
           "Could not find foreign method '@' for class $ in module '$'.",
           methodValue, classObj->name->value, module->name->value));
       return;
@@ -390,21 +390,22 @@ static void callForeign(ObjFiber* fiber,
 // handles the error. If none do, tells the VM to stop.
 static void runtimeError(WrenVM* vm)
 {
-  ASSERT(wrenFiberHasError(vm->fiber), "Should only call this after an error.");
+  ASSERT(canary_thread_has_error(vm->fiber),
+         "Should only call this after an error.");
 
   ObjFiber* current = vm->fiber;
-  Value error = wrenFiberGetError(current);
+  Value error = canary_thread_get_error(current);
   
   while (current != NULL)
   {
     // Every fiber along the call chain gets aborted with the same error.
-    wrenFiberSetError(current, error);
+    canary_thread_set_error(current, error);
 
     // If the caller ran this fiber using "try", give it the error and stop.
     if (current->state == FIBER_TRY)
     {
       // Make the caller's try method return the error message.
-      current->caller->stackTop[-1] = wrenFiberGetError(vm->fiber);
+      current->caller->stackTop[-1] = canary_thread_get_error(vm->fiber);
       vm->fiber = current->caller;
       return;
     }
@@ -425,8 +426,10 @@ static void runtimeError(WrenVM* vm)
 // method with [symbol] on [classObj].
 static void methodNotFound(WrenVM* vm, ObjClass* classObj, int symbol)
 {
-  wrenFiberSetError(vm->fiber, wrenStringFormat(vm, "@ does not implement '$'.",
-      OBJ_VAL(classObj->name), vm->methodNames.data[symbol]->value));
+  canary_thread_set_error(vm->fiber,
+      wrenStringFormat(vm, "@ does not implement '$'.",
+                       OBJ_VAL(classObj->name),
+                       vm->methodNames.data[symbol]->value));
 }
 
 // Looks up the previously loaded module with [name].
@@ -602,9 +605,9 @@ static void createClass(WrenVM* vm, int numFields, ObjModule* module)
   // the other slot.
   vm->fiber->stackTop--;
 
-  wrenFiberSetError(vm->fiber,
-                    validateSuperclass(vm, name, superclass, numFields));
-  if (wrenFiberHasError(vm->fiber)) return;
+  canary_thread_set_error(vm->fiber,
+                          validateSuperclass(vm, name, superclass, numFields));
+  if (canary_thread_has_error(vm->fiber)) return;
 
   ObjClass* classObj = wrenNewClass(vm, AS_CLASS(superclass), numFields,
                                     AS_STRING(name));
@@ -676,9 +679,9 @@ static Value resolveModule(WrenVM* vm, Value name)
                                                     AS_CSTRING(name));
   if (resolved == NULL)
   {
-    wrenFiberSetError(vm->fiber, wrenStringFormat(vm,
-        "Could not resolve module '@' imported from '@'.",
-        name, OBJ_VAL(importer)));
+    canary_thread_set_error(vm->fiber,
+        wrenStringFormat(vm, "Could not resolve module '@' imported from '@'.",
+                         name, OBJ_VAL(importer)));
     return NULL_VAL;
   }
   
@@ -728,7 +731,7 @@ static Value importModule(WrenVM* vm, Value name)
   
   if (source == NULL)
   {
-    wrenFiberSetError(vm->fiber,
+    canary_thread_set_error(vm->fiber,
         wrenStringFormat(vm, "Could not load module '@'.", name));
     wrenPopRoot(vm); // name.
     return NULL_VAL;
@@ -743,7 +746,7 @@ static Value importModule(WrenVM* vm, Value name)
   
   if (moduleClosure == NULL)
   {
-    wrenFiberSetError(vm->fiber,
+    canary_thread_set_error(vm->fiber,
         wrenStringFormat(vm, "Could not compile module '@'.", name));
     wrenPopRoot(vm); // name.
     return NULL_VAL;
@@ -769,9 +772,9 @@ static Value getModuleVariable(WrenVM* vm, ObjModule* module,
     return module->variables.data[variableEntry];
   }
   
-  wrenFiberSetError(vm->fiber, wrenStringFormat(vm,
-      "Could not find a variable named '@' in module '@'.",
-      variableName, OBJ_VAL(module->name)));
+  canary_thread_set_error(vm->fiber,
+      wrenStringFormat(vm, "Could not find a variable named '@' in module '@'.",
+                       variableName, OBJ_VAL(module->name)));
   return NULL_VAL;
 }
 
@@ -1024,7 +1027,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
             // If we don't have a fiber to switch to, stop interpreting.
             fiber = vm->fiber;
             if (fiber == NULL) return WREN_RESULT_SUCCESS;
-            if (wrenFiberHasError(fiber)) RUNTIME_ERROR();
+            if (canary_thread_has_error(fiber)) RUNTIME_ERROR();
             LOAD_FRAME();
           }
           break;
@@ -1032,7 +1035,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
         case METHOD_FOREIGN:
           STORE_FRAME();
           callForeign(fiber, method->as.foreign, numArgs);
-          if (wrenFiberHasError(fiber)) RUNTIME_ERROR();
+          if (canary_thread_has_error(fiber)) RUNTIME_ERROR();
           LOAD_FRAME();
           break;
 
@@ -1249,14 +1252,14 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
     CASE_CODE(CLASS):
     {
       createClass(vm, READ_BYTE(), NULL);
-      if (wrenFiberHasError(fiber)) RUNTIME_ERROR();
+      if (canary_thread_has_error(fiber)) RUNTIME_ERROR();
       DISPATCH();
     }
 
     CASE_CODE(FOREIGN_CLASS):
     {
       createClass(vm, -1, fn->module);
-      if (wrenFiberHasError(fiber)) RUNTIME_ERROR();
+      if (canary_thread_has_error(fiber)) RUNTIME_ERROR();
       DISPATCH();
     }
 
@@ -1267,7 +1270,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
       ObjClass* classObj = AS_CLASS(PEEK());
       Value method = PEEK2();
       bindMethod(vm, instruction, symbol, fn->module, classObj, method);
-      if (wrenFiberHasError(fiber)) RUNTIME_ERROR();
+      if (canary_thread_has_error(fiber)) RUNTIME_ERROR();
       DROP();
       DROP();
       DISPATCH();
@@ -1287,7 +1290,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
       // imported module's closure in the slot in case a GC happens when
       // invoking the closure.
       PUSH(importModule(vm, fn->constants.data[READ_SHORT()]));
-      if (wrenFiberHasError(fiber)) RUNTIME_ERROR();
+      if (canary_thread_has_error(fiber)) RUNTIME_ERROR();
       
       // If we get a closure, call it to execute the module body.
       if (IS_CLOSURE(PEEK()))
@@ -1312,7 +1315,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
       Value variable = fn->constants.data[READ_SHORT()];
       ASSERT(vm->lastModule != NULL, "Should have already imported module.");
       Value result = getModuleVariable(vm, vm->lastModule, variable);
-      if (wrenFiberHasError(fiber)) RUNTIME_ERROR();
+      if (canary_thread_has_error(fiber)) RUNTIME_ERROR();
 
       PUSH(result);
       DISPATCH();
@@ -1474,7 +1477,7 @@ Value wrenGetModuleVariable(WrenVM* vm, Value moduleName, Value variableName)
   ObjModule* module = getModule(vm, moduleName);
   if (module == NULL)
   {
-    wrenFiberSetError(vm->fiber,
+    canary_thread_set_error(vm->fiber,
         wrenStringFormat(vm, "Module '@' is not loaded.", moduleName));
     return NULL_VAL;
   }
@@ -1765,7 +1768,7 @@ void wrenAbortFiber(WrenVM* vm, WrenSlot srcSlot)
 {
   Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   
-  wrenFiberSetError(vm->fiber, value);
+  canary_thread_set_error(vm->fiber, value);
 }
 
 void* wrenGetUserData(WrenVM* vm)

@@ -11,7 +11,7 @@ void wrenDebugPrintStackTrace(WrenVM* vm)
   if (vm->config.errorFn == NULL) return;
   
   ObjFiber* fiber = vm->fiber;
-  Value error = wrenFiberGetError(fiber);
+  Value error = canary_thread_get_error(fiber);
   
   if (IS_STRING(error))
   {

@@ -519,23 +519,6 @@ ObjClosure* wrenNewClosure(WrenVM* vm, ObjFn* fn);
 // Creates a new fiber object that will invoke [closure].
 ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure);
 
-static inline bool
-wrenFiberHasError(ObjFiber* fiber) {
-  return !IS_NULL(fiber->error);
-}
-
-static inline Value
-wrenFiberGetError(ObjFiber* fiber) {
-  return fiber->error;
-}
-
-static inline void
-wrenFiberSetError(ObjFiber* fiber, Value error) {
-  if (wrenFiberHasError(fiber)) return; // Do not clobber previous error.
-  
-  fiber->error = error;
-}
-
 // Adds a new [CallFrame] to [fiber] invoking [closure] whose stack starts at
 // [stackStart].
 static inline void wrenAppendCallFrame(ObjFiber* fiber,
