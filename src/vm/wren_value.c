@@ -1007,10 +1007,6 @@ static void blackenClass(WrenVM* vm, ObjClass* classObj)
   }
 
   wrenGrayObj(vm, (Obj*)classObj->name);
-
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjClass);
-  vm->bytesAllocated += classObj->methods.capacity * sizeof(Method);
 }
 
 static void blackenClosure(WrenVM* vm, ObjClosure* closure)
@@ -1023,10 +1019,6 @@ static void blackenClosure(WrenVM* vm, ObjClosure* closure)
   {
     wrenGrayObj(vm, (Obj*)closure->upvalues[i]);
   }
-
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjClosure);
-  vm->bytesAllocated += sizeof(ObjUpvalue*) * closure->fn->numUpvalues;
 }
 
 static void blackenFiber(WrenVM* vm, ObjFiber* fiber)
@@ -1051,26 +1043,12 @@ static void blackenFiber(WrenVM* vm, ObjFiber* fiber)
   // The caller.
   wrenGrayObj(vm, (Obj*)fiber->caller);
   wrenGrayValue(vm, fiber->error);
-
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjFiber);
-  vm->bytesAllocated += fiber->frameCapacity * sizeof(CallFrame);
-  vm->bytesAllocated += sizeof(Value) * canary_thread_get_stack_capacity(fiber);
 }
 
 static void blackenFn(WrenVM* vm, ObjFn* fn)
 {
   // Mark the constants.
   wrenGrayBuffer(vm, &fn->constants);
-
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjFn);
-  vm->bytesAllocated += sizeof(uint8_t) * fn->code.capacity;
-  vm->bytesAllocated += sizeof(Value) * fn->constants.capacity;
-  
-  // The debug line number buffer.
-  vm->bytesAllocated += sizeof(int) * fn->code.capacity;
-  // TODO: What about the function name?
 }
 
 static void blackenForeign(WrenVM* vm, ObjForeign* foreign)
@@ -1091,20 +1069,12 @@ static void blackenInstance(WrenVM* vm, ObjInstance* instance)
   {
     wrenGrayValue(vm, instance->fields[i]);
   }
-
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjInstance);
-  vm->bytesAllocated += sizeof(Value) * instance->obj.classObj->numFields;
 }
 
 static void blackenList(WrenVM* vm, ObjList* list)
 {
   // Mark the elements.
   wrenGrayBuffer(vm, &list->elements);
-
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjList);
-  vm->bytesAllocated += sizeof(Value) * list->elements.capacity;
 }
 
 static void blackenMap(WrenVM* vm, ObjMap* map)
@@ -1118,10 +1088,6 @@ static void blackenMap(WrenVM* vm, ObjMap* map)
     wrenGrayValue(vm, entry->key);
     wrenGrayValue(vm, entry->value);
   }
-
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjMap);
-  vm->bytesAllocated += sizeof(MapEntry) * map->capacity;
 }
 
 static void blackenModule(WrenVM* vm, ObjModule* module)
@@ -1132,30 +1098,20 @@ static void blackenModule(WrenVM* vm, ObjModule* module)
   wrenBlackenSymbolTable(vm, &module->variableNames);
 
   wrenGrayObj(vm, (Obj*)module->name);
-
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjModule);
 }
 
 static void blackenRange(WrenVM* vm, ObjRange* range)
 {
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjRange);
 }
 
 static void blackenString(WrenVM* vm, ObjString* string)
 {
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjString) + string->length + 1;
 }
 
 static void blackenUpvalue(WrenVM* vm, ObjUpvalue* upvalue)
 {
   // Mark the closed-over object (in case it is closed).
   wrenGrayValue(vm, upvalue->closed);
-
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += sizeof(ObjUpvalue);
 }
 
 static void blackenObject(WrenVM* vm, Obj* obj)

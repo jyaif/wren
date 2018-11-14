@@ -61,9 +61,6 @@ void wrenBlackenSymbolTable(WrenVM* vm, SymbolTable* symbolTable)
   {
     wrenGrayObj(vm, &symbolTable->data[i]->obj);
   }
-  
-  // Keep track of how much memory is still in use.
-  vm->bytesAllocated += symbolTable->capacity * sizeof(*symbolTable->data);
 }
 
 int wrenUtf8EncodeNumBytes(int value)

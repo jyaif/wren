@@ -126,16 +126,6 @@ void wrenCollectGarbage(WrenVM* vm)
 
   // Mark all reachable objects.
 
-  // Reset this. As we mark objects, their size will be counted again so that
-  // we can track how much memory is in use without needing to know the size
-  // of each *freed* object.
-  //
-  // This is important because when freeing an unmarked object, we don't always
-  // know how much memory it is using. For example, when freeing an instance,
-  // we need to know its class to know how big it is, but its class may have
-  // already been freed.
-  vm->bytesAllocated = 0;
-
   wrenGrayObj(vm, (Obj*)vm->modules);
 
   // Temporary roots.
