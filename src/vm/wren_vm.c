@@ -690,7 +690,10 @@ static Value resolveModule(WrenVM* vm, Value name)
 
   // Copy the string into a Wren String object.
   name = wrenNewString(vm, resolved);
-  DEALLOCATE(vm, (char*)resolved);
+  
+  // FIXME: The mallocator used here is unknown. Change to something under the
+  //        vm control.
+  free((char*)resolved);
   return name;
 }
 
@@ -742,7 +745,10 @@ static Value importModule(WrenVM* vm, Value name)
   // Modules loaded by the host are expected to be dynamically allocated with
   // ownership given to the VM, which will free it. The built in optional
   // modules are constant strings which don't need to be freed.
-  if (allocatedSource) DEALLOCATE(vm, (char*)source);
+  //
+  // FIXME: The mallocator used here is unknown. Change to something under the
+  //        vm control.
+  if (allocatedSource) free((char*)source);
   
   if (moduleClosure == NULL)
   {
