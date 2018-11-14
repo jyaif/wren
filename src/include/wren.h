@@ -50,7 +50,8 @@ typedef struct WrenHandle WrenHandle;
 //
 // - To free memory, [memory] will be the memory to free and [newSize] will be
 //   zero. It should return NULL.
-typedef void* (*WrenReallocateFn)(void* memory, size_t newSize);
+typedef void *(*WrenReallocateFn)(void *user_data,
+                                  void *memory, size_t newSize);
 
 // A function callable from Wren code, but implemented in C.
 typedef void (*WrenForeignMethodFn)(WrenVM* vm);

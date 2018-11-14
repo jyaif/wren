@@ -961,9 +961,10 @@ void wrenGrayObj(WrenVM* vm, Obj* obj)
   // more marks later.
   if (vm->grayCount >= vm->grayCapacity)
   {
+    // Cannot use realloc wrenReallocate here, since it might trigger the gc.
     vm->grayCapacity = vm->grayCount * 2;
-    vm->gray = (Obj**)vm->config.reallocateFn(vm->gray,
-                                              vm->grayCapacity * sizeof(Obj*));
+    vm->gray = (Obj**)vm->config.reallocateFn(vm->config.userData, vm->gray,
+                                              sizeof(Obj*) * vm->grayCapacity);
   }
 
   vm->gray[vm->grayCount++] = obj;
