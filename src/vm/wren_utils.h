@@ -36,7 +36,7 @@ typedef struct sObjString ObjString;
     \
     void wren##name##BufferClear(WrenVM* vm, name##Buffer* buffer) \
     { \
-      wrenReallocate(vm, buffer->data, 0, 0); \
+      canary_vm_free(vm, buffer->data);                                        \
       wren##name##BufferInit(buffer); \
     } \
     \
@@ -46,8 +46,8 @@ typedef struct sObjString ObjString;
       if (buffer->capacity < buffer->count + count) \
       { \
         int capacity = wrenPowerOf2Ceil(buffer->count + count); \
-        buffer->data = (type*)wrenReallocate(vm, buffer->data, \
-            buffer->capacity * sizeof(type), capacity * sizeof(type)); \
+        buffer->data = (type*)                                                 \
+            canary_vm_realloc(vm, buffer->data, sizeof(type) * capacity);      \
         buffer->capacity = capacity; \
       } \
       \

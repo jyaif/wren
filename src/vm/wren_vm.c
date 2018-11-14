@@ -11,6 +11,8 @@
   #include "wren_opt_random.h"
 #endif
 
+#include "canary_vm.h"
+
 #include <stdlib.h>
 
 #if WREN_DEBUG_TRACE_MEMORY || WREN_DEBUG_TRACE_GC
@@ -57,7 +59,7 @@ WrenVM* wrenNewVM(WrenConfiguration* config)
     user_data = config->userData;
   }
   
-  WrenVM* vm = (WrenVM*)reallocate(user_data, NULL, sizeof(*vm));
+  WrenVM* vm = canary_vm_bootstrap(reallocate, user_data);
   memset(vm, 0, sizeof(WrenVM));
 
   // Copy the configuration if given one.
@@ -74,7 +76,7 @@ WrenVM* wrenNewVM(WrenConfiguration* config)
   vm->grayCount = 0;
   // TODO: Tune this.
   vm->grayCapacity = 4;
-  // Cannot use realloc wrenReallocate here, since it might trigger the gc.
+  // Cannot use realloc canary_vm_malloc here, since it might trigger the gc.
   vm->gray = (Obj**)vm->config.reallocateFn(vm->config.userData, vm->gray,
                                             sizeof(Obj*) * vm->grayCapacity);
   vm->nextGC = vm->config.initialHeapSize;
@@ -100,7 +102,7 @@ void wrenFreeVM(WrenVM* vm)
   }
 
   // Free up the GC gray set.
-  // Cannot use realloc wrenReallocate here, since it might trigger the gc.
+  // Cannot use realloc canary_vm_free here, since it might trigger the gc.
   vm->gray = (Obj**)vm->config.reallocateFn(vm->config.userData, vm->gray, 0);
 
   // Tell the user if they didn't free any handles. We don't want to just free
@@ -110,7 +112,7 @@ void wrenFreeVM(WrenVM* vm)
 
   wrenSymbolTableClear(vm, &vm->methodNames);
 
-  DEALLOCATE(vm, vm);
+  canary_vm_free(vm, vm);
 }
 
 void wrenCollectGarbage(WrenVM* vm)
@@ -199,32 +201,6 @@ void wrenCollectGarbage(WrenVM* vm)
          (unsigned long)vm->nextGC,
          elapsed);
 #endif
-}
-
-void* wrenReallocate(WrenVM* vm, void* memory, size_t oldSize, size_t newSize)
-{
-#if WREN_DEBUG_TRACE_MEMORY
-  // Explicit cast because size_t has different sizes on 32-bit and 64-bit and
-  // we need a consistent type for the format string.
-  printf("reallocate %p %lu -> %lu\n",
-         memory, (unsigned long)oldSize, (unsigned long)newSize);
-#endif
-
-  // If new bytes are being allocated, add them to the total count. If objects
-  // are being completely deallocated, we don't track that (since we don't
-  // track the original size). Instead, that will be handled while marking
-  // during the next GC.
-  vm->bytesAllocated += newSize - oldSize;
-
-#if WREN_DEBUG_GC_STRESS
-  // Since collecting calls this function to free things, make sure we don't
-  // recurse.
-  if (newSize > 0) wrenCollectGarbage(vm);
-#else
-  if (newSize > 0 && vm->bytesAllocated > vm->nextGC) wrenCollectGarbage(vm);
-#endif
-
-  return vm->config.reallocateFn(vm->config.userData, memory, newSize);
 }
 
 // Captures the local variable [local] into an [Upvalue]. If that local is

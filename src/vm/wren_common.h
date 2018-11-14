@@ -101,20 +101,20 @@
 
 // Use the VM's allocator to allocate an object of [type].
 #define ALLOCATE(vm, type) \
-    ((type*)wrenReallocate(vm, NULL, 0, sizeof(type)))
+    ((type*)canary_vm_malloc(vm, sizeof(type)))
 
 // Use the VM's allocator to allocate an object of [mainType] containing a
 // flexible array of [count] objects of [arrayType].
 #define ALLOCATE_FLEX(vm, mainType, arrayType, count) \
-    ((mainType*)wrenReallocate(vm, NULL, 0, \
-    sizeof(mainType) + sizeof(arrayType) * (count)))
+    ((mainType*)canary_vm_malloc(vm, sizeof(mainType) +                        \
+                                     sizeof(arrayType) * (count)))
 
 // Use the VM's allocator to allocate an array of [count] elements of [type].
 #define ALLOCATE_ARRAY(vm, type, count) \
-    ((type*)wrenReallocate(vm, NULL, 0, sizeof(type) * (count)))
+    ((type*)canary_vm_malloc(vm, sizeof(type) * (count)))
 
 // Use the VM's allocator to free the previously allocated memory at [pointer].
-#define DEALLOCATE(vm, pointer) wrenReallocate(vm, pointer, 0, 0)
+#define DEALLOCATE(vm, pointer) canary_vm_free(vm, pointer)
 
 // This is used to clearly mark flexible-sized arrays that appear at the end of
 // some dynamically-allocated structs, known as the "struct hack".

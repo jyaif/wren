@@ -3,6 +3,8 @@
 
 #include "wren_vm.h"
 
+#include "canary_vm.h"
+
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -187,15 +189,14 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
 
 void _wrenEnsureStack(ObjFiber* fiber, size_t needed)
 {
-  size_t old_stack_capacity = canary_thread_get_stack_capacity(fiber);
-  ASSERT(old_stack_capacity < needed, "Use wrenEnsureStack instead.");
+  ASSERT(canary_thread_get_stack_capacity(fiber) < needed,
+         "Use wrenEnsureStack instead.");
   
   size_t new_stack_capacity = wrenPowerOf2Ceil(needed);
   
   Value* oldStack = fiber->stack;
-  fiber->stack = (Value*)wrenReallocate(fiber->vm, fiber->stack,
-                                        sizeof(Value) * old_stack_capacity,
-                                        sizeof(Value) * new_stack_capacity);
+  fiber->stack = (Value*)canary_vm_realloc(fiber->vm, fiber->stack,
+                                           sizeof(Value) * new_stack_capacity);
   fiber->stackCapacity = new_stack_capacity;
   
   ptrdiff_t stack_diff = fiber->stack - oldStack;
@@ -331,8 +332,7 @@ Value wrenListRemoveAt(WrenVM* vm, ObjList* list, uint32_t index)
   // If we have too much excess capacity, shrink it.
   if (list->elements.capacity / GROW_FACTOR >= list->elements.count)
   {
-    list->elements.data = (Value*)wrenReallocate(vm, list->elements.data,
-        sizeof(Value) * list->elements.capacity,
+    list->elements.data = (Value*)canary_vm_realloc(vm, list->elements.data,
         sizeof(Value) * (list->elements.capacity / GROW_FACTOR));
     list->elements.capacity /= GROW_FACTOR;
   }
@@ -961,7 +961,7 @@ void wrenGrayObj(WrenVM* vm, Obj* obj)
   // more marks later.
   if (vm->grayCount >= vm->grayCapacity)
   {
-    // Cannot use realloc wrenReallocate here, since it might trigger the gc.
+    // Cannot use realloc canary_vm_realloc here, since it might trigger the gc.
     vm->grayCapacity = vm->grayCount * 2;
     vm->gray = (Obj**)vm->config.reallocateFn(vm->config.userData, vm->gray,
                                               sizeof(Obj*) * vm->grayCapacity);

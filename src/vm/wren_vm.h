@@ -3,6 +3,8 @@
 
 #include "wren_compiler.h"
 
+#include "canary_vm.h"
+
 // The maximum number of temporary objects that can be made visible to the GC
 // at one time.
 #define WREN_MAX_TEMP_ROOTS 5
@@ -108,24 +110,6 @@ struct WrenVM
   SymbolTable methodNames;
 };
 
-// A generic allocation function that handles all explicit memory management.
-// It's used like so:
-//
-// - To allocate new memory, [memory] is NULL and [oldSize] is zero. It should
-//   return the allocated memory or NULL on failure.
-//
-// - To attempt to grow an existing allocation, [memory] is the memory,
-//   [oldSize] is its previous size, and [newSize] is the desired size.
-//   It should return [memory] if it was able to grow it in place, or a new
-//   pointer if it had to move it.
-//
-// - To shrink memory, [memory], [oldSize], and [newSize] are the same as above
-//   but it will always return [memory].
-//
-// - To free memory, [memory] will be the memory to free and [newSize] and
-//   [oldSize] will be zero. It should return NULL.
-void* wrenReallocate(WrenVM* vm, void* memory, size_t oldSize, size_t newSize);
-
 // Invoke the finalizer for the foreign object referenced by [foreign].
 void wrenFinalizeForeign(WrenVM* vm, ObjForeign* foreign);
 
@@ -178,8 +162,8 @@ static inline void wrenCallFunction(ObjFiber* fiber,
   if (fiber->numFrames + 1 > fiber->frameCapacity)
   {
     int max = fiber->frameCapacity * 2;
-    fiber->frames = (CallFrame*)wrenReallocate(fiber->vm, fiber->frames,
-        sizeof(CallFrame) * fiber->frameCapacity, sizeof(CallFrame) * max);
+    fiber->frames = (CallFrame*)
+        canary_vm_realloc(fiber->vm, fiber->frames, sizeof(CallFrame) * max);
     fiber->frameCapacity = max;
   }
   
