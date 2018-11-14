@@ -5,8 +5,14 @@
 #include "canary_value.h"
 
 // The global object memory associated to this thread.
-static inline canary_objectmemory_t *
-canary_thread_get_object_memory(canary_thread_t *thread) {
+static inline canary_vm_t *
+canary_thread_get_vm(canary_thread_t *thread) {
+  return thread->vm;
+}
+
+// The global object memory associated to this thread.
+static inline const canary_vm_t *
+canary_thread_get_vm_const(const canary_thread_t *thread) {
   return thread->vm;
 }
 
