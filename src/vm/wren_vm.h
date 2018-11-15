@@ -110,6 +110,17 @@ struct WrenVM
   SymbolTable methodNames;
 };
 
+void bindMethod(WrenVM* vm, int methodType, int symbol,
+                ObjModule* module, ObjClass* classObj, Value methodValue);
+
+void createClass(WrenVM* vm, int numFields, ObjModule* module);
+
+void createForeign(ObjFiber* fiber, Value* stack);
+
+Value importModule(WrenVM* vm, Value name);
+
+Value getModuleVariable(WrenVM* vm, ObjModule* module, Value variableName);
+
 // Creates a new [WrenHandle] for [value].
 WrenHandle* wrenMakeHandle(WrenVM* vm, Value value);
 

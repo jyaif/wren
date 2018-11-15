@@ -4,6 +4,8 @@
 
 #include "canary_value.h"
 
+#include "wren.h"
+
 typedef struct sObjClosure ObjClosure;
 
 canary_thread_t *
@@ -180,5 +182,10 @@ canary_thread_get_frame_stack_size(const canary_thread_t *thread) {
 void
 canary_thread_call_function(canary_thread_t *thread, ObjClosure* closure,
                             canary_slot_t numArgs);
+
+// The main bytecode interpreter loop. This is where the magic happens. It is
+// also, as you can imagine, highly performance critical.
+WrenInterpretResult
+canary_thread_interpret(canary_thread_t *fiber);
 
 #endif // CANARY_THREAD_H
