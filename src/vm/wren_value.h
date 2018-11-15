@@ -496,6 +496,9 @@ typedef union
 
 #include "canary_thread.h"
 
+// Initialise the Obj.
+void wrenInitObj(WrenVM* vm, Obj* obj, ObjType type, ObjClass* classObj);
+
 // Creates a new "raw" class. It has no metaclass or superclass whatsoever.
 // This is only used for bootstrapping the initial Object and Class classes,
 // which are a little special.

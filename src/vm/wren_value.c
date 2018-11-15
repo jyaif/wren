@@ -31,7 +31,7 @@
 DEFINE_BUFFER(Value, Value);
 DEFINE_BUFFER(Method, Method);
 
-static void initObj(WrenVM* vm, Obj* obj, ObjType type, ObjClass* classObj)
+void wrenInitObj(WrenVM* vm, Obj* obj, ObjType type, ObjClass* classObj)
 {
   obj->type = type;
   obj->isDark = false;
@@ -43,7 +43,7 @@ static void initObj(WrenVM* vm, Obj* obj, ObjType type, ObjClass* classObj)
 ObjClass* wrenNewSingleClass(WrenVM* vm, int numFields, ObjString* name)
 {
   ObjClass* classObj = ALLOCATE(vm, ObjClass);
-  initObj(vm, &classObj->obj, OBJ_CLASS, NULL);
+  wrenInitObj(vm, &classObj->obj, OBJ_CLASS, NULL);
   classObj->superclass = NULL;
   classObj->numFields = numFields;
   classObj->name = name;
@@ -131,7 +131,7 @@ ObjClosure* wrenNewClosure(WrenVM* vm, ObjFn* fn)
 {
   ObjClosure* closure = ALLOCATE_FLEX(vm, ObjClosure,
                                       ObjUpvalue*, fn->numUpvalues);
-  initObj(vm, &closure->obj, OBJ_CLOSURE, vm->fnClass);
+  wrenInitObj(vm, &closure->obj, OBJ_CLOSURE, vm->fnClass);
 
   closure->fn = fn;
 
@@ -156,7 +156,7 @@ ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure)
   Value* stack = ALLOCATE_ARRAY(vm, Value, stack_capacity);
   
   ObjFiber* fiber = ALLOCATE(vm, ObjFiber);
-  initObj(vm, &fiber->obj, OBJ_FIBER, vm->fiberClass);
+  wrenInitObj(vm, &fiber->obj, OBJ_FIBER, vm->fiberClass);
   
   fiber->vm = vm;
   
@@ -231,7 +231,7 @@ void _wrenEnsureStack(ObjFiber* fiber, size_t needed)
 ObjForeign* wrenNewForeign(WrenVM* vm, ObjClass* classObj, size_t size)
 {
   ObjForeign* object = ALLOCATE_FLEX(vm, ObjForeign, uint8_t, size);
-  initObj(vm, &object->obj, OBJ_FOREIGN, classObj);
+  wrenInitObj(vm, &object->obj, OBJ_FOREIGN, classObj);
 
   // Zero out the bytes.
   memset(object->data, 0, size);
@@ -268,7 +268,7 @@ ObjFn* wrenNewFunction(WrenVM* vm, ObjModule* module, int maxSlots)
   wrenIntBufferInit(&debug->sourceLines);
 
   ObjFn* fn = ALLOCATE(vm, ObjFn);
-  initObj(vm, &fn->obj, OBJ_FN, vm->fnClass);
+  wrenInitObj(vm, &fn->obj, OBJ_FN, vm->fnClass);
   
   wrenValueBufferInit(&fn->constants);
   wrenByteBufferInit(&fn->code);
@@ -292,7 +292,7 @@ Value wrenNewInstance(WrenVM* vm, ObjClass* classObj)
 {
   ObjInstance* instance = ALLOCATE_FLEX(vm, ObjInstance,
                                         Value, classObj->numFields);
-  initObj(vm, &instance->obj, OBJ_INSTANCE, classObj);
+  wrenInitObj(vm, &instance->obj, OBJ_INSTANCE, classObj);
 
   // Initialize fields to null.
   for (int i = 0; i < classObj->numFields; i++)
@@ -314,7 +314,7 @@ ObjList* wrenNewList(WrenVM* vm, uint32_t numElements)
   }
 
   ObjList* list = ALLOCATE(vm, ObjList);
-  initObj(vm, &list->obj, OBJ_LIST, vm->listClass);
+  wrenInitObj(vm, &list->obj, OBJ_LIST, vm->listClass);
   list->elements.capacity = numElements;
   list->elements.count = numElements;
   list->elements.data = elements;
@@ -369,7 +369,7 @@ Value wrenListRemoveAt(WrenVM* vm, ObjList* list, uint32_t index)
 ObjMap* wrenNewMap(WrenVM* vm)
 {
   ObjMap* map = ALLOCATE(vm, ObjMap);
-  initObj(vm, &map->obj, OBJ_MAP, vm->mapClass);
+  wrenInitObj(vm, &map->obj, OBJ_MAP, vm->mapClass);
   map->capacity = 0;
   map->count = 0;
   map->entries = NULL;
@@ -653,7 +653,7 @@ ObjModule* wrenNewModule(WrenVM* vm, ObjString* name)
   ObjModule* module = ALLOCATE(vm, ObjModule);
 
   // Modules are never used as first-class objects, so don't need a class.
-  initObj(vm, (Obj*)module, OBJ_MODULE, NULL);
+  wrenInitObj(vm, (Obj*)module, OBJ_MODULE, NULL);
 
   wrenPushRoot(vm, (Obj*)module);
 
@@ -669,7 +669,7 @@ ObjModule* wrenNewModule(WrenVM* vm, ObjString* name)
 Value wrenNewRange(WrenVM* vm, double from, double to, bool isInclusive)
 {
   ObjRange* range = ALLOCATE(vm, ObjRange);
-  initObj(vm, &range->obj, OBJ_RANGE, vm->rangeClass);
+  wrenInitObj(vm, &range->obj, OBJ_RANGE, vm->rangeClass);
   range->from = from;
   range->to = to;
   range->isInclusive = isInclusive;
@@ -685,7 +685,7 @@ Value wrenNewRange(WrenVM* vm, double from, double to, bool isInclusive)
 static ObjString* allocateString(WrenVM* vm, size_t length)
 {
   ObjString* string = ALLOCATE_FLEX(vm, ObjString, char, length + 1);
-  initObj(vm, &string->obj, OBJ_STRING, vm->stringClass);
+  wrenInitObj(vm, &string->obj, OBJ_STRING, vm->stringClass);
   string->length = (int)length;
   string->value[length] = '\0';
 
@@ -964,7 +964,7 @@ ObjUpvalue* wrenNewUpvalue(WrenVM* vm, Value* value)
   ObjUpvalue* upvalue = ALLOCATE(vm, ObjUpvalue);
 
   // Upvalues are never used as first-class objects, so don't need a class.
-  initObj(vm, &upvalue->obj, OBJ_UPVALUE, NULL);
+  wrenInitObj(vm, &upvalue->obj, OBJ_UPVALUE, NULL);
 
   upvalue->value = value;
   upvalue->closed = NULL_VAL;
