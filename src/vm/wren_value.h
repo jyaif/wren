@@ -519,20 +519,6 @@ void wrenBindMethod(WrenVM* vm, ObjClass* classObj, int symbol, Method method);
 // upvalues, but assumes outside code will populate it.
 ObjClosure* wrenNewClosure(WrenVM* vm, ObjFn* fn);
 
-// Adds a new [CallFrame] to [fiber] invoking [closure] whose stack starts at
-// [stackStart].
-static inline void wrenAppendCallFrame(ObjFiber* fiber,
-                                       ObjClosure* closure, Value* stackStart)
-{
-  // The caller should have ensured we already have enough capacity.
-  ASSERT(fiber->frameCapacity > fiber->numFrames, "No memory for call frame.");
-  
-  CallFrame* frame = &fiber->frames[fiber->numFrames++];
-  frame->stackStart = stackStart;
-  frame->closure = closure;
-  frame->ip = closure->fn->code.data;
-}
-
 ObjForeign* wrenNewForeign(WrenVM* vm, ObjClass* classObj, size_t size);
 
 // Creates a new empty function. Before being used, it must have code,

@@ -169,7 +169,7 @@ static inline void wrenCallFunction(ObjFiber* fiber,
   size_t needed = stackSize + closure->fn->maxSlots;
   canary_thread_ensure_stack_capacity(fiber, needed);
   
-  wrenAppendCallFrame(fiber, closure, fiber->stackTop - numArgs);
+  canary_thread_push_frame(fiber, closure, fiber->stackTop - numArgs);
 }
 
 // Marks [obj] as a GC root so that it doesn't get collected.

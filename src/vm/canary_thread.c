@@ -46,7 +46,7 @@ canary_thread_new(canary_vm_t *vm, ObjClosure* closure)
   if (closure != NULL)
   {
     // Initialize the first call frame.
-    wrenAppendCallFrame(thread, closure, thread->stack);
+    canary_thread_push_frame(thread, closure, thread->stack);
 
     // The first slot always holds the closure.
     thread->stackTop[0] = OBJ_VAL(closure);
@@ -123,4 +123,17 @@ canary_thread_set_frame_size(canary_thread_t *thread, canary_slot_t numSlots) {
   }
   
   thread->stackTop = new_stack_top;
+}
+
+void
+canary_thread_push_frame(canary_thread_t *thread, ObjClosure* closure,
+                         canary_value_t* stackStart) {
+  // The caller should have ensured we already have enough capacity.
+  ASSERT(canary_thread_get_stack_capacity(thread) > thread->numFrames,
+         "No memory for call frame.");
+  
+  CallFrame* frame = &thread->frames[thread->numFrames++];
+  frame->stackStart = stackStart;
+  frame->closure = closure;
+  frame->ip = closure->fn->code.data;
 }
