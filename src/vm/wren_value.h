@@ -264,7 +264,7 @@ typedef struct
 
 // An instance of a first-class function and the environment it has closed over.
 // Unlike [ObjFn], this has captured the upvalues that the function accesses.
-typedef struct
+typedef struct sObjClosure
 {
   Obj obj;
 
@@ -519,9 +519,6 @@ void wrenBindMethod(WrenVM* vm, ObjClass* classObj, int symbol, Method method);
 // upvalues, but assumes outside code will populate it.
 ObjClosure* wrenNewClosure(WrenVM* vm, ObjFn* fn);
 
-// Creates a new fiber object that will invoke [closure].
-ObjFiber* wrenNewFiber(WrenVM* vm, ObjClosure* closure);
-
 // Adds a new [CallFrame] to [fiber] invoking [closure] whose stack starts at
 // [stackStart].
 static inline void wrenAppendCallFrame(ObjFiber* fiber,
@@ -543,7 +540,7 @@ static inline void wrenEnsureStack(ObjFiber* fiber, size_t needed)
 {
   if (canary_thread_get_stack_capacity(fiber) >= needed) return;
   
-  _wrenEnsureStack(fiber, needed);
+  canary_thread_ensure_stack_capacity(fiber, needed);
 }
 
 ObjForeign* wrenNewForeign(WrenVM* vm, ObjClass* classObj, size_t size);

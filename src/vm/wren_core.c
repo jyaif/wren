@@ -49,7 +49,7 @@ DEF_PRIMITIVE(fiber_new)
     RETURN_ERROR("Function cannot take more than one parameter.");
   }
   
-  RETURN_OBJ(wrenNewFiber(vm, closure));
+  RETURN_OBJ(canary_thread_new(vm, closure));
 }
 
 DEF_PRIMITIVE(fiber_abort)

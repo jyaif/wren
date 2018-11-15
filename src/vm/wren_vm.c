@@ -1361,7 +1361,7 @@ WrenInterpretResult wrenInterpret(WrenVM* vm, const char* module,
   if (closure == NULL) return WREN_RESULT_COMPILE_ERROR;
   
   wrenPushRoot(vm, (Obj*)closure);
-  ObjFiber* fiber = wrenNewFiber(vm, closure);
+  ObjFiber* fiber = canary_thread_new(vm, closure);
   wrenPopRoot(vm); // closure.
   
   return runInterpreter(vm, fiber);
@@ -1476,7 +1476,7 @@ void wrenSetSlotCount(WrenVM* vm, WrenSlot numSlots)
   if (!vm->is_api_call)
   {
     vm->is_api_call = true;
-    vm->fiber = wrenNewFiber(vm, NULL);
+    vm->fiber = canary_thread_new(vm, NULL);
   }
   
   ObjFiber *fiber = vm->fiber;

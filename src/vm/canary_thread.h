@@ -4,6 +4,11 @@
 
 #include "canary_value.h"
 
+typedef struct sObjClosure ObjClosure;
+
+canary_thread_t *
+canary_thread_new(canary_vm_t *vm, ObjClosure* closure);
+
 // The global object memory associated to this thread.
 static inline canary_vm_t *
 canary_thread_get_vm(canary_thread_t *thread) {
@@ -21,6 +26,10 @@ static inline size_t
 canary_thread_get_stack_capacity(const canary_thread_t *thread) {
   return thread->stackCapacity;
 }
+
+// Ensures [thread]'s stack has at least [needed] slots.
+void
+canary_thread_ensure_stack_capacity(canary_thread_t *thread, size_t needed);
 
 // The number of used slots in the stack array.
 static inline size_t
