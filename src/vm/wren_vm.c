@@ -616,28 +616,6 @@ static void createForeign(ObjFiber* fiber, Value* stack)
   // TODO: Check that allocateForeign was called.
 }
 
-void wrenFinalizeForeign(WrenVM* vm, ObjForeign* foreign)
-{
-  // TODO: Don't look up every time.
-  int symbol = wrenSymbolTableFind(&vm->methodNames, "<finalize>", 10);
-  ASSERT(symbol != -1, "Should have defined <finalize> symbol.");
-
-  // If there are no finalizers, don't finalize it.
-  if (symbol == -1) return;
-
-  // If the class doesn't have a finalizer, bail out.
-  ObjClass* classObj = foreign->obj.classObj;
-  if (symbol >= classObj->methods.count) return;
-
-  Method* method = &classObj->methods.data[symbol];
-  if (method->type == METHOD_NONE) return;
-
-  ASSERT(method->type == METHOD_FOREIGN, "Finalizer should be foreign.");
-
-  WrenFinalizerFn finalizer = (WrenFinalizerFn)method->as.foreign;
-  finalizer(foreign->data);
-}
-
 // Let the host resolve an imported module name if it wants to.
 static Value resolveModule(WrenVM* vm, Value name)
 {

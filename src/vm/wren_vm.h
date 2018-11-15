@@ -110,9 +110,6 @@ struct WrenVM
   SymbolTable methodNames;
 };
 
-// Invoke the finalizer for the foreign object referenced by [foreign].
-void wrenFinalizeForeign(WrenVM* vm, ObjForeign* foreign);
-
 // Creates a new [WrenHandle] for [value].
 WrenHandle* wrenMakeHandle(WrenVM* vm, Value value);
 
