@@ -3,6 +3,12 @@
 
 #include "canary_thread.h"
 
+// Adds a new [CallFrame] to [thread] invoking [closure] whose stack starts at
+// [stackStart].
+static void
+canary_thread_push_frame(canary_thread_t *thread, ObjClosure* closure,
+                         canary_value_t* stackStart);
+
 void
 canary_thread_set_error_str_len(canary_thread_t *thread,
                                 const char *error, size_t len) {
@@ -136,4 +142,24 @@ canary_thread_push_frame(canary_thread_t *thread, ObjClosure* closure,
   frame->stackStart = stackStart;
   frame->closure = closure;
   frame->ip = closure->fn->code.data;
+}
+
+void
+canary_thread_call_function(canary_thread_t *thread, ObjClosure* closure,
+                            canary_slot_t numArgs) {
+  // Grow the call frame array if needed.
+  if (thread->numFrames + 1 > thread->frameCapacity)
+  {
+    int max = thread->frameCapacity * 2;
+    thread->frames = (CallFrame*)
+        canary_vm_realloc(thread->vm, thread->frames, sizeof(CallFrame) * max);
+    thread->frameCapacity = max;
+  }
+  
+  // Grow the stack if needed.
+  size_t stackSize = canary_thread_get_stack_size(thread);
+  size_t needed = stackSize + closure->fn->maxSlots;
+  canary_thread_ensure_stack_capacity(thread, needed);
+  
+  canary_thread_push_frame(thread, closure, thread->stackTop - numArgs);
 }

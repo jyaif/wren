@@ -161,10 +161,10 @@ canary_thread_set_error_str(canary_thread_t *thread, const char *error) {
                             wrenStringFormat((thread)->vm, __VA_ARGS__));      \
   } while(false)
 
-// Adds a new [CallFrame] to [thread] invoking [closure] whose stack starts at
-// [stackStart].
+// Pushes [closure] onto [thread]'s callstack to invoke it. Expects [numArgs]
+// arguments (including the receiver) to be on the top of the stack already.
 void
-canary_thread_push_frame(canary_thread_t *thread, ObjClosure* closure,
-                         canary_value_t* stackStart);
+canary_thread_call_function(canary_thread_t *thread, ObjClosure* closure,
+                            canary_slot_t numArgs);
 
 #endif // CANARY_THREAD_H

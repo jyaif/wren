@@ -262,7 +262,7 @@ static void call(canary_thread_t *thread, Value* args, WrenSlot numArgs)
   }
   
   // +1 to include the function itself.
-  wrenCallFunction(thread, AS_CLOSURE(args[0]), numArgs + 1);
+  canary_thread_call_function(thread, AS_CLOSURE(args[0]), numArgs + 1);
 }
 
 #define DEF_FN_CALL(numArgs) \

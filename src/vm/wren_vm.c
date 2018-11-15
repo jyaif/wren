@@ -953,7 +953,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
 
         case METHOD_BLOCK:
           STORE_FRAME();
-          wrenCallFunction(fiber, (ObjClosure*)method->as.closure, numArgs);
+          canary_thread_call_function(fiber, method->as.closure, numArgs);
           LOAD_FRAME();
           break;
 
@@ -1209,7 +1209,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
       {
         STORE_FRAME();
         ObjClosure* closure = AS_CLOSURE(PEEK());
-        wrenCallFunction(fiber, closure, 1);
+        canary_thread_call_function(fiber, closure, 1);
         LOAD_FRAME();
       }
       else
@@ -1312,7 +1312,7 @@ WrenInterpretResult wrenCall(WrenVM* vm, WrenHandle* method)
   ASSERT(canary_thread_get_stack_size(fiber) >= slots,
          "Stack must have enough arguments for method.");
   
-  wrenCallFunction(fiber, closure, slots);
+  canary_thread_call_function(fiber, closure, slots);
   return runInterpreter(vm, fiber);
 }
 
