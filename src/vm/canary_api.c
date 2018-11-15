@@ -9,6 +9,20 @@ canary_bootstrap(canary_realloc_fn_t realloc_fn, void *user_data) {
   return NULL;
 }
 
+canary_slot_t
+canary_get_frame_size(const canary_context_t *context) {
+  const canary_thread_t *thread = canary_context_to_thread_const(context);
+  
+  return canary_thread_get_frame_size(thread);
+}
+
+void
+canary_set_frame_size(canary_context_t *context, canary_slot_t slots) {
+  canary_thread_t *thread = canary_context_to_thread(context);
+  
+  return canary_thread_set_frame_size(thread, slots);
+}
+
 canary_type_t
 canary_get_slot_type(const canary_context_t *context, canary_slot_t src_slot) {
   const canary_thread_t *thread = canary_context_to_thread_const(context);

@@ -533,16 +533,6 @@ static inline void wrenAppendCallFrame(ObjFiber* fiber,
   frame->ip = closure->fn->code.data;
 }
 
-// Ensures [fiber]'s stack has at least [needed] slots.
-void _wrenEnsureStack(ObjFiber* fiber, size_t needed);
-
-static inline void wrenEnsureStack(ObjFiber* fiber, size_t needed)
-{
-  if (canary_thread_get_stack_capacity(fiber) >= needed) return;
-  
-  canary_thread_ensure_stack_capacity(fiber, needed);
-}
-
 ObjForeign* wrenNewForeign(WrenVM* vm, ObjClass* classObj, size_t size);
 
 // Creates a new empty function. Before being used, it must have code,

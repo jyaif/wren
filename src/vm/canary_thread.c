@@ -105,3 +105,22 @@ canary_thread_ensure_stack_capacity(canary_thread_t *thread, size_t needed)
   
   _canary_thread_ensure_stack_capacity(thread, needed);
 }
+
+void
+canary_thread_set_frame_size(canary_thread_t *thread, canary_slot_t numSlots) {
+  size_t old_stack_size = (size_t)(thread->stack_base - thread->stack);
+  size_t new_stack_size = old_stack_size + numSlots;
+  
+  // Grow the stack if needed.
+  canary_thread_ensure_stack_capacity(thread, new_stack_size);
+  
+  canary_value_t *old_stack_top = thread->stackTop;
+  canary_value_t *new_stack_top = &thread->stack_base[numSlots];
+  
+  // Reset the growing stack
+  for (; old_stack_top < new_stack_top; old_stack_top++) {
+    *old_stack_top = NULL_VAL;
+  }
+  
+  thread->stackTop = new_stack_top;
+}

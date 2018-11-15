@@ -167,7 +167,7 @@ static inline void wrenCallFunction(ObjFiber* fiber,
   // Grow the stack if needed.
   size_t stackSize = canary_thread_get_stack_size(fiber);
   size_t needed = stackSize + closure->fn->maxSlots;
-  wrenEnsureStack(fiber, needed);
+  canary_thread_ensure_stack_capacity(fiber, needed);
   
   wrenAppendCallFrame(fiber, closure, fiber->stackTop - numArgs);
 }

@@ -43,6 +43,9 @@ canary_thread_get_frame_size(const canary_thread_t *thread) {
   return thread->stackTop - thread->stack_base;
 }
 
+void
+canary_thread_set_frame_size(canary_thread_t *fiber, canary_slot_t numSlots);
+
 // Ensures that [slot] is a valid index into the API's stack of slots.
 static inline void
 canary_thread_validate_slot(const canary_thread_t* thread, canary_slot_t slot) {

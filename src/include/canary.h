@@ -83,6 +83,49 @@ typedef void* (*canary_realloc_fn_t)(void *user_data,
 canary_context_t *
 canary_bootstrap(canary_realloc_fn_t realloc_fn, void *user_data);
 
+// The following functions are intended to be called from foreign methods or
+// finalizers. The interface provided to a foreign method is like a register
+// machine: you are given a numbered array of slots that values can be read
+// from and written to.
+//
+// When your foreign function is called, you are given one slot for the receiver
+// and each argument to the method. The receiver is in slot 0 and the arguments
+// are in increasingly numbered slots after that. You are free to read and
+// write to those slots as you want. If you want more slots to use as scratch
+// space, you can call canary_set_frame_size() to add more.
+//
+// When your function returns, every slot except slot zero is discarded and the
+// value in slot zero is used as the return value of the method. If you don't
+// store a return value in that slot yourself, it will retain its previous
+// value, the receiver.
+//
+// While slots are dynamically typed, C is not. This means the C interface has
+// to support the various types of primitive values a variable can hold: bool,
+// double, string, etc. If every operation were supported in the C API, there
+// would be a combinatorial explosion of functions, like "get a double-valued
+// element from a list", "insert a string key and double value into a map", etc.
+//
+// To avoid that, the only way to convert to and from a raw C value is by going
+// into and out of a slot. All other functions work with values already in a
+// slot.
+//
+// The goal of this API is to be easy to use while not compromising performance.
+// The latter means it does not do type or bounds checking at runtime except
+// using assertions which are generally removed from release builds. C is an
+// unsafe language, so it's up to you to be careful to use it correctly. In
+// return, you get a very fast FFI.
+
+// Returns the number of slots available in the current context frame.
+canary_slot_t
+canary_get_frame_size(const canary_context_t *context);
+
+// Set the number of slots available for the current context frame to [slots],
+// growing the stack if needed.
+//
+// It is an error to call this from a finalizer.
+void
+canary_set_frame_size(canary_context_t *context, canary_slot_t slots);
+
 canary_type_t
 canary_get_slot_type(const canary_context_t *context, canary_slot_t src_slot);
 

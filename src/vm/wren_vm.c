@@ -1478,23 +1478,7 @@ void wrenSetSlotCount(WrenVM* vm, WrenSlot numSlots)
     vm->is_api_call = true;
     vm->fiber = canary_thread_new(vm, NULL);
   }
-  
-  ObjFiber *fiber = vm->fiber;
-  size_t old_stack_size = (size_t)(fiber->stack_base - fiber->stack);
-  size_t new_stack_size = old_stack_size + numSlots;
-
-  // Grow the stack if needed.
-  wrenEnsureStack(fiber, new_stack_size);
-  
-  Value *old_stack_top = fiber->stackTop;
-  Value *new_stack_top = &fiber->stack_base[numSlots];
-  
-  // Reset the growing stack
-  for (; old_stack_top < new_stack_top; old_stack_top++) {
-    *old_stack_top = NULL_VAL;
-  }
-  
-  fiber->stackTop = new_stack_top;
+  canary_thread_set_frame_size(vm->fiber, numSlots);
 }
 
 // Gets the type of the object in [slot].
