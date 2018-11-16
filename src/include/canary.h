@@ -133,7 +133,7 @@ canary_realloc(canary_context_t *context, void *ptr, size_t size);
 void *
 canary_malloc(canary_context_t *context, size_t size);
 
-static inline size_t
+size_t
 canary_malloced_size(void *ptr);
 
 void

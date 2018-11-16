@@ -47,7 +47,7 @@ canary_vm_bootstrap(canary_realloc_fn_t realloc_fn, void *user_data) {
 
 void *
 canary_vm_realloc(canary_vm_t *vm, void *ptr, size_t size) {
-  const size_t old_size = canary_malloced_size(ptr);
+  const size_t old_size = canary_vm_malloced_size(ptr);
   const ssize_t diff_size = size - old_size;
   
 #if WREN_DEBUG_TRACE_MEMORY

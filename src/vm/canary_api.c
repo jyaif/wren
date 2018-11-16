@@ -123,3 +123,8 @@ canary_malloced(const canary_context_t *context) {
   
   return canary_vm_malloced(vm);
 }
+
+size_t
+canary_malloced_size(void *ptr) {
+  return canary_vm_malloced_size(ptr);
+}
