@@ -1,7 +1,17 @@
-class Bool {}
+class Bool {
+  toString { this ? "true" : "false" }
+}
+
 class Fiber {}
-class Fn {}
-class Null {}
+
+class Fn {
+  toString { "<fn>" }
+}
+
+class Null {
+  toString { "null" }
+}
+
 class Num {}
 
 class Sequence {

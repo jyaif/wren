@@ -17,18 +17,6 @@ DEF_PRIMITIVE(bool_not)
   RETURN_BOOL(!AS_BOOL(args[0]));
 }
 
-DEF_PRIMITIVE(bool_toString)
-{
-  if (AS_BOOL(args[0]))
-  {
-    RETURN_VAL(CONST_STRING(vm, "true"));
-  }
-  else
-  {
-    RETURN_VAL(CONST_STRING(vm, "false"));
-  }
-}
-
 DEF_PRIMITIVE(class_name)
 {
   RETURN_OBJ(AS_CLASS(args[0])->name);
@@ -284,11 +272,6 @@ DEF_FN_CALL(13)
 DEF_FN_CALL(14)
 DEF_FN_CALL(15)
 DEF_FN_CALL(16)
-
-DEF_PRIMITIVE(fn_toString)
-{
-  RETURN_VAL(CONST_STRING(vm, "<fn>"));
-}
 
 // Creates a new list of size args[1], with all elements initialized to args[2].
 DEF_PRIMITIVE(list_filled)
@@ -563,11 +546,6 @@ DEF_PRIMITIVE(map_valueIteratorValue)
 DEF_PRIMITIVE(null_not)
 {
   RETURN_VAL(TRUE_VAL);
-}
-
-DEF_PRIMITIVE(null_toString)
-{
-  RETURN_VAL(CONST_STRING(vm, "null"));
 }
 
 DEF_PRIMITIVE(num_fromString)
@@ -1208,7 +1186,6 @@ void wrenInitializeCore(WrenVM* vm)
   wrenInterpret(vm, NULL, coreModuleSource);
 
   vm->boolClass = AS_CLASS(wrenFindVariable(vm, coreModule, "Bool"));
-  PRIMITIVE(vm->boolClass, "toString", bool_toString);
   PRIMITIVE(vm->boolClass, "!", bool_not);
 
   vm->fiberClass = AS_CLASS(wrenFindVariable(vm, coreModule, "Fiber"));
@@ -1248,11 +1225,9 @@ void wrenInitializeCore(WrenVM* vm)
   PRIMITIVE(vm->fnClass, "call(_,_,_,_,_,_,_,_,_,_,_,_,_,_)", fn_call14);
   PRIMITIVE(vm->fnClass, "call(_,_,_,_,_,_,_,_,_,_,_,_,_,_,_)", fn_call15);
   PRIMITIVE(vm->fnClass, "call(_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_)", fn_call16);
-  PRIMITIVE(vm->fnClass, "toString", fn_toString);
 
   vm->nullClass = AS_CLASS(wrenFindVariable(vm, coreModule, "Null"));
   PRIMITIVE(vm->nullClass, "!", null_not);
-  PRIMITIVE(vm->nullClass, "toString", null_toString);
 
   vm->numClass = AS_CLASS(wrenFindVariable(vm, coreModule, "Num"));
   PRIMITIVE(vm->numClass->obj.classObj, "fromString(_)", num_fromString);
