@@ -85,7 +85,7 @@ _canary_thread_ensure_stack_capacity(canary_thread_t *thread, size_t needed)
   if (stack_diff != 0)
   {
     // Stack pointer for each call frame.
-    for (size_t i = 0; i < thread->numFrames; i++)
+    for (size_t i = 0; i < canary_thread_get_frame_stack_size(thread); i++)
     {
       CallFrame* frame = &thread->frames[i];
       frame->stackStart += stack_diff;
@@ -155,7 +155,8 @@ void
 canary_thread_push_frame(canary_thread_t *thread, ObjClosure* closure,
                          canary_value_t* stackStart) {
   // The caller should have ensured we already have enough capacity.
-  ASSERT(canary_thread_get_stack_capacity(thread) > thread->numFrames,
+  ASSERT(canary_thread_get_stack_capacity(thread) >
+         canary_thread_get_frame_stack_size(thread),
          "No memory for call frame.");
   
   CallFrame* frame = &thread->frames[thread->numFrames++];
@@ -168,7 +169,8 @@ void
 canary_thread_call_function(canary_thread_t *thread, ObjClosure* closure,
                             canary_slot_t numArgs) {
   // Grow the call frame array if needed.
-  canary_thread_ensure_frame_stack_capacity(thread, thread->numFrames + 1);
+  canary_thread_ensure_frame_stack_capacity(
+      thread, canary_thread_get_frame_stack_size(thread) + 1);
   
   // Grow the stack if needed.
   size_t stackSize = canary_thread_get_stack_size(thread);

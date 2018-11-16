@@ -170,6 +170,11 @@ void
 canary_thread_ensure_frame_stack_capacity(canary_thread_t *thread,
                                           size_t needed);
 
+static inline size_t
+canary_thread_get_frame_stack_size(const canary_thread_t *thread) {
+  return thread->numFrames;
+}
+
 // Pushes [closure] onto [thread]'s callstack to invoke it. Expects [numArgs]
 // arguments (including the receiver) to be on the top of the stack already.
 void
