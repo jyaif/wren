@@ -131,6 +131,26 @@ canary_thread_set_frame_size(canary_thread_t *thread, canary_slot_t numSlots) {
   thread->stackTop = new_stack_top;
 }
 
+static void
+_canary_thread_ensure_frame_stack_capacity(canary_thread_t *thread,
+                                          size_t needed) {
+  CANARY_ASSERT(canary_thread_get_frame_stack_capacity(thread) < needed,
+                "Use canary_thread_get_frame_stack_capacity instead.");
+  
+  size_t max = thread->frameCapacity * 2;
+  thread->frames = (CallFrame*)
+      canary_vm_realloc(thread->vm, thread->frames, sizeof(CallFrame) * max);
+  thread->frameCapacity = max;
+}
+
+void
+canary_thread_ensure_frame_stack_capacity(canary_thread_t *thread,
+                                          size_t needed) {
+  if (canary_thread_get_frame_stack_capacity(thread) >= needed) return;
+  
+  _canary_thread_ensure_frame_stack_capacity(thread, needed);
+}
+
 void
 canary_thread_push_frame(canary_thread_t *thread, ObjClosure* closure,
                          canary_value_t* stackStart) {
@@ -148,13 +168,7 @@ void
 canary_thread_call_function(canary_thread_t *thread, ObjClosure* closure,
                             canary_slot_t numArgs) {
   // Grow the call frame array if needed.
-  if (thread->numFrames + 1 > thread->frameCapacity)
-  {
-    int max = thread->frameCapacity * 2;
-    thread->frames = (CallFrame*)
-        canary_vm_realloc(thread->vm, thread->frames, sizeof(CallFrame) * max);
-    thread->frameCapacity = max;
-  }
+  canary_thread_ensure_frame_stack_capacity(thread, thread->numFrames + 1);
   
   // Grow the stack if needed.
   size_t stackSize = canary_thread_get_stack_size(thread);

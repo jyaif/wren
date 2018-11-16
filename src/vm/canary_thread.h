@@ -161,6 +161,15 @@ canary_thread_set_error_str(canary_thread_t *thread, const char *error) {
                             wrenStringFormat((thread)->vm, __VA_ARGS__));      \
   } while(false)
 
+static inline size_t
+canary_thread_get_frame_stack_capacity(const canary_thread_t *thread) {
+  return thread->frameCapacity;
+}
+
+void
+canary_thread_ensure_frame_stack_capacity(canary_thread_t *thread,
+                                          size_t needed);
+
 // Pushes [closure] onto [thread]'s callstack to invoke it. Expects [numArgs]
 // arguments (including the receiver) to be on the top of the stack already.
 void
