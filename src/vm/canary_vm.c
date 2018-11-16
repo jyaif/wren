@@ -19,7 +19,7 @@ canary_default_realloc_fn(void *user_data, void *ptr, size_t newSize) {
   return realloc(ptr, newSize);
 }
 
-void *
+static void *
 _canary_vm_realloc(canary_realloc_fn_t realloc_fn, void *user_data,
                   void *ptr, size_t size) {
   canary_memory_chunk_t * mc = canary_memory_chunk_from_ptr(ptr);
@@ -43,11 +43,6 @@ canary_vm_bootstrap(canary_realloc_fn_t realloc_fn, void *user_data) {
       _canary_vm_realloc(realloc_fn, user_data, NULL, sizeof(*vm));
   
   return vm;
-}
-
-void *
-canary_vm_malloc(canary_vm_t *vm, size_t size) {
-  return canary_vm_realloc(vm, NULL, size);
 }
 
 void *
@@ -85,11 +80,6 @@ canary_vm_realloc(canary_vm_t *vm, void *ptr, size_t size) {
     vm->bytesAllocated -= diff_size;
   }
   return ptr;
-}
-
-void
-canary_vm_free(canary_vm_t *vm, void *ptr) {
-  canary_vm_realloc(vm, ptr, 0);
 }
 
 size_t
