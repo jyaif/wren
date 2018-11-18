@@ -142,6 +142,13 @@ canary_double_is_normal(double d) {
 }
 
 static inline bool
+canary_double_is_positive(double d) {
+  uint64_t i = canary_double_to_bits(d) & CANARY_DOUBLE_SIGN_MASK;
+  
+  return i == UINT64_C(0);
+}
+
+static inline bool
 canary_double_is_qnan(double d) {
   uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
