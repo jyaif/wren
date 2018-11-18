@@ -190,13 +190,13 @@ static inline ObjClass* wrenGetClassInline(WrenVM* vm, Value value)
   if (IS_NUM(value)) return vm->numClass;
   if (IS_OBJ(value)) return AS_OBJ(value)->classObj;
 
-  switch (GET_TAG(value))
-  {
-    case TAG_FALSE:     return vm->boolClass; break;
-    case TAG_NAN:       return vm->numClass; break;
-    case TAG_NULL:      return vm->nullClass; break;
-    case TAG_TRUE:      return vm->boolClass; break;
-    case TAG_UNDEFINED: UNREACHABLE();
+  if (canary_value_nantagging_is_singleton(value)) {
+    switch (canary_value_nantagging_get_singleton_tag(value)) {
+      case CANARY_VALUE_SINGLETON_FALSE_TAG:     return vm->boolClass;
+      case CANARY_VALUE_SINGLETON_NULL_TAG:      return vm->nullClass;
+      case CANARY_VALUE_SINGLETON_TRUE_TAG:      return vm->boolClass;
+      case CANARY_VALUE_SINGLETON_UNDEFINED_TAG: UNREACHABLE(); break;
+    }
   }
 #else
   switch (canary_value_get_type(value))
