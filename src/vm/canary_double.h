@@ -6,21 +6,19 @@
 
 // Helper for IEEE 754 double precision numbers.
 
-#define CANARY_DOUBLE_SIGN_BIT      (UINT64_C(0x8000000000000000))
-#define CANARY_DOUBLE_EXPONENT_MASK (UINT64_C(0x7ff0000000000000))
-#define CANARY_DOUBLE_FRACTION_MASK (UINT64_C(0x000fffffffffffff))
+#define CANARY_DOUBLE_SIGN_MASK                   (UINT64_C(0x8000000000000000))
+#define CANARY_DOUBLE_EXPONENT_MASK               (UINT64_C(0x7ff0000000000000))
+#define CANARY_DOUBLE_FRACTION_MASK               (UINT64_C(0x000fffffffffffff))
 
-#define CANARY_DOUBLE_QNAN_MASK     (UINT64_C(0x7ff8000000000000))
-#define CANARY_DOUBLE_QNAN_BITS     (CANARY_DOUBLE_QNAN_MASK)
+#define CANARY_DOUBLE_SIGN_BIT                    (UINT64_C(0x8000000000000000))
+#define CANARY_DOUBLE_INF_BITS                    (UINT64_C(0x7ff0000000000000))
+#define CANARY_DOUBLE_SNAN_MIN_BITS               (UINT64_C(0x7ff0000000000001))
+#define CANARY_DOUBLE_SNAN_MAX_BITS               (UINT64_C(0x7ff7ffffffffffff))
+#define CANARY_DOUBLE_QNAN_MIN_BITS               (UINT64_C(0x7ff8000000000000))
+#define CANARY_DOUBLE_QNAN_MAX_BITS               (UINT64_C(0x7fffffffffffffff))
 
-#define CANARY_DOUBLE_INF_BITS      (UINT64_C(0x7ff0000000000000))
-#define CANARY_DOUBLE_SNAN_MIN_BITS (UINT64_C(0x7ff0000000000001))
-#define CANARY_DOUBLE_SNAN_MAX_BITS (UINT64_C(0x7ff7ffffffffffff))
-#define CANARY_DOUBLE_QNAN_MIN_BITS (UINT64_C(0x7ff8000000000000))
-#define CANARY_DOUBLE_QNAN_MAX_BITS (UINT64_C(0x7fffffffffffffff))
-
-#define CANARY_DOUBLE_NAN_MIN_BITS  (CANARY_DOUBLE_SNAN_MIN_BITS)
-#define CANARY_DOUBLE_NAN_MAX_BITS  (CANARY_DOUBLE_QNAN_MAX_BITS)
+#define CANARY_DOUBLE_NAN_MIN_BITS                 (CANARY_DOUBLE_SNAN_MIN_BITS)
+#define CANARY_DOUBLE_NAN_MAX_BITS                 (CANARY_DOUBLE_QNAN_MAX_BITS)
 
 // Some wellknown values
 
@@ -29,7 +27,7 @@
 // See Intel 64 and IA-32 Architectures Software Developer's Manual Volume 1
 // at chapter 4.8.3.7 / table 4.3 for QNaN Floating-Point Indefinite.
 #define CANARY_DOUBLE_QNAN_FLOATING_POINT_INDEFINITE                           \
-  (canary_double_from_bits(0xfff8000000000000))
+                                   (canary_double_from_bits(0xfff8000000000000))
 
 // A union to let us reinterpret a double as raw bits and back.
 typedef union
@@ -66,7 +64,7 @@ canary_double_to_bits(double value) {
 
 static inline canary_doubletype_t
 canary_double_classify(double d) {
-  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_BIT;
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   if ((i & CANARY_DOUBLE_EXPONENT_MASK) == CANARY_DOUBLE_EXPONENT_MASK) {
     i &= CANARY_DOUBLE_FRACTION_MASK;
@@ -92,21 +90,21 @@ canary_double_classify(double d) {
 
 static inline bool
 canary_double_is_finite(double d) {
-  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_BIT;
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   return (i & CANARY_DOUBLE_EXPONENT_MASK) != CANARY_DOUBLE_EXPONENT_MASK;
 }
 
 static inline bool
 canary_double_is_infinite(double d) {
-  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_BIT;
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   return i == CANARY_DOUBLE_INF_BITS;
 }
 
 static inline bool
 canary_double_is_nan(double d) {
-  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_BIT;
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   return i >= CANARY_DOUBLE_NAN_MIN_BITS &&
          i <= CANARY_DOUBLE_NAN_MAX_BITS;
@@ -114,14 +112,14 @@ canary_double_is_nan(double d) {
 
 static inline bool
 canary_double_is_negative(double d) {
-  uint64_t i = canary_double_to_bits(d);
+  uint64_t i = canary_double_to_bits(d) & CANARY_DOUBLE_SIGN_MASK;
   
-  return (i & CANARY_DOUBLE_SIGN_BIT) != UINT64_C(0);
+  return i != UINT64_C(0);
 }
 
 static inline bool
 canary_double_is_normal(double d) {
-  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_BIT;
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   return (i & CANARY_DOUBLE_EXPONENT_MASK) != CANARY_DOUBLE_EXPONENT_MASK &&
          (i & CANARY_DOUBLE_EXPONENT_MASK) != UINT64_C(0);
@@ -129,7 +127,7 @@ canary_double_is_normal(double d) {
 
 static inline bool
 canary_double_is_qnan(double d) {
-  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_BIT;
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   return i >= CANARY_DOUBLE_QNAN_MIN_BITS &&
          i <= CANARY_DOUBLE_QNAN_MAX_BITS;
@@ -137,7 +135,7 @@ canary_double_is_qnan(double d) {
 
 static inline bool
 canary_double_is_snan(double d) {
-  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_BIT;
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   return i >= CANARY_DOUBLE_SNAN_MIN_BITS &&
          i <= CANARY_DOUBLE_SNAN_MAX_BITS;
@@ -145,7 +143,7 @@ canary_double_is_snan(double d) {
 
 static inline bool
 canary_double_is_subnormal(double d) {
-  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_BIT;
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   return (i & CANARY_DOUBLE_EXPONENT_MASK) == UINT64_C(0) &&
          (i & CANARY_DOUBLE_FRACTION_MASK) != UINT64_C(0);
@@ -153,7 +151,7 @@ canary_double_is_subnormal(double d) {
 
 static inline bool
 canary_double_is_zero(double d) {
-  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_BIT;
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   return i == UINT64_C(0);
 }
