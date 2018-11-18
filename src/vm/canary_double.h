@@ -24,10 +24,19 @@
 
 #define CANARY_DOUBLE_INFINITY (canary_double_from_bits(CANARY_DOUBLE_INF_BITS))
 
-// See Intel 64 and IA-32 Architectures Software Developer's Manual Volume 1
-// at chapter 4.8.3.7 / table 4.3 for QNaN Floating-Point Indefinite.
+// Intel® 64 and IA-32 Architectures Software Developer’s Manual Volume 1
+// sepcify at: 4.8.3.7 QNaN Floating-Point Indefinite refering to
+// Table 4.3 the representation for QNaN Floating-Point Indefinite.
+#define CANARY_DOUBLE_INTEL_X86_QNAN_FLOATING_POINT_INDEFINITE_BITS            \
+                                                  (UINT64_C(0xfff8000000000000))
+
+// However in practice glibc (at least) returns indefinite numbers with
+// different signess.
+#define CANARY_DOUBLE_QNAN_FLOATING_POINT_INDEFINITE_BITS                      \
+                                                  (UINT64_C(0x7ff8000000000000))
+
 #define CANARY_DOUBLE_QNAN_FLOATING_POINT_INDEFINITE                           \
-                                   (canary_double_from_bits(0xfff8000000000000))
+    (canary_double_from_bits(CANARY_DOUBLE_QNAN_FLOATING_POINT_INDEFINITE_BITS))
 
 // A union to let us reinterpret a double as raw bits and back.
 typedef union
@@ -93,6 +102,13 @@ canary_double_is_finite(double d) {
   uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
   
   return (i & CANARY_DOUBLE_EXPONENT_MASK) != CANARY_DOUBLE_EXPONENT_MASK;
+}
+
+static inline bool
+canary_double_is_indefinite(double d) {
+  uint64_t i = canary_double_to_bits(d) & ~CANARY_DOUBLE_SIGN_MASK;
+  
+  return i == CANARY_DOUBLE_QNAN_FLOATING_POINT_INDEFINITE_BITS;
 }
 
 static inline bool
