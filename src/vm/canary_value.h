@@ -21,21 +21,6 @@ typedef canary_value_impl_t canary_value_t;
 
 CANARY_DEFINE_TRIVIALLY_COMPARABLE_TYPE(user_data, void *)
 
-static inline bool
-canary_valuetype_is_singleton(canary_type_t type) {
-  switch (type) {
-    case CANARY_TYPE_BOOL_FALSE:
-    case CANARY_TYPE_NULL:
-    case CANARY_TYPE_BOOL_TRUE:
-    case CANARY_TYPE_UNDEFINED:
-      return true;
-    
-    default:
-      return false;
-  }
-  return false;
-}
-
 // Returns true if [value] and [other] are strictly the same value.
 //
 // This is identity for object values, and value equality for unboxed values.
@@ -52,16 +37,6 @@ canary_value_get_type(canary_value_t value) {
 static inline bool
 canary_value_has_type(canary_value_t value, canary_type_t type) {
   return canary_value_impl_has_type(value, type);
-}
-
-#define canary_value_is_singleton(value, type)                                 \
-    canary_value_has_type((value), (type))
-
-static inline canary_value_t
-canary_value_singleton(canary_type_t type) {
-  CANARY_ASSERT(canary_valuetype_is_singleton(type), "Invalid singleton type.");
-  
-  return canary_value_impl_singleton(type);
 }
 
 #define CANARY_DECLARE_VALUE_SINGLETON(name)                                   \

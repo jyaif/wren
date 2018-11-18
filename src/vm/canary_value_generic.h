@@ -20,71 +20,39 @@ canary_value_impl_has_type(canary_value_impl_t value, canary_type_t type) {
 }
 #endif //canary_value_impl_has_type
 
-#define canary_value_impl_is_singleton(value, type)                            \
-    canary_value_impl_has_type((value), (type))
-
 #ifndef canary_value_impl_is_false
 static inline bool
 canary_value_impl_is_false(canary_value_impl_t value) {
-  return canary_value_impl_is_singleton(value, CANARY_TYPE_BOOL_FALSE);
+  return canary_value_impl_is(value, canary_value_impl_false());
 }
 #endif // canary_value_impl_is_false
-
-#ifndef canary_value_impl_false
-static inline canary_value_impl_t
-canary_value_impl_false() {
-  return canary_value_impl_singleton(CANARY_TYPE_BOOL_FALSE);
-}
-#endif // canary_value_impl_false
 
 #ifndef canary_value_impl_is_null
 static inline bool
 canary_value_impl_is_null(canary_value_impl_t value) {
-  return canary_value_impl_is_singleton(value, CANARY_TYPE_NULL);
+  return canary_value_impl_is(value, canary_value_impl_null());
 }
 #endif // canary_value_impl_is_null
-
-#ifndef canary_value_impl_null
-static inline canary_value_impl_t
-canary_value_impl_null() {
-  return canary_value_impl_singleton(CANARY_TYPE_NULL);
-}
-#endif // canary_value_impl_null
 
 #ifndef canary_value_impl_is_true
 static inline bool
 canary_value_impl_is_true(canary_value_impl_t value) {
-  return canary_value_impl_is_singleton(value, CANARY_TYPE_BOOL_TRUE);
+  return canary_value_impl_is(value, canary_value_impl_true());
 }
 #endif // canary_value_impl_is_true
-
-#ifndef canary_value_impl_true
-static inline canary_value_impl_t
-canary_value_impl_true() {
-  return canary_value_impl_singleton(CANARY_TYPE_BOOL_TRUE);
-}
-#endif // canary_value_impl_true
 
 #ifndef canary_value_impl_is_undefined
 static inline bool
 canary_value_impl_is_undefined(canary_value_impl_t value) {
-  return canary_value_impl_is_singleton(value, CANARY_TYPE_UNDEFINED);
+  return canary_value_impl_is(value, canary_value_impl_undefined());
 }
 #endif // canary_value_impl_is_undefined
-
-#ifndef canary_value_impl_undefined
-static inline canary_value_impl_t
-canary_value_impl_undefined() {
-  return canary_value_impl_singleton(CANARY_TYPE_UNDEFINED);
-}
-#endif // canary_value_impl_undefined
 
 #ifndef canary_value_impl_is_bool
 static inline bool
 canary_value_impl_is_bool(canary_value_impl_t value) {
-  canary_type_t type = canary_value_impl_get_type(value);
-  
-  return type == CANARY_TYPE_BOOL_TRUE || type == CANARY_TYPE_BOOL_FALSE;
+  return canary_value_impl_is(value, canary_value_impl_false()) ||
+         canary_value_impl_is(value, canary_value_impl_true());
 }
 #endif // canary_value_impl_is_bool
 
@@ -98,8 +66,8 @@ canary_value_impl_to_bool(canary_value_impl_t value) {
 #ifndef canary_value_impl_from_bool
 static inline canary_value_impl_t
 canary_value_impl_from_bool(bool bvalue) {
-  return canary_value_impl_singleton(bvalue ? CANARY_TYPE_BOOL_TRUE :
-                                              CANARY_TYPE_BOOL_FALSE);
+  return bvalue ? canary_value_impl_true() :
+                  canary_value_impl_false();
 }
 #endif // canary_value_impl_from_bool
 

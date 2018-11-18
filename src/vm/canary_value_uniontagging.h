@@ -32,11 +32,32 @@ canary_value_uniontagging_get_type(canary_value_uniontagging_t value) {
   return value.type;
 }
 
-#define canary_value_impl_singleton canary_value_uniontagging_singleton
-static inline canary_value_uniontagging_t
-canary_value_uniontagging_singleton(canary_type_t type) {
-    return (canary_value_uniontagging_t){ type, { } };
-}
+#define CANARY_DECLARE_VALUE_UNIONTAGGING_SINGLETON(name, type)                \
+  static inline canary_value_uniontagging_t                                    \
+  canary_value_uniontagging_##name() {                                         \
+    return (canary_value_uniontagging_t){ type, { } };                         \
+  }                                                                            \
+                                                                               \
+  static inline bool                                                           \
+  canary_value_uniontagging_is_##name(canary_value_uniontagging_t value) {     \
+    return canary_value_uniontagging_is(value, canary_value_uniontagging_##name());\
+  }
+
+#define canary_value_impl_is_false canary_value_uniontagging_is_false
+#define canary_value_impl_false canary_value_uniontagging_false
+CANARY_DECLARE_VALUE_UNIONTAGGING_SINGLETON(false, CANARY_TYPE_BOOL_FALSE)
+
+#define canary_value_impl_is_null canary_value_uniontagging_is_null
+#define canary_value_impl_null canary_value_uniontagging_null
+CANARY_DECLARE_VALUE_UNIONTAGGING_SINGLETON(null, CANARY_TYPE_NULL)
+
+#define canary_value_impl_is_true canary_value_uniontagging_is_true
+#define canary_value_impl_true canary_value_uniontagging_true
+CANARY_DECLARE_VALUE_UNIONTAGGING_SINGLETON(true, CANARY_TYPE_BOOL_TRUE)
+
+#define canary_value_impl_is_undefined canary_value_uniontagging_is_undefined
+#define canary_value_impl_undefined canary_value_uniontagging_undefined
+CANARY_DECLARE_VALUE_UNIONTAGGING_SINGLETON(undefined, CANARY_TYPE_UNDEFINED)
 
 #define canary_value_impl_to_double canary_value_uniontagging_to_double
 static inline double
@@ -52,7 +73,6 @@ canary_value_uniontagging_from_double(double dvalue) {
     value.as.num = dvalue;
     return value;
 }
-
 
 #define canary_value_impl_to_user_data canary_value_uniontagging_to_user_data
 static inline void *
