@@ -8,33 +8,38 @@
 
 static int finalized = 0;
 
-static void apiFinalized(WrenVM* vm)
+static void apiFinalized(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotDouble(vm, 0, finalized);
 }
 
-static void counterAllocate(WrenVM* vm)
+static void counterAllocate(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   double* value = (double*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(double));
   *value = 0;
 }
 
-static void counterIncrement(WrenVM* vm)
+static void counterIncrement(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   double* value = (double*)wrenGetSlotForeign(vm, 0);
   double increment = wrenGetSlotDouble(vm, 1);
 
   *value += increment;
 }
 
-static void counterValue(WrenVM* vm)
+static void counterValue(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   double value = *(double*)wrenGetSlotForeign(vm, 0);
   wrenSetSlotDouble(vm, 0, value);
 }
 
-static void pointAllocate(WrenVM* vm)
+static void pointAllocate(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   double* coordinates = (double*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(double[3]));
 
   // This gets called by both constructors, so sniff the slot count to see
@@ -53,16 +58,18 @@ static void pointAllocate(WrenVM* vm)
   }
 }
 
-static void pointTranslate(WrenVM* vm)
+static void pointTranslate(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   double* coordinates = (double*)wrenGetSlotForeign(vm, 0);
   coordinates[0] += wrenGetSlotDouble(vm, 1);
   coordinates[1] += wrenGetSlotDouble(vm, 2);
   coordinates[2] += wrenGetSlotDouble(vm, 3);
 }
 
-static void pointToString(WrenVM* vm)
+static void pointToString(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   double* coordinates = (double*)wrenGetSlotForeign(vm, 0);
   char result[100];
   sprintf(result, "(%g, %g, %g)",
@@ -70,8 +77,9 @@ static void pointToString(WrenVM* vm)
   wrenSetSlotString(vm, 0, result);
 }
 
-static void resourceAllocate(WrenVM* vm)
+static void resourceAllocate(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   int* value = (int*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(int));
   *value = 123;
 }

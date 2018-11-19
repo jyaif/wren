@@ -3,8 +3,9 @@
 
 #include <string.h>
 
-static void nullConfig(WrenVM* vm)
+static void nullConfig(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   WrenVM* otherVM = wrenNewVM(NULL);
   
   // We should be able to execute code.

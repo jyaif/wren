@@ -137,8 +137,9 @@ static void directoryListCallback(uv_fs_t* request)
   schedulerFinishResume();
 }
 
-void directoryList(WrenVM* vm)
+void directoryList(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   const char* path = wrenGetSlotString(vm, 1);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 2));
   
@@ -146,8 +147,9 @@ void directoryList(WrenVM* vm)
   uv_fs_scandir(getLoop(), request, path, 0, directoryListCallback);
 }
 
-void fileAllocate(WrenVM* vm)
+void fileAllocate(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   // Store the file descriptor in the foreign data, so that we can get to it
   // in the finalizer.
   int* fd = (int*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(int));
@@ -172,8 +174,9 @@ static void fileDeleteCallback(uv_fs_t* request)
   schedulerResume(freeRequest(request), false);
 }
 
-void fileDelete(WrenVM* vm)
+void fileDelete(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   const char* path = wrenGetSlotString(vm, 1);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 2));
   
@@ -211,8 +214,9 @@ static int mapFileFlags(int flags)
   return result;
 }
 
-void fileOpen(WrenVM* vm)
+void fileOpen(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   const char* path = wrenGetSlotString(vm, 1);
   int flags = (int)wrenGetSlotDouble(vm, 2);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 3));
@@ -235,8 +239,9 @@ static void fileSizeCallback(uv_fs_t* request)
   schedulerFinishResume();
 }
 
-void fileSizePath(WrenVM* vm)
+void fileSizePath(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   const char* path = wrenGetSlotString(vm, 1);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 2));
   uv_fs_stat(getLoop(), request, path, fileSizeCallback);
@@ -249,8 +254,9 @@ static void fileCloseCallback(uv_fs_t* request)
   schedulerResume(freeRequest(request), false);
 }
 
-void fileClose(WrenVM* vm)
+void fileClose(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   int* foreign = (int*)wrenGetSlotForeign(vm, 0);
   int fd = *foreign;
 
@@ -269,8 +275,9 @@ void fileClose(WrenVM* vm)
   wrenSetSlotBool(vm, 0, false);
 }
 
-void fileDescriptor(WrenVM* vm)
+void fileDescriptor(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   int* foreign = (int*)wrenGetSlotForeign(vm, 0);
   int fd = *foreign;
   wrenSetSlotDouble(vm, 0, fd);
@@ -296,8 +303,9 @@ static void fileReadBytesCallback(uv_fs_t* request)
   free(buffer.base);
 }
 
-void fileReadBytes(WrenVM* vm)
+void fileReadBytes(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 3));
 
   int fd = *(int*)wrenGetSlotForeign(vm, 0);
@@ -326,8 +334,9 @@ static void realPathCallback(uv_fs_t* request)
   schedulerFinishResume();
 }
 
-void fileRealPath(WrenVM* vm)
+void fileRealPath(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   const char* path = wrenGetSlotString(vm, 1);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 2));
   uv_fs_realpath(getLoop(), request, path, realPathCallback);
@@ -362,15 +371,17 @@ static void statCallback(uv_fs_t* request)
   schedulerFinishResume();
 }
 
-void fileStat(WrenVM* vm)
+void fileStat(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   int fd = *(int*)wrenGetSlotForeign(vm, 0);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 1));
   uv_fs_fstat(getLoop(), request, fd, statCallback);
 }
 
-void fileSize(WrenVM* vm)
+void fileSize(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   int fd = *(int*)wrenGetSlotForeign(vm, 0);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 1));
   uv_fs_fstat(getLoop(), request, fd, fileSizeCallback);
@@ -386,8 +397,9 @@ static void fileWriteBytesCallback(uv_fs_t* request)
   schedulerResume(freeRequest(request), false);
 }
 
-void fileWriteBytes(WrenVM* vm)
+void fileWriteBytes(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   int fd = *(int*)wrenGetSlotForeign(vm, 0);
   size_t length;
   const void* bytes = wrenGetSlotBytes(vm, 1, &length);
@@ -407,16 +419,18 @@ void fileWriteBytes(WrenVM* vm)
               fileWriteBytesCallback);
 }
 
-void statPath(WrenVM* vm)
+void statPath(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   const char* path = wrenGetSlotString(vm, 1);
   uv_fs_t* request = createRequest(wrenGetSlotHandle(vm, 2));
   uv_fs_stat(getLoop(), request, path, statCallback);
 }
 
 #define STAT_NUM(name, cname)                                                  \
-  void stat##name(WrenVM* vm)                                                  \
+  void stat##name(canary_context_t *context)                                   \
   {                                                                            \
+    WrenVM *vm = wrenVMFromContext(context);                                   \
     uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);                   \
     wrenSetSlotDouble(vm, 0, (double)stat->cname);                             \
   }
@@ -433,8 +447,9 @@ STAT_NUM(SpecialDevice, st_rdev)
 STAT_NUM(User,          st_uid)
 
 #define STAT_IS_MODE(name, isname)                                             \
-  void statIs##name(WrenVM* vm)                                                \
+  void statIs##name(canary_context_t *context)                                 \
   {                                                                            \
+    WrenVM *vm = wrenVMFromContext(context);                                   \
     uv_stat_t* stat = (uv_stat_t*)wrenGetSlotForeign(vm, 0);                   \
     wrenSetSlotBool(vm, 0, isname(stat->st_mode));                             \
   }
@@ -466,13 +481,15 @@ static void initStdin()
   }
 }
 
-void stdinIsRaw(WrenVM* vm)
+void stdinIsRaw(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotBool(vm, 0, isStdinRaw);
 }
 
-void stdinIsRawSet(WrenVM* vm)
+void stdinIsRawSet(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   initStdin();
   
   isStdinRaw = wrenGetSlotBool(vm, 1);
@@ -489,14 +506,16 @@ void stdinIsRawSet(WrenVM* vm)
   }
 }
 
-void stdinIsTerminal(WrenVM* vm)
+void stdinIsTerminal(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   initStdin();
   wrenSetSlotBool(vm, 0, uv_guess_handle(stdinDescriptor) == UV_TTY);
 }
 
-void stdoutFlush(WrenVM* vm)
+void stdoutFlush(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   fflush(stdout);
   wrenSetSlotNull(vm, 0);
 }
@@ -552,14 +571,14 @@ static void stdinReadCallback(uv_stream_t* stream, ssize_t numRead,
   free(buffer->base);
 }
 
-void stdinReadStart(WrenVM* vm)
+void stdinReadStart(canary_context_t *context)
 {
   initStdin();
   uv_read_start(stdinStream, allocCallback, stdinReadCallback);
   // TODO: Check return.
 }
 
-void stdinReadStop(WrenVM* vm)
+void stdinReadStop(canary_context_t *context)
 {
   uv_read_stop(stdinStream);
 }

@@ -5,8 +5,9 @@
 
 #include "wren_vm.h"
 
-void metaCompile(WrenVM* vm)
+void metaCompile(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   const char* source = wrenGetSlotString(vm, 1);
   bool isExpression = wrenGetSlotBool(vm, 2);
   bool printErrors = wrenGetSlotBool(vm, 3);
@@ -29,8 +30,9 @@ void metaCompile(WrenVM* vm)
                          closure != NULL ? OBJ_VAL(closure) : NULL_VAL);
 }
 
-void metaGetModuleVariables(WrenVM* vm)
+void metaGetModuleVariables(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotCount(vm, 3);
   
   Value moduleValue = wrenMapGet(vm->modules,

@@ -4,6 +4,7 @@
 #include "wren_core.h"
 #include "wren_debug.h"
 
+#include "canary_api.h"
 #include "canary_vm.h"
 
 #include <stdlib.h>
@@ -79,6 +80,11 @@ WrenVM* wrenNewVM(WrenConfiguration* config)
   vm->modules = wrenNewMap(vm);
   wrenInitializeCore(vm);
   return vm;
+}
+
+WrenVM* wrenVMFromContext(canary_context_t *context)
+{
+  return canary_context_to_vm(context);
 }
 
 void wrenFreeVM(WrenVM* vm)
@@ -317,6 +323,7 @@ static void bindMethod(WrenVM* vm, int methodType, int symbol,
 static void callForeign(ObjFiber* fiber,
                         WrenForeignMethodFn foreign, int numArgs)
 {
+  canary_context_t *context = canary_context_from_thread(fiber);
   // Save the current state so we can restore it when done.
   WrenVM* vm = fiber->vm;
   bool old_is_api_call = vm->is_api_call;
@@ -324,7 +331,7 @@ static void callForeign(ObjFiber* fiber,
   ptrdiff_t old_stack_base_diff = fiber->stack_base - fiber->stack;
   fiber->stack_base = fiber->stackTop - numArgs;
 
-  foreign(vm);
+  foreign(context);
 
   // Discard the stack slots for the arguments and temporaries but leave one
   // for the result.
@@ -555,6 +562,7 @@ static void createClass(WrenVM* vm, int numFields, ObjModule* module)
 
 static void createForeign(ObjFiber* fiber, Value* stack)
 {
+  canary_context_t *context = canary_context_from_thread(fiber);
   WrenVM* vm = fiber->vm;
   ObjClass* classObj = AS_CLASS(stack[0]);
   ASSERT(classObj->numFields == -1, "Class must be a foreign class.");
@@ -573,7 +581,7 @@ static void createForeign(ObjFiber* fiber, Value* stack)
   ptrdiff_t old_stack_base_diff = fiber->stack_base - fiber->stack;
   fiber->stack_base = stack;
 
-  method->as.foreign(vm);
+  method->as.foreign(context);
 
   fiber->stack_base = fiber->stack + old_stack_base_diff;
   vm->is_api_call = old_is_api_call;

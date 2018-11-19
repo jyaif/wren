@@ -35,14 +35,16 @@ static uint32_t advanceState(Well512* well)
   return well->state[well->index];
 }
 
-void randomAllocate(WrenVM* vm)
+void randomAllocate(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   Well512* well = (Well512*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(Well512));
   well->index = 0;
 }
 
-void randomSeed0(WrenVM* vm)
+void randomSeed0(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   Well512* well = (Well512*)wrenGetSlotForeign(vm, 0);
 
   srand((uint32_t)time(NULL));
@@ -52,8 +54,9 @@ void randomSeed0(WrenVM* vm)
   }
 }
 
-void randomSeed1(WrenVM* vm)
+void randomSeed1(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   Well512* well = (Well512*)wrenGetSlotForeign(vm, 0);
 
   srand((uint32_t)wrenGetSlotDouble(vm, 1));
@@ -63,8 +66,9 @@ void randomSeed1(WrenVM* vm)
   }
 }
 
-void randomSeed16(WrenVM* vm)
+void randomSeed16(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   Well512* well = (Well512*)wrenGetSlotForeign(vm, 0);
 
   for (int i = 0; i < 16; i++)
@@ -73,8 +77,9 @@ void randomSeed16(WrenVM* vm)
   }
 }
 
-void randomFloat(WrenVM* vm)
+void randomFloat(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   Well512* well = (Well512*)wrenGetSlotForeign(vm, 0);
 
   // A double has 53 bits of precision in its mantissa, and we'd like to take
@@ -93,8 +98,9 @@ void randomFloat(WrenVM* vm)
   wrenSetSlotDouble(vm, 0, result);
 }
 
-void randomInt0(WrenVM* vm)
+void randomInt0(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   Well512* well = (Well512*)wrenGetSlotForeign(vm, 0);
 
   wrenSetSlotDouble(vm, 0, (double)advanceState(well));

@@ -6,8 +6,8 @@
 // Stores the command line arguments passed to the CLI.
 void osSetArguments(int argc, const char* argv[]);
 
-void platformIsPosix(WrenVM* vm);
-void platformName(WrenVM* vm);
-void processAllArguments(WrenVM* vm);
+void platformIsPosix(canary_context_t *context);
+void platformName(canary_context_t *context);
+void processAllArguments(canary_context_t *context);
 
 #endif

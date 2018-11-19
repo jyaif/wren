@@ -5,13 +5,15 @@
 
 static WrenHandle* handle;
 
-static void setValue(WrenVM* vm)
+static void setValue(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   handle = wrenGetSlotHandle(vm, 1);
 }
 
-static void getValue(WrenVM* vm)
+static void getValue(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotHandle(vm, 0, handle);
   wrenReleaseHandle(vm, handle);
 }

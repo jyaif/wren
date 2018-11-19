@@ -4,6 +4,6 @@
 
 #include "wren.h"
 
-void timerStartTimer(WrenVM* vm);
+void timerStartTimer(canary_context_t *context);
 
 #endif

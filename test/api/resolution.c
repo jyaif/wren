@@ -58,8 +58,9 @@ static void runTestVM(WrenVM* vm, WrenConfiguration* configuration,
   wrenFreeVM(otherVM);
 }
 
-static void noResolver(WrenVM* vm)
+static void noResolver(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   WrenConfiguration configuration;
   wrenInitConfiguration(&configuration);
   
@@ -79,8 +80,9 @@ static const char* resolveToNull(WrenVM* vm, const char* importer,
   return NULL;
 }
 
-static void returnsNull(WrenVM* vm)
+static void returnsNull(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   WrenConfiguration configuration;
   wrenInitConfiguration(&configuration);
   
@@ -107,8 +109,9 @@ static const char* resolveChange(WrenVM* vm, const char* importer,
   return result;
 }
 
-static void changesString(WrenVM* vm)
+static void changesString(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   WrenConfiguration configuration;
   wrenInitConfiguration(&configuration);
   
@@ -116,8 +119,9 @@ static void changesString(WrenVM* vm)
   runTestVM(vm, &configuration, "import \"foo|bar\"");
 }
 
-static void shared(WrenVM* vm)
+static void shared(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   WrenConfiguration configuration;
   wrenInitConfiguration(&configuration);
   
@@ -125,8 +129,9 @@ static void shared(WrenVM* vm)
   runTestVM(vm, &configuration, "import \"foo|bar\"\nimport \"foo/bar\"");
 }
 
-static void importer(WrenVM* vm)
+static void importer(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   WrenConfiguration configuration;
   wrenInitConfiguration(&configuration);
   

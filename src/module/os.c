@@ -14,8 +14,9 @@ void osSetArguments(int argc, const char* argv[])
   args = argv;
 }
 
-void platformName(WrenVM* vm)
+void platformName(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotCount(vm, 1);
   
   wrenSetSlotString(vm, 0,
@@ -41,8 +42,9 @@ void platformName(WrenVM* vm)
                     );
 }
 
-void platformIsPosix(WrenVM* vm)
+void platformIsPosix(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotCount(vm, 1);
   
   wrenSetSlotBool(vm, 0,
@@ -62,8 +64,9 @@ void platformIsPosix(WrenVM* vm)
                   );
 }
 
-void processAllArguments(WrenVM* vm)
+void processAllArguments(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotCount(vm, 2);
   wrenSetSlotNewList(vm, 0);
 

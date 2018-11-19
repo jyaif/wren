@@ -3,8 +3,9 @@
 
 #include <string.h>
 
-static void runtimeError(WrenVM* vm)
+static void runtimeError(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotCount(vm, 1);
   wrenSetSlotString(vm, 0, "Error!");
   wrenAbortFiber(vm, 0);

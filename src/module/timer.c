@@ -24,8 +24,9 @@ static void timerCallback(uv_timer_t* handle)
   schedulerResume(fiber, false);
 }
 
-void timerStartTimer(WrenVM* vm)
+void timerStartTimer(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   int milliseconds = (int)wrenGetSlotDouble(vm, 1);
   WrenHandle* fiber = wrenGetSlotHandle(vm, 2);
 

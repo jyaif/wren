@@ -3,7 +3,7 @@
 
 #include "wren.h"
 
-void metaCompile(WrenVM* vm);
-void metaGetModuleVariables(WrenVM* vm);
+void metaCompile(canary_context_t *context);
+void metaGetModuleVariables(canary_context_t *context);
 
 #endif // CANARY_META_H

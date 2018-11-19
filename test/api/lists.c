@@ -3,8 +3,9 @@
 
 #include <string.h>
 
-static void newList(WrenVM* vm)
+static void newList(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotNewList(vm, 0);
 }
 
@@ -16,8 +17,9 @@ static void insertNumber(WrenVM* vm, int index, double value)
   wrenInsertInList(vm, 0, index, 1);
 }
 
-static void insert(WrenVM* vm)
+static void insert(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotNewList(vm, 0);
   
   wrenSetSlotCount(vm, 2);

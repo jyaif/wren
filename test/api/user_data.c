@@ -5,8 +5,9 @@
 static const char* data = "my user data";
 static const char* otherData = "other user data";
 
-static void test(WrenVM* vm)
+static void test(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   WrenConfiguration configuration;
   wrenInitConfiguration(&configuration);
   

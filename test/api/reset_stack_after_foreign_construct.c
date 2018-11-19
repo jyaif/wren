@@ -3,8 +3,9 @@
 
 #include <string.h>
 
-static void counterAllocate(WrenVM* vm)
+static void counterAllocate(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   double* counter = (double*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(double));
   *counter = wrenGetSlotDouble(vm, 1);
 }

@@ -4,13 +4,13 @@
 
 #include "wren.h"
 
-void randomAllocate(WrenVM* vm);
+void randomAllocate(canary_context_t *context);
 
-void randomSeed0(WrenVM* vm);
-void randomSeed1(WrenVM* vm);
-void randomSeed16(WrenVM* vm);
+void randomSeed0(canary_context_t *context);
+void randomSeed1(canary_context_t *context);
+void randomSeed16(canary_context_t *context);
 
-void randomFloat(WrenVM* vm);
-void randomInt0(WrenVM* vm);
+void randomFloat(canary_context_t *context);
+void randomInt0(canary_context_t *context);
 
 #endif // CANARY_RANDOM_H

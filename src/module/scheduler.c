@@ -30,8 +30,9 @@ static void resume(WrenHandle* method)
   }
 }
 
-void schedulerCaptureMethods(WrenVM* vm)
+void schedulerCaptureMethods(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotCount(vm, 1);
   wrenGetVariable(vm, 0, "scheduler", "Scheduler");
   schedulerClass = wrenGetSlotHandle(vm, 0);

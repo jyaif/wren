@@ -1,6 +1,8 @@
 #ifndef wren_h
 #define wren_h
 
+#include "canary.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -54,7 +56,7 @@ typedef void *(*WrenReallocateFn)(void *user_data,
                                   void *memory, size_t newSize);
 
 // A function callable from Wren code, but implemented in C.
-typedef void (*WrenForeignMethodFn)(WrenVM* vm);
+typedef void (*WrenForeignMethodFn)(canary_context_t *context);
 
 // A finalizer function for freeing resources owned by an instance of a foreign
 // class. Unlike most foreign methods, finalizers do not have access to the VM
@@ -284,6 +286,8 @@ void wrenInitConfiguration(WrenConfiguration* configuration);
 // freed after calling this. If [configuration] is `NULL`, uses a default
 // configuration.
 WrenVM* wrenNewVM(WrenConfiguration* configuration);
+
+WrenVM* wrenVMFromContext(canary_context_t *context);
 
 // Disposes of all resources is use by [vm], which was previously created by a
 // call to [wrenNewVM].

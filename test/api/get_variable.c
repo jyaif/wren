@@ -3,23 +3,27 @@
 
 #include <string.h>
 
-static void beforeDefined(WrenVM* vm)
+static void beforeDefined(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenGetVariable(vm, 0, "./test/api/get_variable", "A");
 }
 
-static void afterDefined(WrenVM* vm)
+static void afterDefined(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenGetVariable(vm, 0, "./test/api/get_variable", "A");
 }
 
-static void afterAssigned(WrenVM* vm)
+static void afterAssigned(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenGetVariable(vm, 0, "./test/api/get_variable", "A");
 }
 
-static void otherSlot(WrenVM* vm)
+static void otherSlot(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenSetSlotCount(vm, 3);
   wrenGetVariable(vm, 2, "./test/api/get_variable", "B");
   
@@ -28,8 +32,9 @@ static void otherSlot(WrenVM* vm)
   wrenSetSlotString(vm, 0, string);
 }
 
-static void otherModule(WrenVM* vm)
+static void otherModule(canary_context_t *context)
 {
+  WrenVM *vm = wrenVMFromContext(context);
   wrenGetVariable(vm, 0, "./test/api/get_variable_module", "Variable");
 }
 
