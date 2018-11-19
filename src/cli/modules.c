@@ -1,52 +1,24 @@
 
 #include "modules.h"
 
+#include "io.h"
 #include "io.wren.inc"
+
+#include "os.h"
 #include "os.wren.inc"
+
+#include "repl.h"
 #include "repl.wren.inc"
+
+#include "scheduler.h"
 #include "scheduler.wren.inc"
+
+#include "timer.h"
 #include "timer.wren.inc"
 
 #include <stdlib.h>
 #include <string.h>
 
-extern void directoryList(WrenVM* vm);
-extern void fileAllocate(WrenVM* vm);
-extern void fileFinalize(void* data);
-extern void fileDelete(WrenVM* vm);
-extern void fileOpen(WrenVM* vm);
-extern void fileSizePath(WrenVM* vm);
-extern void fileClose(WrenVM* vm);
-extern void fileDescriptor(WrenVM* vm);
-extern void fileReadBytes(WrenVM* vm);
-extern void fileRealPath(WrenVM* vm);
-extern void fileSize(WrenVM* vm);
-extern void fileStat(WrenVM* vm);
-extern void fileWriteBytes(WrenVM* vm);
-extern void platformIsPosix(WrenVM* vm);
-extern void platformName(WrenVM* vm);
-extern void processAllArguments(WrenVM* vm);
-extern void statPath(WrenVM* vm);
-extern void statBlockCount(WrenVM* vm);
-extern void statBlockSize(WrenVM* vm);
-extern void statDevice(WrenVM* vm);
-extern void statGroup(WrenVM* vm);
-extern void statInode(WrenVM* vm);
-extern void statLinkCount(WrenVM* vm);
-extern void statMode(WrenVM* vm);
-extern void statSize(WrenVM* vm);
-extern void statSpecialDevice(WrenVM* vm);
-extern void statUser(WrenVM* vm);
-extern void statIsDirectory(WrenVM* vm);
-extern void statIsFile(WrenVM* vm);
-extern void stdinIsRaw(WrenVM* vm);
-extern void stdinIsRawSet(WrenVM* vm);
-extern void stdinIsTerminal(WrenVM* vm);
-extern void stdinReadStart(WrenVM* vm);
-extern void stdinReadStop(WrenVM* vm);
-extern void stdoutFlush(WrenVM* vm);
-extern void schedulerCaptureMethods(WrenVM* vm);
-extern void timerStartTimer(WrenVM* vm);
 
 // The maximum number of foreign methods a single class defines. Ideally, we
 // would use variable-length arrays for each class in the table below, but
