@@ -17,7 +17,7 @@ static WrenVM* vm;
 
 static WrenBindForeignMethodFn bindMethodFn = NULL;
 static WrenBindForeignClassFn bindClassFn = NULL;
-static WrenForeignMethodFn afterLoadFn = NULL;
+static void (*afterLoadFn)(WrenVM *vm) = NULL;
 
 static uv_loop_t* loop;
 
@@ -401,7 +401,7 @@ void setExitCode(int exitCode)
 
 void setTestCallbacks(WrenBindForeignMethodFn bindMethod,
                       WrenBindForeignClassFn bindClass,
-                      WrenForeignMethodFn afterLoad)
+                      void (*afterLoad)(WrenVM *vm))
 {
   bindMethodFn = bindMethod;
   bindClassFn = bindClass;
