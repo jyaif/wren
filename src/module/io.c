@@ -1,6 +1,7 @@
 
 #include "io.h"
 
+#include "canary_uv.h"
 #include "scheduler.h"
 #include "stat.h"
 #include "vm.h"
@@ -119,10 +120,10 @@ WrenHandle* freeRequest(uv_fs_t* request)
 static void directoryListCallback(uv_fs_t* request)
 {
   if (handleRequestError(request)) return;
-
+  
+  WrenVM* vm = canary_uv_fs_get_vm(request);
   uv_dirent_t entry;
-
-  WrenVM* vm = getVM();
+  
   wrenSetSlotCount(vm, 3);
   wrenSetSlotNewList(vm, 2);
   
@@ -184,9 +185,11 @@ static void fileOpenCallback(uv_fs_t* request)
 {
   if (handleRequestError(request)) return;
   
+  WrenVM* vm = canary_uv_fs_get_vm(request);
   double fd = (double)request->result;
+  
   schedulerResume(freeRequest(request), true);
-  wrenSetSlotDouble(getVM(), 2, fd);
+  wrenSetSlotDouble(vm, 2, fd);
   schedulerFinishResume();
 }
 
@@ -223,10 +226,12 @@ void fileOpen(WrenVM* vm)
 static void fileSizeCallback(uv_fs_t* request)
 {
   if (handleRequestError(request)) return;
-
+  
+  WrenVM* vm = canary_uv_fs_get_vm(request);
   double size = (double)request->statbuf.st_size;
+  
   schedulerResume(freeRequest(request), true);
-  wrenSetSlotDouble(getVM(), 2, size);
+  wrenSetSlotDouble(vm, 2, size);
   schedulerFinishResume();
 }
 
@@ -274,7 +279,8 @@ void fileDescriptor(WrenVM* vm)
 static void fileReadBytesCallback(uv_fs_t* request)
 {
   if (handleRequestError(request)) return;
-
+  
+  WrenVM* vm = canary_uv_fs_get_vm(request);
   FileRequestData* data = (FileRequestData*)request->data;
   uv_buf_t buffer = data->buffer;
   size_t count = request->result;
@@ -283,7 +289,7 @@ static void fileReadBytesCallback(uv_fs_t* request)
   // embedding API supported a way to *give* it bytes that were previously
   // allocated using Wren's own allocator.
   schedulerResume(freeRequest(request), true);
-  wrenSetSlotBytes(getVM(), 2, buffer.base, count);
+  wrenSetSlotBytes(vm, 2, buffer.base, count);
   schedulerFinishResume();
 
   // TODO: Likewise, freeing this after we resume is lame.
@@ -312,8 +318,10 @@ static void realPathCallback(uv_fs_t* request)
 {
   if (handleRequestError(request)) return;
   
-  wrenSetSlotCount(getVM(), 3);
-  wrenSetSlotString(getVM(), 2, (char*)request->ptr);
+  WrenVM* vm = canary_uv_fs_get_vm(request);
+  
+  wrenSetSlotCount(vm, 3);
+  wrenSetSlotString(vm, 2, (char*)request->ptr);
   schedulerResume(freeRequest(request), true);
   schedulerFinishResume();
 }
@@ -330,7 +338,8 @@ static void statCallback(uv_fs_t* request)
 {
   if (handleRequestError(request)) return;
   
-  WrenVM* vm = getVM();
+  WrenVM* vm = canary_uv_fs_get_vm(request);
+  
   wrenSetSlotCount(vm, 3);
   
   // Get a handle to the Stat class. We'll hang on to this so we don't have to
@@ -503,7 +512,7 @@ static void allocCallback(uv_handle_t* handle, size_t suggestedSize,
 static void stdinReadCallback(uv_stream_t* stream, ssize_t numRead,
                               const uv_buf_t* buffer)
 {
-  WrenVM* vm = getVM();
+  WrenVM* vm = canary_uv_loop_get_vm(stream->loop);
   
   if (stdinClass == NULL)
   {

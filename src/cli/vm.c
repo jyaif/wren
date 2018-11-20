@@ -5,6 +5,7 @@
 #include "path.h"
 #include "stat.h"
 
+#include "canary_uv.h"
 #include "io.h"
 #include "scheduler.h"
 
@@ -285,6 +286,7 @@ static void initVM()
   // Initialize the event loop.
   loop = (uv_loop_t*)malloc(sizeof(uv_loop_t));
   uv_loop_init(loop);
+  canary_uv_loop_set_vm(loop, vm);
 }
 
 static void freeVM()
