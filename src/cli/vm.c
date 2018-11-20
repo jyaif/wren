@@ -291,7 +291,7 @@ static void initVM()
 
 static void freeVM()
 {
-  ioShutdown();
+  ioShutdown(vm);
   schedulerShutdown();
   
   uv_loop_close(loop);

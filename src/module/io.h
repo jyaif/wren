@@ -6,7 +6,7 @@
 // Frees up any pending resources in use by the IO module.
 //
 // In particular, this closes down the stdin stream.
-void ioShutdown();
+void ioShutdown(WrenVM* vm);
 
 void directoryList(WrenVM* vm);
 void fileAllocate(WrenVM* vm);

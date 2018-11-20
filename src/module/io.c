@@ -36,7 +36,7 @@ static uv_stream_t* stdinStream = NULL;
 static bool isStdinRaw = false;
 
 // Frees all resources related to stdin.
-static void shutdownStdin()
+static void shutdownStdin(WrenVM* vm)
 {
   if (stdinStream != NULL)
   {
@@ -48,24 +48,24 @@ static void shutdownStdin()
   
   if (stdinClass != NULL)
   {
-    wrenReleaseHandle(getVM(), stdinClass);
+    wrenReleaseHandle(vm, stdinClass);
     stdinClass = NULL;
   }
   
   if (stdinOnData != NULL)
   {
-    wrenReleaseHandle(getVM(), stdinOnData);
+    wrenReleaseHandle(vm, stdinOnData);
     stdinOnData = NULL;
   }
 }
 
-void ioShutdown()
+void ioShutdown(WrenVM* vm)
 {
-  shutdownStdin();
+  shutdownStdin(vm);
   
   if (statClass != NULL)
   {
-    wrenReleaseHandle(getVM(), statClass);
+    wrenReleaseHandle(vm, statClass);
     statClass = NULL;
   }
 }
@@ -534,7 +534,7 @@ static void stdinReadCallback(uv_stream_t* stream, ssize_t numRead,
     wrenSetSlotNull(vm, 1);
     wrenCall(vm, stdinOnData);
     
-    shutdownStdin();
+    shutdownStdin(vm);
     return;
   }
 
