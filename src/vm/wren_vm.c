@@ -4,10 +4,6 @@
 #include "wren_core.h"
 #include "wren_debug.h"
 
-#if WREN_OPT_RANDOM
-  #include "wren_opt_random.h"
-#endif
-
 #include "canary_vm.h"
 
 #include <stdlib.h>
@@ -272,17 +268,6 @@ static WrenForeignMethodFn findForeignMethod(WrenVM* vm,
                                             signature);
   }
   
-  // If the host didn't provide it, see if it's an optional one.
-  if (method == NULL)
-  {
-#if WREN_OPT_RANDOM
-    if (strcmp(moduleName, "random") == 0)
-    {
-      method = wrenRandomBindForeignMethod(vm, className, isStatic, signature);
-    }
-#endif
-  }
-
   return method;
 }
 
@@ -517,18 +502,6 @@ static void bindForeignClass(WrenVM* vm, ObjClass* classObj, ObjModule* module)
     methods = vm->config.bindForeignClassFn(vm, module->name->value,
                                             classObj->name->value);
   }
-
-  // If the host didn't provide it, see if it's a built in optional module.
-  if (methods.allocate == NULL && methods.finalize == NULL)
-  {
-#if WREN_OPT_RANDOM
-    if (strcmp(module->name->value, "random") == 0)
-    {
-      methods = wrenRandomBindForeignClass(vm, module->name->value,
-                                           classObj->name->value);
-    }
-#endif
-  }
   
   Method method;
   method.type = METHOD_FOREIGN;
@@ -650,25 +623,11 @@ static Value importModule(WrenVM* vm, Value name)
   wrenPushRoot(vm, AS_OBJ(name));
 
   const char* source = NULL;
-  bool allocatedSource = true;
   
   // Let the host try to provide the module.
   if (vm->config.loadModuleFn != NULL)
   {
     source = vm->config.loadModuleFn(vm, AS_CSTRING(name));
-  }
-  
-  // If the host didn't provide it, see if it's a built in optional module.
-  if (source == NULL)
-  {
-    ObjString* nameString = AS_STRING(name);
-#if WREN_OPT_RANDOM
-    if (strcmp(nameString->value, "random") == 0) source = wrenRandomSource();
-#endif
-    
-    // TODO: Should we give the host the ability to provide strings that don't
-    // need to be freed?
-    allocatedSource = false;
   }
   
   if (source == NULL)
@@ -687,7 +646,7 @@ static Value importModule(WrenVM* vm, Value name)
   //
   // FIXME: The mallocator used here is unknown. Change to something under the
   //        vm control.
-  if (allocatedSource) free((char*)source);
+  free((char*)source);
   
   if (moduleClosure == NULL)
   {

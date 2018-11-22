@@ -30,13 +30,6 @@
 #define WREN_NAN_TAGGING                                                       \
   (CANARY_VALUE_FLAVOUR == CANARY_VALUE_FLAVOUR_NANTAGGING)
 
-// The VM includes a number of optional modules. You can choose to include
-// these or not. By default, they are all available. To disable one, set the
-// corresponding `WREN_OPT_<name>` define to `0`.
-#ifndef WREN_OPT_RANDOM
-  #define WREN_OPT_RANDOM 1
-#endif
-
 // These flags are useful for debugging and hacking on Wren itself. They are not
 // intended to be used for production code. They default to off.
 

@@ -10,6 +10,9 @@
 #include "os.h"
 #include "os.wren.inc"
 
+#include "canary_random.h"
+#include "canary_random.wren.inc"
+
 #include "repl.h"
 #include "repl.wren.inc"
 
@@ -147,6 +150,16 @@ static ModuleRegistry modules[] =
     END_CLASS
     CLASS(Process)
       STATIC_METHOD("allArguments", processAllArguments)
+    END_CLASS
+  END_MODULE
+  MODULE(random)
+    CLASS(Random)
+      STATIC_METHOD("<allocate>", randomAllocate)
+      METHOD("seed_()", randomSeed0)
+      METHOD("seed_(_)", randomSeed1)
+      METHOD("seed_(_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_)", randomSeed16)
+      METHOD("float()", randomFloat)
+      METHOD("int()", randomInt0)
     END_CLASS
   END_MODULE
   MODULE(repl)
