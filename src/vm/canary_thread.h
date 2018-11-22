@@ -133,4 +133,20 @@ canary_thread_set_error(canary_thread_t *thread, canary_value_t error) {
   thread->error = error;
 }
 
+// TODO: inline
+void
+canary_thread_set_error_str_len(canary_thread_t *thread,
+                                const char *error, size_t len);
+
+static inline void
+canary_thread_set_error_str(canary_thread_t *thread, const char *error) {
+  canary_thread_set_error_str_len(thread, error, strlen(error));
+}
+
+#define canary_thread_set_error_str_format(thread, ...)                        \
+  do {                                                                         \
+    canary_thread_set_error((thread),                                          \
+                            wrenStringFormat((thread)->vm, __VA_ARGS__));      \
+  } while(false)
+
 #endif // CANARY_THREAD_H

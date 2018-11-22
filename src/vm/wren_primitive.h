@@ -32,13 +32,17 @@
 
 #define RETURN_ERROR(msg) \
     do { \
-      vm->fiber->error = wrenNewStringLength(vm, msg, sizeof(msg) - 1); \
+      canary_thread_t *thread = vm->fiber;                                     \
+                                                                               \
+      canary_thread_set_error_str(thread, msg);                                \
       return false; \
     } while (0);
 
-#define RETURN_ERROR_FMT(msg, arg) \
+#define RETURN_ERROR_FMT(...)                                                  \
     do { \
-      vm->fiber->error = wrenStringFormat(vm, msg, arg); \
+      canary_thread_t *thread = vm->fiber;                                     \
+                                                                               \
+      canary_thread_set_error_str_format(thread, __VA_ARGS__);                 \
       return false; \
     } while (0);
 

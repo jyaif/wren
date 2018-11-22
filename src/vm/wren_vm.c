@@ -296,9 +296,9 @@ static void bindMethod(WrenVM* vm, int methodType, int symbol,
 
     if (method.as.foreign == NULL)
     {
-      canary_thread_set_error(vm->fiber, wrenStringFormat(vm,
+      canary_thread_set_error_str_format(vm->fiber,
           "Could not find foreign method '@' for class $ in module '$'.",
-          methodValue, classObj->name->value, module->name->value));
+          methodValue, classObj->name->value, module->name->value);
       return;
     }
   }
@@ -375,10 +375,10 @@ static void runtimeError(WrenVM* vm)
 // method with [symbol] on [classObj].
 static void methodNotFound(WrenVM* vm, ObjClass* classObj, int symbol)
 {
-  canary_thread_set_error(vm->fiber,
-      wrenStringFormat(vm, "@ does not implement '$'.",
-                       OBJ_VAL(classObj->name),
-                       vm->methodNames.data[symbol]->value));
+  canary_thread_t *thread = vm->fiber;
+  
+  canary_thread_set_error_str_format(thread, "@ does not implement '$'.",
+      OBJ_VAL(classObj->name), vm->methodNames.data[symbol]->value);
 }
 
 // Looks up the previously loaded module with [name].
@@ -594,9 +594,9 @@ static Value resolveModule(WrenVM* vm, Value name)
                                                     AS_CSTRING(name));
   if (resolved == NULL)
   {
-    canary_thread_set_error(vm->fiber,
-        wrenStringFormat(vm, "Could not resolve module '@' imported from '@'.",
-                         name, OBJ_VAL(importer)));
+    canary_thread_set_error_str_format(fiber,
+        "Could not resolve module '@' imported from '@'.",
+        name, OBJ_VAL(importer));
     return NULL_VAL;
   }
   
@@ -632,8 +632,8 @@ static Value importModule(WrenVM* vm, Value name)
   
   if (source == NULL)
   {
-    canary_thread_set_error(vm->fiber,
-        wrenStringFormat(vm, "Could not load module '@'.", name));
+    canary_thread_set_error_str_format(vm->fiber,
+                                       "Could not load module '@'.", name);
     wrenPopRoot(vm); // name.
     return NULL_VAL;
   }
@@ -650,8 +650,8 @@ static Value importModule(WrenVM* vm, Value name)
   
   if (moduleClosure == NULL)
   {
-    canary_thread_set_error(vm->fiber,
-        wrenStringFormat(vm, "Could not compile module '@'.", name));
+    canary_thread_set_error_str_format(vm->fiber,
+                                       "Could not compile module '@'.", name);
     wrenPopRoot(vm); // name.
     return NULL_VAL;
   }
@@ -676,9 +676,9 @@ static Value getModuleVariable(WrenVM* vm, ObjModule* module,
     return module->variables.data[variableEntry];
   }
   
-  canary_thread_set_error(vm->fiber,
-      wrenStringFormat(vm, "Could not find a variable named '@' in module '@'.",
-                       variableName, OBJ_VAL(module->name)));
+  canary_thread_set_error_str_format(vm->fiber,
+      "Could not find a variable named '@' in module '@'.",
+      variableName, OBJ_VAL(module->name));
   return NULL_VAL;
 }
 
@@ -1381,8 +1381,8 @@ Value wrenGetModuleVariable(WrenVM* vm, Value moduleName, Value variableName)
   ObjModule* module = getModule(vm, moduleName);
   if (module == NULL)
   {
-    canary_thread_set_error(vm->fiber,
-        wrenStringFormat(vm, "Module '@' is not loaded.", moduleName));
+    canary_thread_set_error_str_format(vm->fiber,
+                                       "Module '@' is not loaded.", moduleName);
     return NULL_VAL;
   }
   

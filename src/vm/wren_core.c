@@ -236,11 +236,12 @@ DEF_PRIMITIVE(fn_arity)
 
 static void call(WrenVM* vm, Value* args, WrenSlot numArgs)
 {
+  canary_thread_t *thread = vm->fiber;
+  
   // We only care about missing arguments, not extras.
   if (AS_CLOSURE(args[0])->fn->arity > numArgs)
   {
-    canary_thread_set_error(vm->fiber,
-        CONST_STRING(vm, "Function expects more arguments."));
+    canary_thread_set_error_str(thread, "Function expects more arguments.");
     return;
   }
   

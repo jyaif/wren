@@ -10,6 +10,8 @@
 static uint32_t validateIndexValue(WrenVM* vm, uint32_t count, double value,
                                    const char* argName)
 {
+  canary_thread_t *thread = vm->fiber;
+  
   if (!validateIntValue(vm, value, argName)) return UINT32_MAX;
   
   // Negative indices count from the end.
@@ -18,17 +20,17 @@ static uint32_t validateIndexValue(WrenVM* vm, uint32_t count, double value,
   // Check bounds.
   if (value >= 0 && value < count) return (uint32_t)value;
   
-  canary_thread_set_error(vm->fiber,
-      wrenStringFormat(vm, "$ out of bounds.", argName));
+  canary_thread_set_error_str_format(thread, "$ out of bounds.", argName);
   return UINT32_MAX;
 }
 
 bool validateFn(WrenVM* vm, Value arg, const char* argName)
 {
+   canary_thread_t *thread = vm->fiber;
+  
   if (IS_CLOSURE(arg)) return true;
   
-  canary_thread_set_error(vm->fiber,
-      wrenStringFormat(vm, "$ must be a function.", argName));
+  canary_thread_set_error_str_format(thread, "$ must be a function.", argName);
   return false;
 }
 
@@ -78,6 +80,8 @@ bool validateString(WrenVM* vm, Value arg, const char* argName)
 uint32_t calculateRange(WrenVM* vm, ObjRange* range, uint32_t* length,
                         int* step)
 {
+   canary_thread_t *thread = vm->fiber;
+  
   *step = 0;
 
   // Edge case: an empty range is allowed at the end of a sequence. This way,
@@ -118,8 +122,7 @@ uint32_t calculateRange(WrenVM* vm, ObjRange* range, uint32_t* length,
   // Check bounds.
   if (value < 0 || value >= *length)
   {
-    canary_thread_set_error(vm->fiber,
-                            CONST_STRING(vm, "Range end out of bounds."));
+    canary_thread_set_error_str(thread, "Range end out of bounds.");
     return UINT32_MAX;
   }
 
