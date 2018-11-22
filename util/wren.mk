@@ -19,9 +19,6 @@
 # Then, for the libraries, the correct extension is added.
 
 # Files.
-OPT_HEADERS := $(wildcard src/optional/*.h) $(wildcard src/optional/*.wren.inc)
-OPT_SOURCES := $(wildcard src/optional/*.c)
-
 CLI_HEADERS  := $(wildcard src/cli/*.h)
 CLI_SOURCES  := $(wildcard src/cli/*.c)
 
@@ -123,7 +120,6 @@ endif
 
 CFLAGS := $(C_OPTIONS) $(C_WARNINGS)
 
-OPT_OBJECTS       := $(addprefix $(BUILD_DIR)/optional/, $(notdir $(OPT_SOURCES:.c=.o)))
 CLI_OBJECTS       := $(addprefix $(BUILD_DIR)/cli/, $(notdir $(CLI_SOURCES:.c=.o)))
 MODULE_OBJECTS    := $(addprefix $(BUILD_DIR)/module/, $(notdir $(MODULE_SOURCES:.c=.o)))
 VM_OBJECTS        := $(addprefix $(BUILD_DIR)/vm/, $(notdir $(VM_SOURCES:.c=.o)))
@@ -162,26 +158,25 @@ api_test: $(BUILD_DIR)/test/api_$(WREN)
 unit_test: $(BUILD_DIR)/test/unit_$(WREN)
 
 # Command-line interpreter.
-bin/$(WREN): $(OPT_OBJECTS) $(CLI_OBJECTS) $(MODULE_OBJECTS) $(VM_OBJECTS) \
-		$(LIBUV)
+bin/$(WREN): $(CLI_OBJECTS) $(MODULE_OBJECTS) $(VM_OBJECTS) $(LIBUV)
 	@ printf "%10s %-30s %s\n" $(CC) $@ "$(C_OPTIONS)"
 	$(V) mkdir -p bin
 	$(V) $(CC) $(CFLAGS) $^ -o $@ -lm $(LIBUV_LIBS)
 
 # Static library.
-lib/lib$(WREN).a: $(OPT_OBJECTS) $(VM_OBJECTS)
+lib/lib$(WREN).a: $(VM_OBJECTS)
 	@ printf "%10s %-30s %s\n" $(AR) $@ "rcu"
 	$(V) mkdir -p lib
 	$(V) $(AR) rcu $@ $^
 
 # Shared library.
-lib/lib$(WREN).$(SHARED_EXT): $(OPT_OBJECTS) $(VM_OBJECTS)
+lib/lib$(WREN).$(SHARED_EXT): $(VM_OBJECTS)
 	@ printf "%10s %-30s %s\n" $(CC) $@ "$(C_OPTIONS) $(SHARED_LIB_FLAGS)"
 	$(V) mkdir -p lib
 	$(V) $(CC) $(CFLAGS) -shared $(SHARED_LIB_FLAGS) -o $@ $^
 
 # API test executable.
-$(BUILD_DIR)/test/api_$(WREN): $(OPT_OBJECTS) $(MODULE_OBJECTS) $(API_TEST_OBJECTS) \
+$(BUILD_DIR)/test/api_$(WREN): $(MODULE_OBJECTS) $(API_TEST_OBJECTS) \
 		$(VM_OBJECTS) $(BUILD_DIR)/cli/modules.o $(BUILD_DIR)/cli/vm.o \
 		$(BUILD_DIR)/cli/path.o $(LIBUV)
 	@ printf "%10s %-30s %s\n" $(CC) $@ "$(C_OPTIONS)"
@@ -189,7 +184,7 @@ $(BUILD_DIR)/test/api_$(WREN): $(OPT_OBJECTS) $(MODULE_OBJECTS) $(API_TEST_OBJEC
 	$(V) $(CC) $(CFLAGS) $^ -o $@ -lm $(LIBUV_LIBS)
 
 # Unit test executable.
-$(BUILD_DIR)/test/unit_$(WREN): $(OPT_OBJECTS) $(MODULE_OBJECTS) $(UNIT_TEST_OBJECTS) \
+$(BUILD_DIR)/test/unit_$(WREN): $(MODULE_OBJECTS) $(UNIT_TEST_OBJECTS) \
 		$(VM_OBJECTS) $(BUILD_DIR)/cli/modules.o $(BUILD_DIR)/cli/vm.o \
 		$(BUILD_DIR)/cli/path.o $(LIBUV)
 	@ printf "%10s %-30s %s\n" $(CC) $@ "$(C_OPTIONS)"
@@ -210,12 +205,6 @@ $(BUILD_DIR)/module/%.o: src/module/%.c $(CLI_HEADERS) $(MODULE_HEADERS) \
 	$(V) mkdir -p $(BUILD_DIR)/module
 	$(V) $(CC) -c $(CFLAGS) $(CLI_FLAGS) -o $@ $(FILE_FLAG) $<
 
-# Optional object files.
-$(BUILD_DIR)/optional/%.o: src/optional/%.c $(VM_HEADERS) $(OPT_HEADERS)
-	@ printf "%10s %-30s %s\n" $(CC) $< "$(C_OPTIONS)"
-	$(V) mkdir -p $(BUILD_DIR)/optional
-	$(V) $(CC) -c $(CFLAGS) -Isrc/include -Isrc/vm -o $@ $(FILE_FLAG) $<
-
 # VM object files.
 $(BUILD_DIR)/vm/%.o: src/vm/%.c $(VM_HEADERS)
 	@ printf "%10s %-30s %s\n" $(CC) $< "$(C_OPTIONS)"
@@ -223,14 +212,14 @@ $(BUILD_DIR)/vm/%.o: src/vm/%.c $(VM_HEADERS)
 	$(V) $(CC) -c $(CFLAGS) -Isrc/include -Isrc/optional -Isrc/vm -o $@ $(FILE_FLAG) $<
 
 # API test object files.
-$(BUILD_DIR)/test/api/%.o: test/api/%.c $(OPT_HEADERS) $(MODULE_HEADERS) \
+$(BUILD_DIR)/test/api/%.o: test/api/%.c $(MODULE_HEADERS) \
 		 $(VM_HEADERS) $(API_TEST_HEADERS) $(LIBUV)
 	@ printf "%10s %-30s %s\n" $(CC) $< "$(C_OPTIONS)"
 	$(V) mkdir -p $(dir $@)
 	$(V) $(CC) -c $(CFLAGS) $(CLI_FLAGS) -o $@ $(FILE_FLAG) $<
 
 # Unit test object files.
-$(BUILD_DIR)/test/unit/%.o: test/unit/%.c $(OPT_HEADERS) $(MODULE_HEADERS) \
+$(BUILD_DIR)/test/unit/%.o: test/unit/%.c $(MODULE_HEADERS) \
 		 $(VM_HEADERS) $(UNIT_TEST_HEADERS) $(LIBUV)
 	@ printf "%10s %-30s %s\n" $(CC) $< "$(C_OPTIONS)"
 	$(V) mkdir -p $(dir $@)
@@ -240,11 +229,6 @@ $(BUILD_DIR)/test/unit/%.o: test/unit/%.c $(OPT_HEADERS) $(MODULE_HEADERS) \
 $(LIBUV):
 	@ printf "%10s %-30s %s\n" run util/build_libuv.py
 	$(V) ./util/build_libuv.py $(LIBUV_ARCH)
-
-# Wren modules that get compiled into the binary as C strings.
-src/optional/wren_opt_%.wren.inc: src/optional/wren_opt_%.wren util/wren_to_c_string.py
-	@ printf "%10s %-30s %s\n" str $<
-	$(V) ./util/wren_to_c_string.py $@ $<
 
 src/vm/wren_%.wren.inc: src/vm/wren_%.wren util/wren_to_c_string.py
 	@ printf "%10s %-30s %s\n" str $<
