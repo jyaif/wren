@@ -52,10 +52,12 @@ DEF_PRIMITIVE(fiber_new)
 
 DEF_PRIMITIVE(fiber_abort)
 {
-  vm->fiber->error = args[1];
-
+  canary_thread_t *thread = vm->fiber;
+  
+  canary_thread_set_error(thread, args[1]);
+  
   // If the error is explicitly null, it's not really an abort.
-  return IS_NULL(args[1]);
+  return !canary_thread_has_error(thread);
 }
 
 // Transfer execution to [fiber] coming from the current fiber whose stack has
@@ -166,7 +168,10 @@ DEF_PRIMITIVE(fiber_transfer1)
 DEF_PRIMITIVE(fiber_transferError)
 {
   runFiber(vm, AS_FIBER(args[0]), args, false, true, "transfer to");
-  vm->fiber->error = args[1];
+  
+  canary_thread_t *scheduled_thread = vm->fiber;
+  
+  canary_thread_set_error(scheduled_thread, args[1]);
   return false;
 }
 
