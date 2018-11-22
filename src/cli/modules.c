@@ -4,6 +4,9 @@
 #include "io.h"
 #include "io.wren.inc"
 
+#include "canary_meta.h"
+#include "canary_meta.wren.inc"
+
 #include "os.h"
 #include "os.wren.inc"
 
@@ -129,6 +132,12 @@ static ModuleRegistry modules[] =
     END_CLASS
     CLASS(Stdout)
       STATIC_METHOD("flush()", stdoutFlush)
+    END_CLASS
+  END_MODULE
+  MODULE(meta)
+    CLASS(Meta)
+      STATIC_METHOD("compile_(_,_,_)",metaCompile)
+      STATIC_METHOD("getModuleVariables_(_)",metaGetModuleVariables)
     END_CLASS
   END_MODULE
   MODULE(os)

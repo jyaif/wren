@@ -4,9 +4,6 @@
 #include "wren_core.h"
 #include "wren_debug.h"
 
-#if WREN_OPT_META
-  #include "wren_opt_meta.h"
-#endif
 #if WREN_OPT_RANDOM
   #include "wren_opt_random.h"
 #endif
@@ -278,12 +275,6 @@ static WrenForeignMethodFn findForeignMethod(WrenVM* vm,
   // If the host didn't provide it, see if it's an optional one.
   if (method == NULL)
   {
-#if WREN_OPT_META
-    if (strcmp(moduleName, "meta") == 0)
-    {
-      method = wrenMetaBindForeignMethod(vm, className, isStatic, signature);
-    }
-#endif
 #if WREN_OPT_RANDOM
     if (strcmp(moduleName, "random") == 0)
     {
@@ -671,9 +662,6 @@ static Value importModule(WrenVM* vm, Value name)
   if (source == NULL)
   {
     ObjString* nameString = AS_STRING(name);
-#if WREN_OPT_META
-    if (strcmp(nameString->value, "meta") == 0) source = wrenMetaSource();
-#endif
 #if WREN_OPT_RANDOM
     if (strcmp(nameString->value, "random") == 0) source = wrenRandomSource();
 #endif

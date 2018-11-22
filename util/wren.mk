@@ -136,7 +136,7 @@ LIBUV     := build/libuv$(LIBUV_ARCH).a
 # Flags needed to compile source files for the CLI, including the modules and
 # API tests.
 CLI_FLAGS := -D_XOPEN_SOURCE=600 -Isrc/include -I$(LIBUV_DIR)/include \
-             -Isrc/cli -Isrc/module
+             -Isrc/cli -Isrc/module -Isrc/vm
 
 # Targets ---------------------------------------------------------------------
 

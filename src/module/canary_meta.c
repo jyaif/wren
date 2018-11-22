@@ -1,11 +1,9 @@
-#include "wren_opt_meta.h"
 
-#if WREN_OPT_META
+#include "canary_meta.h"
 
 #include <string.h>
 
 #include "wren_vm.h"
-#include "wren_opt_meta.wren.inc"
 
 void metaCompile(WrenVM* vm)
 {
@@ -59,33 +57,3 @@ void metaGetModuleVariables(WrenVM* vm)
     names->elements.data[i] = OBJ_VAL(module->variableNames.data[i]);
   }
 }
-
-const char* wrenMetaSource()
-{
-  return metaModuleSource;
-}
-
-WrenForeignMethodFn wrenMetaBindForeignMethod(WrenVM* vm,
-                                              const char* className,
-                                              bool isStatic,
-                                              const char* signature)
-{
-  // There is only one foreign method in the meta module.
-  ASSERT(strcmp(className, "Meta") == 0, "Should be in Meta class.");
-  ASSERT(isStatic, "Should be static.");
-  
-  if (strcmp(signature, "compile_(_,_,_)") == 0)
-  {
-    return metaCompile;
-  }
-  
-  if (strcmp(signature, "getModuleVariables_(_)") == 0)
-  {
-    return metaGetModuleVariables;
-  }
-  
-  ASSERT(false, "Unknown method.");
-  return NULL;
-}
-
-#endif
