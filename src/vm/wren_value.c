@@ -814,6 +814,8 @@ Value wrenStringFromCodePoint(WrenVM* vm, int value)
 
 Value wrenStringFormat(WrenVM* vm, const char* format, ...)
 {
+  // NOTE: The va_list generalisation of this is not possible because it would
+  //       require va_copy. It was introduced in C98, but C++11 introduced it.
   va_list argList;
 
   // Calculate the length of the result string. Do this up front so we can
