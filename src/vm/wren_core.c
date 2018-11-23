@@ -239,10 +239,8 @@ DEF_PRIMITIVE(fn_arity)
   RETURN_NUM(AS_CLOSURE(args[0])->fn->arity);
 }
 
-static void call(WrenVM* vm, Value* args, WrenSlot numArgs)
+static void call(canary_thread_t *thread, Value* args, WrenSlot numArgs)
 {
-  canary_thread_t *thread = vm->fiber;
-  
   // We only care about missing arguments, not extras.
   if (AS_CLOSURE(args[0])->fn->arity > numArgs)
   {
@@ -251,13 +249,15 @@ static void call(WrenVM* vm, Value* args, WrenSlot numArgs)
   }
   
   // +1 to include the function itself.
-  wrenCallFunction(vm->fiber, AS_CLOSURE(args[0]), numArgs + 1);
+  wrenCallFunction(thread, AS_CLOSURE(args[0]), numArgs + 1);
 }
 
 #define DEF_FN_CALL(numArgs) \
     DEF_PRIMITIVE(fn_call##numArgs) \
     { \
-      call(vm, args, numArgs); \
+      canary_thread_t *thread = vm->fiber;                                     \
+                                                                               \
+      call(thread, args, numArgs);                                             \
       return false; \
     } \
 
