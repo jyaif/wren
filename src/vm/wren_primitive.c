@@ -7,12 +7,10 @@
 // Validates that [value] is an integer within `[0, count)`. Also allows
 // negative indices which map backwards from the end. Returns the valid positive
 // index value. If invalid, reports an error and returns `UINT32_MAX`.
-static uint32_t validateIndexValue(WrenVM* vm, uint32_t count, double value,
-                                   const char* argName)
+static uint32_t validateIndexValue(canary_thread_t *thread, uint32_t count,
+                                   double value, const char* argName)
 {
-  canary_thread_t *thread = vm->fiber;
-  
-  if (!validateIntValue(vm, value, argName)) return UINT32_MAX;
+  if (!validateIntValue(thread, value, argName)) return UINT32_MAX;
   
   // Negative indices count from the end.
   if (value < 0) value = count + value;
@@ -24,36 +22,35 @@ static uint32_t validateIndexValue(WrenVM* vm, uint32_t count, double value,
   return UINT32_MAX;
 }
 
-bool validateFn(WrenVM* vm, Value arg, const char* argName)
+bool validateFn(canary_thread_t *thread, Value arg, const char* argName)
 {
-   canary_thread_t *thread = vm->fiber;
-  
   if (IS_CLOSURE(arg)) return true;
   
   canary_thread_set_error_str_format(thread, "$ must be a function.", argName);
   return false;
 }
 
-bool validateNum(WrenVM* vm, Value arg, const char* argName)
+bool validateNum(canary_thread_t *thread, Value arg, const char* argName)
 {
   if (IS_NUM(arg)) return true;
   RETURN_ERROR_FMT("$ must be a number.", argName);
 }
 
-bool validateIntValue(WrenVM* vm, double value, const char* argName)
+bool validateIntValue(canary_thread_t *thread, double value,
+                      const char* argName)
 {
   if (trunc(value) == value) return true;
   RETURN_ERROR_FMT("$ must be an integer.", argName);
 }
 
-bool validateInt(WrenVM* vm, Value arg, const char* argName)
+bool validateInt(canary_thread_t *thread, Value arg, const char* argName)
 {
   // Make sure it's a number first.
-  if (!validateNum(vm, arg, argName)) return false;
-  return validateIntValue(vm, AS_NUM(arg), argName);
+  if (!validateNum(thread, arg, argName)) return false;
+  return validateIntValue(thread, AS_NUM(arg), argName);
 }
 
-bool validateKey(WrenVM* vm, Value arg)
+bool validateKey(canary_thread_t *thread, Value arg)
 {
   if (IS_BOOL(arg) || IS_CLASS(arg) || IS_NULL(arg) ||
       IS_NUM(arg) || IS_RANGE(arg) || IS_STRING(arg))
@@ -64,24 +61,22 @@ bool validateKey(WrenVM* vm, Value arg)
   RETURN_ERROR("Key must be a value type.");
 }
 
-uint32_t validateIndex(WrenVM* vm, Value arg, uint32_t count,
+uint32_t validateIndex(canary_thread_t *thread, Value arg, uint32_t count,
                        const char* argName)
 {
-  if (!validateNum(vm, arg, argName)) return UINT32_MAX;
-  return validateIndexValue(vm, count, AS_NUM(arg), argName);
+  if (!validateNum(thread, arg, argName)) return UINT32_MAX;
+  return validateIndexValue(thread, count, AS_NUM(arg), argName);
 }
 
-bool validateString(WrenVM* vm, Value arg, const char* argName)
+bool validateString(canary_thread_t *thread, Value arg, const char* argName)
 {
   if (IS_STRING(arg)) return true;
   RETURN_ERROR_FMT("$ must be a string.", argName);
 }
 
-uint32_t calculateRange(WrenVM* vm, ObjRange* range, uint32_t* length,
-                        int* step)
+uint32_t calculateRange(canary_thread_t *thread, ObjRange* range,
+                        uint32_t* length, int* step)
 {
-   canary_thread_t *thread = vm->fiber;
-  
   *step = 0;
 
   // Edge case: an empty range is allowed at the end of a sequence. This way,
@@ -94,12 +89,13 @@ uint32_t calculateRange(WrenVM* vm, ObjRange* range, uint32_t* length,
     return 0;
   }
 
-  uint32_t from = validateIndexValue(vm, *length, range->from, "Range start");
+  uint32_t from = validateIndexValue(thread, *length, range->from,
+                                     "Range start");
   if (from == UINT32_MAX) return UINT32_MAX;
 
   // Bounds check the end manually to handle exclusive ranges.
   double value = range->to;
-  if (!validateIntValue(vm, value, "Range end")) return UINT32_MAX;
+  if (!validateIntValue(thread, value, "Range end")) return UINT32_MAX;
 
   // Negative indices count from the end.
   if (value < 0) value = *length + value;

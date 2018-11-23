@@ -41,7 +41,7 @@ DEF_PRIMITIVE(fiber_new)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   
-  if (!validateFn(vm, args[1], "Argument")) return false;
+  if (!validateFn(thread, args[1], "Argument")) return false;
 
   ObjClosure* closure = AS_CLOSURE(args[1]);
   if (closure->fn->arity > 1)
@@ -241,9 +241,7 @@ DEF_PRIMITIVE(fiber_yield1)
 
 DEF_PRIMITIVE(fn_new)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateFn(vm, args[1], "Argument")) return false;
+  if (!validateFn(thread, args[1], "Argument")) return false;
 
   // The block argument is already a function, so just return it.
   RETURN_VAL(args[1]);
@@ -297,7 +295,7 @@ DEF_PRIMITIVE(list_filled)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   
-  if (!validateInt(vm, args[1], "Size")) return false;  
+  if (!validateInt(thread, args[1], "Size")) return false;  
   if (AS_NUM(args[1]) < 0) RETURN_ERROR("Size cannot be negative.");
   
   uint32_t size = (uint32_t)AS_NUM(args[1]);
@@ -358,7 +356,7 @@ DEF_PRIMITIVE(list_insert)
   ObjList* list = AS_LIST(args[0]);
 
   // count + 1 here so you can "insert" at the very end.
-  uint32_t index = validateIndex(vm, args[1], list->elements.count + 1,
+  uint32_t index = validateIndex(thread, args[1], list->elements.count + 1,
                                  "Index");
   if (index == UINT32_MAX) return false;
 
@@ -368,7 +366,6 @@ DEF_PRIMITIVE(list_insert)
 
 DEF_PRIMITIVE(list_iterate)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
 
   // If we're starting the iteration, return the first index.
@@ -378,7 +375,7 @@ DEF_PRIMITIVE(list_iterate)
     RETURN_NUM(0);
   }
 
-  if (!validateInt(vm, args[1], "Iterator")) return false;
+  if (!validateInt(thread, args[1], "Iterator")) return false;
 
   // Stop if we're out of bounds.
   double index = AS_NUM(args[1]);
@@ -390,9 +387,9 @@ DEF_PRIMITIVE(list_iterate)
 
 DEF_PRIMITIVE(list_iteratorValue)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
-  uint32_t index = validateIndex(vm, args[1], list->elements.count, "Iterator");
+  uint32_t index = validateIndex(thread, args[1], list->elements.count,
+                                 "Iterator");
   if (index == UINT32_MAX) return false;
 
   RETURN_VAL(list->elements.data[index]);
@@ -402,7 +399,8 @@ DEF_PRIMITIVE(list_removeAt)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
-  uint32_t index = validateIndex(vm, args[1], list->elements.count, "Index");
+  uint32_t index = validateIndex(thread, args[1], list->elements.count,
+                                 "Index");
   if (index == UINT32_MAX) return false;
 
   RETURN_VAL(wrenListRemoveAt(vm, list, index));
@@ -415,7 +413,7 @@ DEF_PRIMITIVE(list_subscript)
 
   if (IS_NUM(args[1]))
   {
-    uint32_t index = validateIndex(vm, args[1], list->elements.count,
+    uint32_t index = validateIndex(thread, args[1], list->elements.count,
                                    "Subscript");
     if (index == UINT32_MAX) return false;
 
@@ -429,7 +427,7 @@ DEF_PRIMITIVE(list_subscript)
 
   int step;
   uint32_t count = list->elements.count;
-  uint32_t start = calculateRange(vm, AS_RANGE(args[1]), &count, &step);
+  uint32_t start = calculateRange(thread, AS_RANGE(args[1]), &count, &step);
   if (start == UINT32_MAX) return false;
 
   ObjList* result = wrenNewList(vm, count);
@@ -443,9 +441,8 @@ DEF_PRIMITIVE(list_subscript)
 
 DEF_PRIMITIVE(list_subscriptSetter)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
-  uint32_t index = validateIndex(vm, args[1], list->elements.count,
+  uint32_t index = validateIndex(thread, args[1], list->elements.count,
                                  "Subscript");
   if (index == UINT32_MAX) return false;
 
@@ -462,9 +459,7 @@ DEF_PRIMITIVE(map_new)
 
 DEF_PRIMITIVE(map_subscript)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateKey(vm, args[1])) return false;
+  if (!validateKey(thread, args[1])) return false;
 
   ObjMap* map = AS_MAP(args[0]);
   Value value = wrenMapGet(map, args[1]);
@@ -477,7 +472,7 @@ DEF_PRIMITIVE(map_subscriptSetter)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   
-  if (!validateKey(vm, args[1])) return false;
+  if (!validateKey(thread, args[1])) return false;
 
   wrenMapSet(vm, AS_MAP(args[0]), args[1], args[2]);
   RETURN_VAL(args[2]);
@@ -490,7 +485,7 @@ DEF_PRIMITIVE(map_addCore)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   
-  if (!validateKey(vm, args[1])) return false;
+  if (!validateKey(thread, args[1])) return false;
   
   wrenMapSet(vm, AS_MAP(args[0]), args[1], args[2]);
   
@@ -508,9 +503,7 @@ DEF_PRIMITIVE(map_clear)
 
 DEF_PRIMITIVE(map_containsKey)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateKey(vm, args[1])) return false;
+  if (!validateKey(thread, args[1])) return false;
 
   RETURN_BOOL(!IS_UNDEFINED(wrenMapGet(AS_MAP(args[0]), args[1])));
 }
@@ -522,7 +515,6 @@ DEF_PRIMITIVE(map_count)
 
 DEF_PRIMITIVE(map_iterate)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjMap* map = AS_MAP(args[0]);
 
   if (map->count == 0) RETURN_FALSE;
@@ -533,7 +525,7 @@ DEF_PRIMITIVE(map_iterate)
   // Otherwise, start one past the last entry we stopped at.
   if (!IS_NULL(args[1]))
   {
-    if (!validateInt(vm, args[1], "Iterator")) return false;
+    if (!validateInt(thread, args[1], "Iterator")) return false;
 
     if (AS_NUM(args[1]) < 0) RETURN_FALSE;
     index = (uint32_t)AS_NUM(args[1]);
@@ -558,16 +550,15 @@ DEF_PRIMITIVE(map_remove)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   
-  if (!validateKey(vm, args[1])) return false;
+  if (!validateKey(thread, args[1])) return false;
 
   RETURN_VAL(wrenMapRemoveKey(vm, AS_MAP(args[0]), args[1]));
 }
 
 DEF_PRIMITIVE(map_keyIteratorValue)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjMap* map = AS_MAP(args[0]);
-  uint32_t index = validateIndex(vm, args[1], map->capacity, "Iterator");
+  uint32_t index = validateIndex(thread, args[1], map->capacity, "Iterator");
   if (index == UINT32_MAX) return false;
 
   MapEntry* entry = &map->entries[index];
@@ -581,9 +572,8 @@ DEF_PRIMITIVE(map_keyIteratorValue)
 
 DEF_PRIMITIVE(map_valueIteratorValue)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjMap* map = AS_MAP(args[0]);
-  uint32_t index = validateIndex(vm, args[1], map->capacity, "Iterator");
+  uint32_t index = validateIndex(thread, args[1], map->capacity, "Iterator");
   if (index == UINT32_MAX) return false;
 
   MapEntry* entry = &map->entries[index];
@@ -602,9 +592,7 @@ DEF_PRIMITIVE(null_not)
 
 DEF_PRIMITIVE(num_fromString)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateString(vm, args[1], "Argument")) return false;
+  if (!validateString(thread, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[1]);
 
@@ -636,9 +624,7 @@ DEF_PRIMITIVE(num_pi)
 #define DEF_NUM_INFIX(name, op, type) \
     DEF_PRIMITIVE(num_##name) \
     { \
-      WrenVM *vm = canary_thread_get_vm(thread);                               \
-                                                                               \
-      if (!validateNum(vm, args[1], "Right operand")) return false; \
+      if (!validateNum(thread, args[1], "Right operand")) return false;        \
       RETURN_##type(AS_NUM(args[0]) op AS_NUM(args[1])); \
     }
 
@@ -655,9 +641,7 @@ DEF_NUM_INFIX(gte,      >=, BOOL)
 #define DEF_NUM_BITWISE(name, op) \
     DEF_PRIMITIVE(num_bitwise##name) \
     { \
-      WrenVM *vm = canary_thread_get_vm(thread);                               \
-                                                                               \
-      if (!validateNum(vm, args[1], "Right operand")) return false; \
+      if (!validateNum(thread, args[1], "Right operand")) return false;        \
       uint32_t left = (uint32_t)AS_NUM(args[0]); \
       uint32_t right = (uint32_t)AS_NUM(args[1]); \
       RETURN_NUM(left op right); \
@@ -692,9 +676,7 @@ DEF_NUM_FN(log,     log)
 
 DEF_PRIMITIVE(num_mod)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateNum(vm, args[1], "Right operand")) return false;
+  if (!validateNum(thread, args[1], "Right operand")) return false;
   RETURN_NUM(fmod(AS_NUM(args[0]), AS_NUM(args[1])));
 }
 
@@ -720,7 +702,7 @@ DEF_PRIMITIVE(num_dotDot)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   
-  if (!validateNum(vm, args[1], "Right hand side of range")) return false;
+  if (!validateNum(thread, args[1], "Right hand side of range")) return false;
 
   double from = AS_NUM(args[0]);
   double to = AS_NUM(args[1]);
@@ -731,7 +713,7 @@ DEF_PRIMITIVE(num_dotDotDot)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   
-  if (!validateNum(vm, args[1], "Right hand side of range")) return false;
+  if (!validateNum(thread, args[1], "Right hand side of range")) return false;
 
   double from = AS_NUM(args[0]);
   double to = AS_NUM(args[1]);
@@ -900,7 +882,6 @@ DEF_PRIMITIVE(range_isInclusive)
 
 DEF_PRIMITIVE(range_iterate)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjRange* range = AS_RANGE(args[0]);
 
   // Special case: empty range.
@@ -909,7 +890,7 @@ DEF_PRIMITIVE(range_iterate)
   // Start the iteration.
   if (IS_NULL(args[1])) RETURN_NUM(range->from);
 
-  if (!validateNum(vm, args[1], "Iterator")) return false;
+  if (!validateNum(thread, args[1], "Iterator")) return false;
 
   double iterator = AS_NUM(args[1]);
 
@@ -959,7 +940,7 @@ DEF_PRIMITIVE(string_fromCodePoint)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   
-  if (!validateInt(vm, args[1], "Code point")) return false;
+  if (!validateInt(thread, args[1], "Code point")) return false;
 
   int codePoint = (int)AS_NUM(args[1]);
   if (codePoint < 0)
@@ -976,10 +957,9 @@ DEF_PRIMITIVE(string_fromCodePoint)
 
 DEF_PRIMITIVE(string_byteAt)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
 
-  uint32_t index = validateIndex(vm, args[1], string->length, "Index");
+  uint32_t index = validateIndex(thread, args[1], string->length, "Index");
   if (index == UINT32_MAX) return false;
 
   RETURN_NUM((uint8_t)string->value[index]);
@@ -992,10 +972,9 @@ DEF_PRIMITIVE(string_byteCount)
 
 DEF_PRIMITIVE(string_codePointAt)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
 
-  uint32_t index = validateIndex(vm, args[1], string->length, "Index");
+  uint32_t index = validateIndex(thread, args[1], string->length, "Index");
   if (index == UINT32_MAX) return false;
 
   // If we are in the middle of a UTF-8 sequence, indicate that.
@@ -1009,9 +988,7 @@ DEF_PRIMITIVE(string_codePointAt)
 
 DEF_PRIMITIVE(string_contains)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateString(vm, args[1], "Argument")) return false;
+  if (!validateString(thread, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
   ObjString* search = AS_STRING(args[1]);
@@ -1021,9 +998,7 @@ DEF_PRIMITIVE(string_contains)
 
 DEF_PRIMITIVE(string_endsWith)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateString(vm, args[1], "Argument")) return false;
+  if (!validateString(thread, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
   ObjString* search = AS_STRING(args[1]);
@@ -1037,9 +1012,7 @@ DEF_PRIMITIVE(string_endsWith)
 
 DEF_PRIMITIVE(string_indexOf1)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateString(vm, args[1], "Argument")) return false;
+  if (!validateString(thread, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
   ObjString* search = AS_STRING(args[1]);
@@ -1050,13 +1023,11 @@ DEF_PRIMITIVE(string_indexOf1)
 
 DEF_PRIMITIVE(string_indexOf2)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateString(vm, args[1], "Argument")) return false;
+  if (!validateString(thread, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
   ObjString* search = AS_STRING(args[1]);
-  uint32_t start = validateIndex(vm, args[2], string->length, "Start");
+  uint32_t start = validateIndex(thread, args[2], string->length, "Start");
   if (start == UINT32_MAX) return false;
   
   uint32_t index = wrenStringFind(string, search, start);
@@ -1065,7 +1036,6 @@ DEF_PRIMITIVE(string_indexOf2)
 
 DEF_PRIMITIVE(string_iterate)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
 
   // If we're starting the iteration, return the first index.
@@ -1075,7 +1045,7 @@ DEF_PRIMITIVE(string_iterate)
     RETURN_NUM(0);
   }
 
-  if (!validateInt(vm, args[1], "Iterator")) return false;
+  if (!validateInt(thread, args[1], "Iterator")) return false;
 
   if (AS_NUM(args[1]) < 0) RETURN_FALSE;
   uint32_t index = (uint32_t)AS_NUM(args[1]);
@@ -1092,7 +1062,6 @@ DEF_PRIMITIVE(string_iterate)
 
 DEF_PRIMITIVE(string_iterateByte)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
 
   // If we're starting the iteration, return the first index.
@@ -1102,7 +1071,7 @@ DEF_PRIMITIVE(string_iterateByte)
     RETURN_NUM(0);
   }
 
-  if (!validateInt(vm, args[1], "Iterator")) return false;
+  if (!validateInt(thread, args[1], "Iterator")) return false;
 
   if (AS_NUM(args[1]) < 0) RETURN_FALSE;
   uint32_t index = (uint32_t)AS_NUM(args[1]);
@@ -1118,7 +1087,7 @@ DEF_PRIMITIVE(string_iteratorValue)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
-  uint32_t index = validateIndex(vm, args[1], string->length, "Iterator");
+  uint32_t index = validateIndex(thread, args[1], string->length, "Iterator");
   if (index == UINT32_MAX) return false;
 
   RETURN_VAL(wrenStringCodePointAt(vm, string, index));
@@ -1126,9 +1095,7 @@ DEF_PRIMITIVE(string_iteratorValue)
 
 DEF_PRIMITIVE(string_startsWith)
 {
-  WrenVM *vm = canary_thread_get_vm(thread);
-  
-  if (!validateString(vm, args[1], "Argument")) return false;
+  if (!validateString(thread, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
   ObjString* search = AS_STRING(args[1]);
@@ -1143,7 +1110,7 @@ DEF_PRIMITIVE(string_plus)
 {
   WrenVM *vm = canary_thread_get_vm(thread);
   
-  if (!validateString(vm, args[1], "Right operand")) return false;
+  if (!validateString(thread, args[1], "Right operand")) return false;
   RETURN_VAL(wrenStringFormat(vm, "@@", args[0], args[1]));
 }
 
@@ -1154,7 +1121,7 @@ DEF_PRIMITIVE(string_subscript)
 
   if (IS_NUM(args[1]))
   {
-    int index = validateIndex(vm, args[1], string->length, "Subscript");
+    int index = validateIndex(thread, args[1], string->length, "Subscript");
     if (index == -1) return false;
 
     RETURN_VAL(wrenStringCodePointAt(vm, string, index));
@@ -1167,7 +1134,7 @@ DEF_PRIMITIVE(string_subscript)
 
   int step;
   uint32_t count = string->length;
-  int start = calculateRange(vm, AS_RANGE(args[1]), &count, &step);
+  int start = calculateRange(thread, AS_RANGE(args[1]), &count, &step);
   if (start == -1) return false;
 
   RETURN_VAL(wrenNewStringFromRange(vm, string, start, count, step));

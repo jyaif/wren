@@ -32,50 +32,47 @@
 
 #define RETURN_ERROR(msg) \
     do { \
-      canary_thread_t *thread = vm->fiber;                                     \
-                                                                               \
       canary_thread_set_error_str(thread, msg);                                \
       return false; \
     } while (0);
 
 #define RETURN_ERROR_FMT(...)                                                  \
     do { \
-      canary_thread_t *thread = vm->fiber;                                     \
-                                                                               \
       canary_thread_set_error_str_format(thread, __VA_ARGS__);                 \
       return false; \
     } while (0);
 
 // Validates that the given [arg] is a function. Returns true if it is. If not,
 // reports an error and returns false.
-bool validateFn(WrenVM* vm, Value arg, const char* argName);
+bool validateFn(canary_thread_t *thread, Value arg, const char* argName);
 
 // Validates that the given [arg] is a Num. Returns true if it is. If not,
 // reports an error and returns false.
-bool validateNum(WrenVM* vm, Value arg, const char* argName);
+bool validateNum(canary_thread_t *thread, Value arg, const char* argName);
 
 // Validates that [value] is an integer. Returns true if it is. If not, reports
 // an error and returns false.
-bool validateIntValue(WrenVM* vm, double value, const char* argName);
+bool validateIntValue(canary_thread_t *thread, double value,
+                      const char* argName);
 
 // Validates that the given [arg] is an integer. Returns true if it is. If not,
 // reports an error and returns false.
-bool validateInt(WrenVM* vm, Value arg, const char* argName);
+bool validateInt(canary_thread_t *thread, Value arg, const char* argName);
 
 // Validates that [arg] is a valid object for use as a map key. Returns true if
 // it is. If not, reports an error and returns false.
-bool validateKey(WrenVM* vm, Value arg);
+bool validateKey(canary_thread_t *thread, Value arg);
 
 // Validates that the argument at [argIndex] is an integer within `[0, count)`.
 // Also allows negative indices which map backwards from the end. Returns the
 // valid positive index value. If invalid, reports an error and returns
 // `UINT32_MAX`.
-uint32_t validateIndex(WrenVM* vm, Value arg, uint32_t count,
+uint32_t validateIndex(canary_thread_t *thread, Value arg, uint32_t count,
                        const char* argName);
 
 // Validates that the given [arg] is a String. Returns true if it is. If not,
 // reports an error and returns false.
-bool validateString(WrenVM* vm, Value arg, const char* argName);
+bool validateString(canary_thread_t *thread, Value arg, const char* argName);
 
 // Given a [range] and the [length] of the object being operated on, determines
 // the series of elements that should be chosen from the underlying object.
@@ -86,7 +83,7 @@ bool validateString(WrenVM* vm, Value arg, const char* argName);
 // elements in the resulting sequence. [step] will be direction that the range
 // is going: `1` if the range is increasing from the start index or `-1` if the
 // range is decreasing.
-uint32_t calculateRange(WrenVM* vm, ObjRange* range, uint32_t* length,
-                        int* step);
+uint32_t calculateRange(canary_thread_t *thread, ObjRange* range,
+                        uint32_t* length, int* step);
 
 #endif
