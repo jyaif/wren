@@ -67,9 +67,10 @@ DEF_PRIMITIVE(fiber_abort)
 //
 // [hasValue] is true if a value in [args] is being passed to the new fiber.
 // Otherwise, `null` is implicitly being passed.
-static bool runFiber(WrenVM* vm, ObjFiber* fiber, Value* args, bool isCall,
-                     bool hasValue, const char* verb)
+static bool runFiber(canary_thread_t *thread, ObjFiber* fiber, Value* args,
+                     bool isCall, bool hasValue, const char* verb)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
 
   if (canary_thread_has_error(fiber))
   {
@@ -123,12 +124,16 @@ static bool runFiber(WrenVM* vm, ObjFiber* fiber, Value* args, bool isCall,
 
 DEF_PRIMITIVE(fiber_call)
 {
-  return runFiber(vm, AS_FIBER(args[0]), args, true, false, "call");
+  canary_thread_t *thread = vm->fiber;
+  
+  return runFiber(thread, AS_FIBER(args[0]), args, true, false, "call");
 }
 
 DEF_PRIMITIVE(fiber_call1)
 {
-  return runFiber(vm, AS_FIBER(args[0]), args, true, true, "call");
+  canary_thread_t *thread = vm->fiber;
+  
+  return runFiber(thread, AS_FIBER(args[0]), args, true, true, "call");
 }
 
 DEF_PRIMITIVE(fiber_current)
@@ -157,17 +162,23 @@ DEF_PRIMITIVE(fiber_suspend)
 
 DEF_PRIMITIVE(fiber_transfer)
 {
-  return runFiber(vm, AS_FIBER(args[0]), args, false, false, "transfer to");
+  canary_thread_t *thread = vm->fiber;
+  
+  return runFiber(thread, AS_FIBER(args[0]), args, false, false, "transfer to");
 }
 
 DEF_PRIMITIVE(fiber_transfer1)
 {
-  return runFiber(vm, AS_FIBER(args[0]), args, false, true, "transfer to");
+  canary_thread_t *thread = vm->fiber;
+  
+  return runFiber(thread, AS_FIBER(args[0]), args, false, true, "transfer to");
 }
 
 DEF_PRIMITIVE(fiber_transferError)
 {
-  runFiber(vm, AS_FIBER(args[0]), args, false, true, "transfer to");
+  canary_thread_t *thread = vm->fiber;
+  
+  runFiber(thread, AS_FIBER(args[0]), args, false, true, "transfer to");
   
   canary_thread_t *scheduled_thread = vm->fiber;
   
@@ -177,10 +188,16 @@ DEF_PRIMITIVE(fiber_transferError)
 
 DEF_PRIMITIVE(fiber_try)
 {
-  runFiber(vm, AS_FIBER(args[0]), args, true, false, "try");
+  canary_thread_t *thread = vm->fiber;
+  
+  runFiber(thread, AS_FIBER(args[0]), args, true, false, "try");
   
   // If we're switching to a valid fiber to try, remember that we're trying it.
-  if (!canary_thread_has_error(vm->fiber)) vm->fiber->state = FIBER_TRY;
+  canary_thread_t *scheduled_thread = vm->fiber;
+  
+  if (!canary_thread_has_error(scheduled_thread)) {
+    scheduled_thread->state = FIBER_TRY;
+  }
   return false;
 }
 
