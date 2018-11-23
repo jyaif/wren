@@ -67,12 +67,11 @@ void schedulerResumeError(WrenHandle* fiber, const char* error)
   resume(resumeError);
 }
 
-void schedulerShutdown()
+void schedulerShutdown(WrenVM *vm)
 {
   // If the module was never loaded, we don't have anything to release.
   if (schedulerClass == NULL) return;
   
-  WrenVM* vm = getVM();
   wrenReleaseHandle(vm, schedulerClass);
   wrenReleaseHandle(vm, resume1);
   wrenReleaseHandle(vm, resume2);

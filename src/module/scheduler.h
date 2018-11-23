@@ -15,7 +15,7 @@ void schedulerResume(WrenHandle* fiber, bool hasArgument);
 void schedulerFinishResume();
 void schedulerResumeError(WrenHandle* fiber, const char* error);
 
-void schedulerShutdown();
+void schedulerShutdown(WrenVM *vm);
 
 void schedulerCaptureMethods(canary_context_t *context);
 

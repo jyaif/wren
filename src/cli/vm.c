@@ -292,7 +292,7 @@ static void initVM()
 static void freeVM()
 {
   ioShutdown(vm);
-  schedulerShutdown();
+  schedulerShutdown(vm);
   
   uv_loop_close(loop);
   free(loop);
