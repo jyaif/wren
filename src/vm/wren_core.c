@@ -39,6 +39,8 @@ DEF_PRIMITIVE(class_toString)
 
 DEF_PRIMITIVE(fiber_new)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateFn(vm, args[1], "Argument")) return false;
 
   ObjClosure* closure = AS_CLOSURE(args[1]);
@@ -52,8 +54,6 @@ DEF_PRIMITIVE(fiber_new)
 
 DEF_PRIMITIVE(fiber_abort)
 {
-  canary_thread_t *thread = vm->fiber;
-  
   canary_thread_set_error(thread, args[1]);
   
   // If the error is explicitly null, it's not really an abort.
@@ -124,21 +124,17 @@ static bool runFiber(canary_thread_t *thread, ObjFiber* fiber, Value* args,
 
 DEF_PRIMITIVE(fiber_call)
 {
-  canary_thread_t *thread = vm->fiber;
-  
   return runFiber(thread, AS_FIBER(args[0]), args, true, false, "call");
 }
 
 DEF_PRIMITIVE(fiber_call1)
 {
-  canary_thread_t *thread = vm->fiber;
-  
   return runFiber(thread, AS_FIBER(args[0]), args, true, true, "call");
 }
 
 DEF_PRIMITIVE(fiber_current)
 {
-  RETURN_OBJ(vm->fiber);
+  RETURN_OBJ(thread);
 }
 
 DEF_PRIMITIVE(fiber_error)
@@ -154,6 +150,8 @@ DEF_PRIMITIVE(fiber_isDone)
 
 DEF_PRIMITIVE(fiber_suspend)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   // Switching to a null fiber tells the interpreter to stop and exit.
   vm->fiber = NULL;
   vm->is_api_call = false;
@@ -162,21 +160,17 @@ DEF_PRIMITIVE(fiber_suspend)
 
 DEF_PRIMITIVE(fiber_transfer)
 {
-  canary_thread_t *thread = vm->fiber;
-  
   return runFiber(thread, AS_FIBER(args[0]), args, false, false, "transfer to");
 }
 
 DEF_PRIMITIVE(fiber_transfer1)
 {
-  canary_thread_t *thread = vm->fiber;
-  
   return runFiber(thread, AS_FIBER(args[0]), args, false, true, "transfer to");
 }
 
 DEF_PRIMITIVE(fiber_transferError)
 {
-  canary_thread_t *thread = vm->fiber;
+  WrenVM *vm = canary_thread_get_vm(thread);
   
   runFiber(thread, AS_FIBER(args[0]), args, false, true, "transfer to");
   
@@ -188,7 +182,7 @@ DEF_PRIMITIVE(fiber_transferError)
 
 DEF_PRIMITIVE(fiber_try)
 {
-  canary_thread_t *thread = vm->fiber;
+  WrenVM *vm = canary_thread_get_vm(thread);
   
   runFiber(thread, AS_FIBER(args[0]), args, true, false, "try");
   
@@ -203,6 +197,7 @@ DEF_PRIMITIVE(fiber_try)
 
 DEF_PRIMITIVE(fiber_yield)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjFiber* current = vm->fiber;
   vm->fiber = current->caller;
 
@@ -221,6 +216,7 @@ DEF_PRIMITIVE(fiber_yield)
 
 DEF_PRIMITIVE(fiber_yield1)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjFiber* current = vm->fiber;
   vm->fiber = current->caller;
 
@@ -245,6 +241,8 @@ DEF_PRIMITIVE(fiber_yield1)
 
 DEF_PRIMITIVE(fn_new)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateFn(vm, args[1], "Argument")) return false;
 
   // The block argument is already a function, so just return it.
@@ -272,8 +270,6 @@ static void call(canary_thread_t *thread, Value* args, WrenSlot numArgs)
 #define DEF_FN_CALL(numArgs) \
     DEF_PRIMITIVE(fn_call##numArgs) \
     { \
-      canary_thread_t *thread = vm->fiber;                                     \
-                                                                               \
       call(thread, args, numArgs);                                             \
       return false; \
     } \
@@ -299,6 +295,8 @@ DEF_FN_CALL(16)
 // Creates a new list of size args[1], with all elements initialized to args[2].
 DEF_PRIMITIVE(list_filled)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateInt(vm, args[1], "Size")) return false;  
   if (AS_NUM(args[1]) < 0) RETURN_ERROR("Size cannot be negative.");
   
@@ -315,11 +313,15 @@ DEF_PRIMITIVE(list_filled)
 
 DEF_PRIMITIVE(list_new)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   RETURN_OBJ(wrenNewList(vm, 0));
 }
 
 DEF_PRIMITIVE(list_add)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   wrenValueBufferWrite(vm, &AS_LIST(args[0])->elements, args[1]);
   RETURN_VAL(args[1]);
 }
@@ -329,6 +331,8 @@ DEF_PRIMITIVE(list_add)
 // minimize stack churn.
 DEF_PRIMITIVE(list_addCore)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   wrenValueBufferWrite(vm, &AS_LIST(args[0])->elements, args[1]);
   
   // Return the list.
@@ -337,6 +341,8 @@ DEF_PRIMITIVE(list_addCore)
 
 DEF_PRIMITIVE(list_clear)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   wrenValueBufferClear(vm, &AS_LIST(args[0])->elements);
   RETURN_NULL;
 }
@@ -348,6 +354,7 @@ DEF_PRIMITIVE(list_count)
 
 DEF_PRIMITIVE(list_insert)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
 
   // count + 1 here so you can "insert" at the very end.
@@ -361,6 +368,7 @@ DEF_PRIMITIVE(list_insert)
 
 DEF_PRIMITIVE(list_iterate)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
 
   // If we're starting the iteration, return the first index.
@@ -382,6 +390,7 @@ DEF_PRIMITIVE(list_iterate)
 
 DEF_PRIMITIVE(list_iteratorValue)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
   uint32_t index = validateIndex(vm, args[1], list->elements.count, "Iterator");
   if (index == UINT32_MAX) return false;
@@ -391,6 +400,7 @@ DEF_PRIMITIVE(list_iteratorValue)
 
 DEF_PRIMITIVE(list_removeAt)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
   uint32_t index = validateIndex(vm, args[1], list->elements.count, "Index");
   if (index == UINT32_MAX) return false;
@@ -400,6 +410,7 @@ DEF_PRIMITIVE(list_removeAt)
 
 DEF_PRIMITIVE(list_subscript)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
 
   if (IS_NUM(args[1]))
@@ -432,6 +443,7 @@ DEF_PRIMITIVE(list_subscript)
 
 DEF_PRIMITIVE(list_subscriptSetter)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjList* list = AS_LIST(args[0]);
   uint32_t index = validateIndex(vm, args[1], list->elements.count,
                                  "Subscript");
@@ -443,11 +455,15 @@ DEF_PRIMITIVE(list_subscriptSetter)
 
 DEF_PRIMITIVE(map_new)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   RETURN_OBJ(wrenNewMap(vm));
 }
 
 DEF_PRIMITIVE(map_subscript)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateKey(vm, args[1])) return false;
 
   ObjMap* map = AS_MAP(args[0]);
@@ -459,6 +475,8 @@ DEF_PRIMITIVE(map_subscript)
 
 DEF_PRIMITIVE(map_subscriptSetter)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateKey(vm, args[1])) return false;
 
   wrenMapSet(vm, AS_MAP(args[0]), args[1], args[2]);
@@ -470,6 +488,8 @@ DEF_PRIMITIVE(map_subscriptSetter)
 // minimize stack churn.
 DEF_PRIMITIVE(map_addCore)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateKey(vm, args[1])) return false;
   
   wrenMapSet(vm, AS_MAP(args[0]), args[1], args[2]);
@@ -480,12 +500,16 @@ DEF_PRIMITIVE(map_addCore)
 
 DEF_PRIMITIVE(map_clear)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   wrenMapClear(vm, AS_MAP(args[0]));
   RETURN_NULL;
 }
 
 DEF_PRIMITIVE(map_containsKey)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateKey(vm, args[1])) return false;
 
   RETURN_BOOL(!IS_UNDEFINED(wrenMapGet(AS_MAP(args[0]), args[1])));
@@ -498,6 +522,7 @@ DEF_PRIMITIVE(map_count)
 
 DEF_PRIMITIVE(map_iterate)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjMap* map = AS_MAP(args[0]);
 
   if (map->count == 0) RETURN_FALSE;
@@ -531,6 +556,8 @@ DEF_PRIMITIVE(map_iterate)
 
 DEF_PRIMITIVE(map_remove)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateKey(vm, args[1])) return false;
 
   RETURN_VAL(wrenMapRemoveKey(vm, AS_MAP(args[0]), args[1]));
@@ -538,6 +565,7 @@ DEF_PRIMITIVE(map_remove)
 
 DEF_PRIMITIVE(map_keyIteratorValue)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjMap* map = AS_MAP(args[0]);
   uint32_t index = validateIndex(vm, args[1], map->capacity, "Iterator");
   if (index == UINT32_MAX) return false;
@@ -553,6 +581,7 @@ DEF_PRIMITIVE(map_keyIteratorValue)
 
 DEF_PRIMITIVE(map_valueIteratorValue)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjMap* map = AS_MAP(args[0]);
   uint32_t index = validateIndex(vm, args[1], map->capacity, "Iterator");
   if (index == UINT32_MAX) return false;
@@ -573,6 +602,8 @@ DEF_PRIMITIVE(null_not)
 
 DEF_PRIMITIVE(num_fromString)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateString(vm, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[1]);
@@ -605,6 +636,8 @@ DEF_PRIMITIVE(num_pi)
 #define DEF_NUM_INFIX(name, op, type) \
     DEF_PRIMITIVE(num_##name) \
     { \
+      WrenVM *vm = canary_thread_get_vm(thread);                               \
+                                                                               \
       if (!validateNum(vm, args[1], "Right operand")) return false; \
       RETURN_##type(AS_NUM(args[0]) op AS_NUM(args[1])); \
     }
@@ -622,6 +655,8 @@ DEF_NUM_INFIX(gte,      >=, BOOL)
 #define DEF_NUM_BITWISE(name, op) \
     DEF_PRIMITIVE(num_bitwise##name) \
     { \
+      WrenVM *vm = canary_thread_get_vm(thread);                               \
+                                                                               \
       if (!validateNum(vm, args[1], "Right operand")) return false; \
       uint32_t left = (uint32_t)AS_NUM(args[0]); \
       uint32_t right = (uint32_t)AS_NUM(args[1]); \
@@ -657,6 +692,8 @@ DEF_NUM_FN(log,     log)
 
 DEF_PRIMITIVE(num_mod)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateNum(vm, args[1], "Right operand")) return false;
   RETURN_NUM(fmod(AS_NUM(args[0]), AS_NUM(args[1])));
 }
@@ -681,6 +718,8 @@ DEF_PRIMITIVE(num_bitwiseNot)
 
 DEF_PRIMITIVE(num_dotDot)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateNum(vm, args[1], "Right hand side of range")) return false;
 
   double from = AS_NUM(args[0]);
@@ -690,6 +729,8 @@ DEF_PRIMITIVE(num_dotDot)
 
 DEF_PRIMITIVE(num_dotDotDot)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateNum(vm, args[1], "Right hand side of range")) return false;
 
   double from = AS_NUM(args[0]);
@@ -759,6 +800,8 @@ DEF_PRIMITIVE(num_smallest)
 
 DEF_PRIMITIVE(num_toString)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   RETURN_VAL(wrenNumToString(vm, AS_NUM(args[0])));
 }
 
@@ -791,6 +834,8 @@ DEF_PRIMITIVE(object_bangeq)
 
 DEF_PRIMITIVE(object_is)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!IS_CLASS(args[1]))
   {
     RETURN_ERROR("Right operand must be a class.");
@@ -813,6 +858,7 @@ DEF_PRIMITIVE(object_is)
 
 DEF_PRIMITIVE(object_toString)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   Obj* obj = AS_OBJ(args[0]);
   Value name = OBJ_VAL(obj->classObj->name);
   RETURN_VAL(wrenStringFormat(vm, "instance of @", name));
@@ -820,6 +866,8 @@ DEF_PRIMITIVE(object_toString)
 
 DEF_PRIMITIVE(object_type)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   RETURN_OBJ(wrenGetClass(vm, args[0]));
 }
 
@@ -852,6 +900,7 @@ DEF_PRIMITIVE(range_isInclusive)
 
 DEF_PRIMITIVE(range_iterate)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjRange* range = AS_RANGE(args[0]);
 
   // Special case: empty range.
@@ -889,6 +938,7 @@ DEF_PRIMITIVE(range_iteratorValue)
 
 DEF_PRIMITIVE(range_toString)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjRange* range = AS_RANGE(args[0]);
 
   Value from = wrenNumToString(vm, range->from);
@@ -907,6 +957,8 @@ DEF_PRIMITIVE(range_toString)
 
 DEF_PRIMITIVE(string_fromCodePoint)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateInt(vm, args[1], "Code point")) return false;
 
   int codePoint = (int)AS_NUM(args[1]);
@@ -924,6 +976,7 @@ DEF_PRIMITIVE(string_fromCodePoint)
 
 DEF_PRIMITIVE(string_byteAt)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
 
   uint32_t index = validateIndex(vm, args[1], string->length, "Index");
@@ -939,6 +992,7 @@ DEF_PRIMITIVE(string_byteCount)
 
 DEF_PRIMITIVE(string_codePointAt)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
 
   uint32_t index = validateIndex(vm, args[1], string->length, "Index");
@@ -955,6 +1009,8 @@ DEF_PRIMITIVE(string_codePointAt)
 
 DEF_PRIMITIVE(string_contains)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateString(vm, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
@@ -965,6 +1021,8 @@ DEF_PRIMITIVE(string_contains)
 
 DEF_PRIMITIVE(string_endsWith)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateString(vm, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
@@ -979,6 +1037,8 @@ DEF_PRIMITIVE(string_endsWith)
 
 DEF_PRIMITIVE(string_indexOf1)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateString(vm, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
@@ -990,6 +1050,8 @@ DEF_PRIMITIVE(string_indexOf1)
 
 DEF_PRIMITIVE(string_indexOf2)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateString(vm, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
@@ -1003,6 +1065,7 @@ DEF_PRIMITIVE(string_indexOf2)
 
 DEF_PRIMITIVE(string_iterate)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
 
   // If we're starting the iteration, return the first index.
@@ -1029,6 +1092,7 @@ DEF_PRIMITIVE(string_iterate)
 
 DEF_PRIMITIVE(string_iterateByte)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
 
   // If we're starting the iteration, return the first index.
@@ -1052,6 +1116,7 @@ DEF_PRIMITIVE(string_iterateByte)
 
 DEF_PRIMITIVE(string_iteratorValue)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
   uint32_t index = validateIndex(vm, args[1], string->length, "Iterator");
   if (index == UINT32_MAX) return false;
@@ -1061,6 +1126,8 @@ DEF_PRIMITIVE(string_iteratorValue)
 
 DEF_PRIMITIVE(string_startsWith)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateString(vm, args[1], "Argument")) return false;
 
   ObjString* string = AS_STRING(args[0]);
@@ -1074,12 +1141,15 @@ DEF_PRIMITIVE(string_startsWith)
 
 DEF_PRIMITIVE(string_plus)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (!validateString(vm, args[1], "Right operand")) return false;
   RETURN_VAL(wrenStringFormat(vm, "@@", args[0], args[1]));
 }
 
 DEF_PRIMITIVE(string_subscript)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
   ObjString* string = AS_STRING(args[0]);
 
   if (IS_NUM(args[1]))
@@ -1115,12 +1185,16 @@ DEF_PRIMITIVE(system_clock)
 
 DEF_PRIMITIVE(system_gc)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   wrenCollectGarbage(vm);
   RETURN_NULL;
 }
 
 DEF_PRIMITIVE(system_writeString)
 {
+  WrenVM *vm = canary_thread_get_vm(thread);
+  
   if (vm->config.writeFn != NULL)
   {
     vm->config.writeFn(vm, AS_CSTRING(args[1]));

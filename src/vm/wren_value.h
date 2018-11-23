@@ -195,7 +195,7 @@ typedef struct sObjUpvalue
 // VM internals. It is passed the arguments in [args]. If it returns a value,
 // it places it in `args[0]` and returns `true`. If it causes a runtime error
 // or modifies the running fiber, it returns `false`.
-typedef bool (*Primitive)(WrenVM* vm, Value* args);
+typedef bool (*Primitive)(canary_thread_t *thread, Value *args);
 
 // TODO: See if it's actually a perf improvement to have this in a separate
 // struct instead of in ObjFn.

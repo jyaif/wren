@@ -919,7 +919,7 @@ static WrenInterpretResult runInterpreter(WrenVM* vm, register ObjFiber* fiber)
       switch (method->type)
       {
         case METHOD_PRIMITIVE:
-          if (method->as.primitive(vm, args))
+          if (method->as.primitive(fiber, args))
           {
             // The result is now in the first arg slot. Discard the other
             // stack slots.
