@@ -522,7 +522,7 @@ Value importModule(WrenVM* vm, Value name)
   //
   // FIXME: The mallocator used here is unknown. Change to something under the
   //        vm control.
-  free((char*)source);
+  vm->config.reallocateFn(vm->config.userData, (char*)source, 0);
   
   if (moduleClosure == NULL)
   {
@@ -799,6 +799,7 @@ WrenType wrenGetSlotType(WrenVM* vm, WrenSlot srcSlot)
   if (IS_NUM(value)) return WREN_TYPE_NUM;
   if (IS_FOREIGN(value)) return WREN_TYPE_FOREIGN;
   if (IS_LIST(value)) return WREN_TYPE_LIST;
+  if (IS_MAP(value)) return WREN_TYPE_MAP;
   if (IS_NULL(value)) return WREN_TYPE_NULL;
   if (IS_STRING(value)) return WREN_TYPE_STRING;
   
@@ -852,6 +853,11 @@ WrenHandle* wrenGetSlotHandle(WrenVM* vm, WrenSlot srcSlot)
   Value value = canary_thread_get_slot(vm->fiber, srcSlot);
   
   return wrenMakeHandle(vm, value);
+}
+
+static Value getSlot(WrenVM* vm, WrenSlot srcSlot)
+{
+  return canary_thread_get_slot(vm->fiber, srcSlot);
 }
 
 void wrenSetSlotBool(WrenVM* vm, WrenSlot dstSlot, bool value)
@@ -919,6 +925,50 @@ int wrenGetListCount(WrenVM* vm, WrenSlot listSlot)
   ObjList* listObj = AS_LIST(listValue);
   return listObj->elements.count;
 }
+
+void wrenSetSlotNewMap (WrenVM* vm, WrenSlot slot)
+{
+  canary_thread_set_slot(vm->fiber, slot, OBJ_VAL(wrenNewMap(vm)));
+}
+
+ bool wrenGetMapValue (WrenVM* vm, int mapSlot, int keySlot, WrenSlot valueSlot)
+{
+  ASSERT(IS_MAP(getSlot(vm, mapSlot)), "Must be a map");
+  ObjMap* map = AS_MAP(getSlot(vm, mapSlot));
+  Value value = wrenMapGet(map, getSlot(vm, keySlot));
+  if (valueSlot>=0)
+  {
+    if (IS_UNDEFINED(value)) {
+       canary_thread_set_slot(vm->fiber, valueSlot, NULL_VAL);
+    } else {
+      canary_thread_set_slot(vm->fiber, valueSlot, value);
+    }
+  }
+  return !IS_UNDEFINED(value);
+}
+
+/*
+ void wrenPutInMap (WrenVM* vm, int mapSlot, int keySlot, int valueSlot)
+{
+  ASSERT(IS_MAP(getSlot(vm, mapSlot)), "Must be a map");
+  ObjMap* map = AS_MAP(getSlot(vm, mapSlot));
+  wrenMapSet(vm, map, getSlot(vm, keySlot), getSlot(vm, valueSlot));
+}
+ bool wrenRemoveMap (WrenVM* vm, int mapSlot, int keySlot, int valueSlot)
+{
+  ASSERT(IS_MAP(getSlot(vm, mapSlot)), "Must be a map");
+  ObjMap* map = AS_MAP(getSlot(vm, mapSlot));
+  Value removedValue = wrenMapRemoveKey(vm, map, getSlot(vm, keySlot));
+  if (valueSlot>=0) setSlot(vm, valueSlot, removedValue);
+  return !IS_NULL(removedValue);
+}
+ void wrenClearMap (WrenVM* vm, int mapSlot)
+{
+  ASSERT(IS_MAP(getSlot(vm, mapSlot)), "Must be a map");
+  ObjMap* map = AS_MAP(getSlot(vm, mapSlot));
+  wrenMapClear(vm, map);
+}
+*/
 
 void wrenGetListElement(WrenVM* vm, WrenSlot dstSlot,
                         WrenSlot listSlot, int index)

@@ -25,7 +25,8 @@
 
 #if CANARY_MSC_PREREQ(CANARY_MSC_VER_VS_2013_V12_0) &&                         \
     !defined(canary_unreachable)
-#define canary_unreachable() __assume(0)
+#define canary_unreachable() __builtin_unreachable()
+
 #endif
 
 #endif // CANARY_GLOBAL_MSC_H
